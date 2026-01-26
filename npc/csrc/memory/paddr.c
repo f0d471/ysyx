@@ -1,8 +1,9 @@
-#include "common.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+
+#include "common.h"
 
 static uint8_t pmem[CONFIG_MSIZE] = {};
 
@@ -50,7 +51,7 @@ void load_bin(const char *bin_file) {
     printf("Loaded binary file: %s (size: %ld bytes)\n", bin_file, size);
 }
 
-// ====================== C 内部内存接口 ==========================
+// ====================== C 环境内存接口 ==========================
 uint32_t pmem_read(uint32_t addr, int len) {
     if (in_pmem(addr)) {
         switch (len) {
@@ -79,15 +80,15 @@ void pmem_write(uint32_t addr, int len, uint32_t data) {
 }
 
 // ================= 硬件DPI-C调用接口 ================================
-uint32_t paddr_read(paddr_t addr) {
+extern "C" uint32_t paddr_read(uint32_t  addr) {
   if (__builtin_expect(in_pmem(addr), 1)) return pmem_read(addr, 4);
-  IFDEF(CONFIG_DEVICE, return mmio_read(addr, 4));
-  out_of_bound(addr);
+  // IFDEF(CONFIG_DEVICE, return mmio_read(addr, 4));
+  out_of_bound(addr,false);
   return 0;
 }
 
-void paddr_write(paddr_t addr, int len, word_t data) {
+extern "C" void paddr_write(uint32_t  addr, int len, uint32_t data) {
   if (__builtin_expect(in_pmem(addr), 1)) { pmem_write(addr, len, data); return; }
-  IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
-  out_of_bound(addr);
+  // IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+  out_of_bound(addr,true);
 }

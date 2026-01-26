@@ -31,9 +31,24 @@ extern uint64_t sim_time;
 // 核心仿真控制 
 void cpu_exec(uint64_t n); 
 
-// 内存与寄存器接口 
-uint32_t pmem_read(uint32_t addr, int len); 
+// 寄存器接口 
 void isa_reg_display(Vtop* top);
+
+// ================= 内存配置宏 =================
+#define CONFIG_MSIZE 0x8000000  // 128MB 
+#define CONFIG_MBASE 0x80000000
+
+// ================= 内存接口声明 =================
+void init_mem();
+void load_bin(const char *bin_file);
+
+// 供 SDB 使用的 C 环境接口
+uint32_t pmem_read(uint32_t addr, int len);
+void pmem_write(uint32_t addr, int len, uint32_t data);
+
+// 供 DPI-C 调用的硬件接口
+extern "C" uint32_t paddr_read(uint32_t addr);
+extern "C" void paddr_write(uint32_t addr, int len, uint32_t data);
 
 // sdb 
 #ifdef CONFIG_SDB
