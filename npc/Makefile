@@ -10,7 +10,7 @@ BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
 BIN = $(BUILD_DIR)/$(TOPNAME)
 
-TEST_BIN ?= ./test/new.bin  
+TEST_BIN ?= ./test/Default.bin  
 ifeq ($(AM_IMAGE),)
   RUN_IMAGE = $(TEST_BIN)  
 else
