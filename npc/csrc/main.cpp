@@ -11,6 +11,7 @@
 Vtop* top = nullptr;
 VerilatedVcdC* tfp = nullptr;
 uint64_t sim_time = 0;
+const char *img_file = NULL;
 NPCState npc_state = NPC_STOP;
 
 // 时钟
@@ -39,10 +40,31 @@ static void reset(int n) {
     top->rst = 0;
 }
 
+// =================== DPI-C: Trap =================== //
+extern "C" void trap(int code, int pc) {
+    if (code == 0) {
+        printf("\33[1;32mHIT GOOD TRAP\33[0m at pc = 0x%08x\n", pc);
+    } else {
+        printf("\33[1;31mHIT BAD TRAP\33[0m at pc = 0x%08x, code = %d\n", pc, code);
+    }
+    npc_state = NPC_END; 
+    Verilated::gotFinish(true);
+}
+
 void init_sim(int argc, char** argv) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <bin_file>\n", argv[0]);
+        exit(1);
+    }
+    img_file = argv[1];
+
     // 基础环境初始化
     Verilated::commandArgs(argc, argv);
     top = new Vtop;
+
+    //初始化内存 & 加载程序
+    init_mem();
+    load_bin(img_file);
 
     // 初始化波形
     #ifdef CONFIG_WAVE
@@ -55,16 +77,13 @@ void init_sim(int argc, char** argv) {
 
     #ifdef CONFIG_ITRACE
     init_disasm(); 
-    
     #endif
 
     #ifdef CONFIG_DIFFTEST
     // 加载 NEMU 的动态库
     difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
-
     // 把 NPC 的内存数据同步给 NEMU , direction = 1 表示从 NPC 复制到 NEMU
     difftest_memcpy(0x80000000, pmem, PMEM_SIZE, 1);
-
     // 把 NPC 的初始寄存器和PC状态同步给 NEMU
     DiffContext ctx;
     for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
