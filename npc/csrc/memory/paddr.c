@@ -54,12 +54,22 @@ void load_bin(const char *bin_file) {
 // ====================== C 环境内存接口 ==========================
 uint32_t pmem_read(uint32_t addr, int len) {
     if (in_pmem(addr)) {
+        uint32_t data = 0;
         switch (len) {
-            case 1: return *(uint8_t  *)guest_to_host(addr);
-            case 2: return *(uint16_t *)guest_to_host(addr);
-            case 4: return *(uint32_t *)guest_to_host(addr);
+            case 1: data = *(uint8_t  *)guest_to_host(addr); break;
+            case 2: data = *(uint16_t *)guest_to_host(addr); break;
+            case 4: data = *(uint32_t *)guest_to_host(addr); break;
             default: assert(0);
         }
+
+        #ifdef CONFIG_MTRACE
+        // 只有当访问的地址不是当前取指地址时，才认为是 Load 访存
+        if (addr != top->pc) { 
+            log_mtrace(addr, data, 0); 
+        }
+        #endif
+
+        return data;
     } else {
         out_of_bound(addr, false);
         return 0;
@@ -69,11 +79,16 @@ uint32_t pmem_read(uint32_t addr, int len) {
 void pmem_write(uint32_t addr, int len, uint32_t data) {
     if (in_pmem(addr)) {
         switch (len) {
-            case 1: *(uint8_t  *)guest_to_host(addr) = (uint8_t)data;  return;
-            case 2: *(uint16_t *)guest_to_host(addr) = (uint16_t)data; return;
-            case 4: *(uint32_t *)guest_to_host(addr) = (uint32_t)data; return;
+            case 1: *(uint8_t  *)guest_to_host(addr) = (uint8_t)data;  break;
+            case 2: *(uint16_t *)guest_to_host(addr) = (uint16_t)data; break;
+            case 4: *(uint32_t *)guest_to_host(addr) = (uint32_t)data; break;
             default: assert(0);
         }
+
+        #ifdef CONFIG_MTRACE
+        log_mtrace(addr, data, 1); 
+        #endif
+
     } else {
         out_of_bound(addr, true); 
     }

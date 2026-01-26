@@ -31,8 +31,9 @@ extern uint64_t sim_time;
 // 核心仿真控制 
 void cpu_exec(uint64_t n); 
 
-// 寄存器接口 
-void isa_reg_display(Vtop* top);
+// 寄存器接口
+void isa_reg_display(); 
+uint32_t isa_reg_str2val(const char *s, bool *success); 
 
 // ================= 内存配置宏 =================
 #define CONFIG_MSIZE 0x8000000  // 128MB 
@@ -57,12 +58,13 @@ void sdb_mainloop();
 #endif
 
 // difftest
+#ifdef CONFIG_DIFFTEST
+
 struct DiffContext {
     uint32_t gpr[16]; 
     uint32_t pc;
 };
 
-#ifdef CONFIG_DIFFTEST
 void difftest_init(const char *so_file);
 void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
 void difftest_regcpy(void *dut, int direction);
@@ -72,7 +74,16 @@ void difftest_step();
 #ifdef CONFIG_ITRACE
 extern "C" void init_disasm();
 extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-
+void init_trace(const char *filename);
+void trace_close();
+void log_itrace();
 #endif
+
+#ifdef CONFIG_MTRACE
+void init_trace(const char *filename);
+void trace_close();
+void log_mtrace(uint32_t addr, uint32_t data, int len, int is_write);
+#endif
+
 
 #endif // __COMMON_H__
