@@ -28,10 +28,10 @@ CFLAGS   += -I$(abspath ./csrc) \
 			-I$(abspath ./csrc/config) \
 			-I$(abspath ./csrc/sdb) \
 			-I$(OBJ_DIR)
-
-
 # === capstone 路径设置 ===
 CFLAGS   += -I$(abspath ../nemu/tools/capstone/repo/include)
+
+LDFLAGS  += -lreadline -lncurses -ldl
 LDFLAGS  += $(abspath ../nemu/tools/capstone/repo/libcapstone.so.5)
 
 default: $(BIN)
@@ -41,12 +41,12 @@ $(BIN): $(VSRCS) $(CSRCS)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		--top-module $(TOPNAME) $^ \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN)) \
-		--LDFLAGS "-lreadline -lncurses -ldl $(LDFLAGS)" \
+		--LDFLAGS "$(LDFLAGS)" \
 		--CFLAGS "$(CFLAGS)"
 
 run: $(BIN)
 	@echo "[NPC] Running with image: $(RUN_IMAGE)"  
-	$(BIN) $(RUN_IMAGE)
+	LD_LIBRARY_PATH=$(abspath ../nemu/tools/capstone/repo) $(BIN) $(RUN_IMAGE)
 
 clean:
 	rm -rf $(BUILD_DIR)

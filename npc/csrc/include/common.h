@@ -3,7 +3,9 @@
 
 #include <cstdint>
 #include <cassert>
+
 #include "Vtop.h" 
+#include "config.h"
 
 // 颜色
 #define ANSI_FG_GREEN   "\33[1;32m"
@@ -33,8 +35,29 @@ void cpu_exec(uint64_t n);
 uint32_t pmem_read(uint32_t addr, int len); 
 void isa_reg_display(Vtop* top);
 
-// SDB 
+// sdb 
+#ifdef CONFIG_SDB
 void init_sdb();
 void sdb_mainloop();
+#endif
+
+// difftest
+struct DiffContext {
+    uint32_t gpr[16]; 
+    uint32_t pc;
+};
+
+#ifdef CONFIG_DIFFTEST
+void difftest_init(const char *so_file);
+void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
+void difftest_regcpy(void *dut, int direction);
+void difftest_step();
+#endif
+
+#ifdef CONFIG_ITRACE
+extern "C" void init_disasm();
+extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+
+#endif
 
 #endif // __COMMON_H__

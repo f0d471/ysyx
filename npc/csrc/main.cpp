@@ -46,11 +46,30 @@ void init_sim(int argc, char** argv) {
 
     // 初始化波形
     #ifdef CONFIG_WAVE
-        Verilated::traceEverOn(true);
-        tfp = new VerilatedVcdC;
-        top->trace(tfp, 99);
-        tfp->open("wave.vcd");
-        printf("VCD Waveform enabled.\n");
+    Verilated::traceEverOn(true);
+    tfp = new VerilatedVcdC;
+    top->trace(tfp, 99);
+    tfp->open("wave.vcd");
+    printf("VCD Waveform enabled.\n");
+    #endif
+
+    #ifdef CONFIG_ITRACE
+    init_disasm(); 
+    
+    #endif
+
+    #ifdef CONFIG_DIFFTEST
+    // 加载 NEMU 的动态库
+    difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
+
+    // 把 NPC 的内存数据同步给 NEMU , direction = 1 表示从 NPC 复制到 NEMU
+    difftest_memcpy(0x80000000, pmem, PMEM_SIZE, 1);
+
+    // 把 NPC 的初始寄存器和PC状态同步给 NEMU
+    DiffContext ctx;
+    for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
+    ctx.pc = top->pc;
+    difftest_regcpy(&ctx, 1); 
     #endif
 
     // 硬件复位
