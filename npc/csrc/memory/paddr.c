@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include <time.h>
 
 #include "common.h"
 
@@ -26,6 +27,8 @@ static void out_of_bound(uint32_t addr, bool is_write) {
 }
 
 void init_mem() {
+    srand((unsigned int)time(NULL));
+
     uint32_t *p = (uint32_t *)pmem;
     for (int i = 0; i < CONFIG_MSIZE / sizeof(uint32_t); i++) {
         p[i] = rand();

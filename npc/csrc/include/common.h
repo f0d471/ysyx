@@ -48,6 +48,7 @@ uint32_t pmem_read(uint32_t addr, int len);
 void pmem_write(uint32_t addr, int len, uint32_t data);
 
 // 供 DPI-C 调用的硬件接口
+extern "C" void trap(int code, int pc);
 extern "C" uint32_t paddr_read(uint32_t addr);
 extern "C" void paddr_write(uint32_t addr, int len, uint32_t data);
 
