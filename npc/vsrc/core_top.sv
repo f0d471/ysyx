@@ -1,4 +1,7 @@
-`include "define.v"
+`include "define.sv"
+
+import "DPI-C" function int paddr_read(input int addr, input int len);
+import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
 
 module top #(
     parameter AW = 32, // 地址位宽
@@ -83,46 +86,54 @@ module top #(
 // =========================================================================
 
     // ---------------- Stage 1: Fetch (IF) ----------------
-    // 1. PC 生成
+    // PC 
     pc_counter #( 
         .AW       (AW),
         .RESET_PC (32'h80000000) 
     ) u_pc_counter ( 
         .clk        (clk),
         .rst_n      (rst_n),
-        .jump_en    (ex_jump_flag),   // 连接 EX 阶段的跳转信号
-        .jump_addr  (ex_jump_target), // 连接 EX 阶段的跳转地址
+        // 流水线暂停和跳转控制
+        .pc_stall   (1'b0),         
+        .jump_en    (ex_jump_flag),   
+        .jump_addr  (ex_jump_target),
+        // 输出的PC
         .pc_pointer (pc_pointer) 
     );  
 
-    // 2. 取指令 (DPI-C)
+    // 取指
     fetch #(
         .AW (AW),  
         .DW (DW)
     ) u_fetch (                        
         .clk       (clk),
         .rst_n     (rst_n),
-        .pc_addr   (pc_pointer),  
+        // PC
+        .pc_addr   (pc_pointer),
+        // 取出的指令
         .instr_out (instruction)  
     ); 
 
-    // ---------------- Pipeline Reg: IF/ID ----------------
+    // 
     if2id #(
         .AW (AW),  
         .DW (DW)   
     ) u_if2id ( 
         .clk            (clk),
         .rst_n          (rst_n),
+        // 流水线暂停和冲刷
         .if_stall       (1'b0),         
-        .if_flush       (ex_jump_flag), // 发生跳转时，冲刷 IF/ID (废除刚取的指令)
+        .if_flush       (ex_jump_flag),
+        //data in
         .instr_addr_in  (pc_pointer), 
         .instr_in       (instruction),
+        //data out
         .instr_addr_out (id_pc),
         .instr_out      (id_instr)     
     );  
 
     // ---------------- Stage 2: Decode (ID) ----------------
-    // 3. 寄存器堆
+    // 寄存器堆
     register #(
         .DW (DW)
     ) u_register (
@@ -148,7 +159,8 @@ module top #(
         .instr_in      (id_instr),
         // RegFile 接口
         .rd_rs1_addr   (id_rs1_addr), 
-        .rd_rs2_addr   (id_rs2_addr), 
+        .rd_rs2_addr   (id_rs2_addr),
+
         .rd_rs1_data   (id_rs1_data), 
         .rd_rs2_data   (id_rs2_data), 
         // 解码结果 -> ID/EX
@@ -156,27 +168,29 @@ module top #(
         .op1_out       (id_op1),
         .op2_out       (id_op2),
         .imm_out       (id_imm),
+        // to execute
         .opcode_out    (id_opcode),
         .funct3_out    (id_funct3),
         .funct7_out    (id_funct7)
     );
 
-    // ---------------- Pipeline Reg: ID/EX ----------------
+    // Pipeline Reg
     id2ex #(
         .AW (AW),
         .DW (DW)
     ) u_id2ex ( 
         .clk            (clk),
         .rst_n          (rst_n),
+
         .id_stall       (1'b0),
-        .id_flush       (ex_jump_flag), // 发生跳转时，冲刷 ID/EX (废除当前译码的指令)
+        .id_flush       (ex_jump_flag), 
         // Inputs
         .instr_addr_in  (id_pc),
         .instr_in       (id_instr),
         .op1_in         (id_op1),
         .op2_in         (id_op2),
-        .rs1_data_in    (id_rs1_data),  // [新增] 传给 JALR 计算用
-        .rs2_data_in    (id_rs2_data),  // 原始值传给 Store
+        .rs1_data_in    (id_rs1_data),  
+        .rs2_data_in    (id_rs2_data),  
         .rd_addr_in     (id_rd_addr),
         .imm_in         (id_imm),
         .opcode_in      (id_opcode),
@@ -187,7 +201,7 @@ module top #(
         .instr_out      (ex_instr),
         .op1_out        (ex_op1),
         .op2_out        (ex_op2),
-        .rs1_data_out   (ex_rs1_data),  // [新增]
+        .rs1_data_out   (ex_rs1_data),  
         .rs2_data_out   (ex_rs2_data),
         .rd_addr_out    (ex_rd_addr),
         .imm_out        (ex_imm),
@@ -197,7 +211,7 @@ module top #(
     );
 
     // ---------------- Stage 3: Execute (EX) ----------------
-    // 5. 执行单元
+    // 执行
     execute #(
         .AW (AW),
         .DW (DW)
@@ -205,18 +219,18 @@ module top #(
         .pc_in           (ex_pc),
         .op1_in          (ex_op1),
         .op2_in          (ex_op2),
-        .rs1_data_in     (ex_rs1_data), // 用于 JALR
+        .rs1_data_in     (ex_rs1_data), 
         .imm_in          (ex_imm),
         .opcode_in       (ex_opcode),
         .funct3_in       (ex_funct3),
         .funct7_in       (ex_funct7),
         // Outputs
         .alu_result_out  (ex_alu_result),
-        .jump_flag_out   (ex_jump_flag),   // -> 反馈给 PC Counter & Pipeline Flush
-        .jump_target_out (ex_jump_target)  // -> 反馈给 PC Counter
+        .jump_flag_out   (ex_jump_flag),   
+        .jump_target_out (ex_jump_target)  r
     );
 
-    // ---------------- Pipeline Reg: EX/MEM ----------------
+    // Pipeline Reg
     ex2mem #(
         .AW (AW),
         .DW (DW)
@@ -239,20 +253,19 @@ module top #(
         .funct3_out     (mem_funct3)
     );
 
-    // ---------------- Stage 4: Memory (MEM) ----------------
-    // 6. 访存单元 (DPI-C)
+    // 访存单元 
     memory #(
         .AW (AW),
         .DW (DW)
     ) u_memory (
         .clk            (clk),
         .rst_n          (rst_n),
-        .alu_result_in  (mem_alu_result), // 此时作为地址
-        .rs2_data_in    (mem_rs2_data),   // Store 的写数据
+        .alu_result_in  (mem_alu_result), 
+        .rs2_data_in    (mem_rs2_data),   
         .opcode_in      (mem_opcode),
         .funct3_in      (mem_funct3),
         // Output
-        .mem_rdata_out  (mem_mem_rdata)   // Load 的读数据
+        .mem_rdata_out  (mem_mem_rdata)  
     );
 
     // ---------------- Pipeline Reg: MEM/WB ----------------

@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module ex2mem #(
     parameter AW = 32,

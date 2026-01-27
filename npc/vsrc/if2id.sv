@@ -1,7 +1,7 @@
-`include "define.v" 
+`include "define.sv" 
 
 module if2id #(
-    parameter AW = `AW, // 使用 define 中的默认位宽
+    parameter AW = `AW, 
     parameter DW = `DW
 )( 
     input  logic          clk,

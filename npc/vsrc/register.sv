@@ -1,3 +1,5 @@
+`include "define.sv"
+
 module register #(
     parameter DW = 32
 )(

@@ -10,8 +10,8 @@
 // S type inst (存储)
 `define INST_TYPE_S       7'b0100011
 
-// R/M type inst (寄存器运算/乘法扩展)
-`define INST_TYPE_R_M     7'b0110011  // R型和M型共享opcode，通过funct7区分
+// R type inst (寄存器运算/乘法扩展)
+`define INST_TYPE_R       7'b0110011  
 
 // B type inst (分支)
 `define INST_TYPE_B       7'b1100011
@@ -24,7 +24,6 @@
 `define INST_TYPE_U_AUIPC 7'b0010111  // AUIPC
 
 // 特殊指令
-`define INST_TYPE_FENCE   7'b0001111  // FENCE（R型）
 `define INST_TYPE_SYSTEM  7'b1110011  // 系统指令（MRET/ECALL等）
 
 // -------------------------- I型指令 funct3 定义 --------------------------
@@ -63,15 +62,15 @@
 `define INST_OR           3'b110
 `define INST_AND          3'b111
 
-// -------------------------- M型指令（乘法扩展）funct3 定义 --------------------------
-`define INST_MUL          3'b000
-`define INST_MULH         3'b001
-`define INST_MULHSU       3'b010
-`define INST_MULHU        3'b011
-`define INST_DIV          3'b100
-`define INST_DIVU         3'b101
-`define INST_REM          3'b110
-`define INST_REMU         3'b111
+// // -------------------------- M型指令（乘法扩展）funct3 定义 --------------------------
+// `define INST_MUL          3'b000
+// `define INST_MULH         3'b001
+// `define INST_MULHSU       3'b010
+// `define INST_MULHU        3'b011
+// `define INST_DIV          3'b100
+// `define INST_DIVU         3'b101
+// `define INST_REM          3'b110
+// `define INST_REMU         3'b111
 
 // -------------------------- B型指令 funct3 定义 --------------------------
 `define INST_BEQ          3'b000

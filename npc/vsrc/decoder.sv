@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module decode #(
     parameter AW = 32,
@@ -7,21 +7,21 @@ module decode #(
     input  logic [AW-1:0] instr_addr_in, // PC from IF/ID
     input  logic [DW-1:0] instr_in,      // Instruction from IF/ID
     
-    // To Register File (Read Port)
+    // To Register  (Read Addr)
     output logic [4:0]    rd_rs1_addr,
     output logic [4:0]    rd_rs2_addr,
     
-    // From Register File (Read Data)
+    // From Register (Read Data)
     input  logic [DW-1:0] rd_rs1_data,
     input  logic [DW-1:0] rd_rs2_data,
     
-    // To Execute Stage
-    output logic [4:0]    rd_addr_out,   // 目标寄存器地址 (RD)
+    // To Execute
+    output logic [4:0]    rd_addr_out,   // 目标寄存器 (rd)
     output logic [DW-1:0] op1_out,       // ALU 操作数 1
     output logic [DW-1:0] op2_out,       // ALU 操作数 2
-    output logic [DW-1:0] imm_out,      
+    output logic [DW-1:0] imm_out,       // 立即数
     
-    // 将指令字段透传给 EX 阶段 (用于 ALU Control 译码)
+    // To Execute for decode
     output logic [6:0]    opcode_out,
     output logic [2:0]    funct3_out,
     output logic [6:0]    funct7_out
@@ -77,77 +77,70 @@ module decode #(
         op2_out     = 32'h0;
 
         case(opcode)
-            `INST_TYPE_I: begin // ADDI, SLTI, etc.
+            `INST_TYPE_I: begin // ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI 
                 rd_rs1_addr = rs1;
-                rd_rs2_addr = 5'h0; // 不需要 rs2
+                rd_rs2_addr = 5'h0;
                 op1_out     = rd_rs1_data;
                 op2_out     = imm;
             end
             
-            `INST_TYPE_R_M: begin // ADD, SUB, MUL, etc.
+            `INST_TYPE_R: begin // ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR ,AND 
                 rd_rs1_addr = rs1;
                 rd_rs2_addr = rs2;
                 op1_out     = rd_rs1_data;
                 op2_out     = rd_rs2_data;
             end
             
-            `INST_TYPE_B: begin // BEQ, BNE...
+            `INST_TYPE_B: begin // BEQ, BNE, BEQ, BNE, BLT, BGE, BLTU, BGEU
                 rd_rs1_addr = rs1;
                 rd_rs2_addr = rs2;
-                op1_out     = rd_rs1_data; // ALU 做比较 (rs1 - rs2)
+                op1_out     = rd_rs1_data; 
                 op2_out     = rd_rs2_data;
-                // 注意：跳转目标 PC + Imm 会在 EX 阶段通过加法器或 ALU 旁路计算
             end
             
             `INST_TYPE_S: begin // SW, SH, SB
-                rd_rs1_addr = rs1; // 基地址
-                rd_rs2_addr = rs2; // 要存的数据
+                rd_rs1_addr = rs1;
+                rd_rs2_addr = rs2; 
                 op1_out     = rd_rs1_data;
-                op2_out     = imm; // ALU 计算地址: rs1 + imm
+                op2_out     = imm; 
             end
             
-            `INST_TYPE_L: begin // LW, LH, LB
+            `INST_TYPE_L: begin // LW, LH, LB, LBU, LHU
                 rd_rs1_addr = rs1;
                 rd_rs2_addr = 5'h0;
                 op1_out     = rd_rs1_data;
-                op2_out     = imm; // ALU 计算地址: rs1 + imm
+                op2_out     = imm; 
             end
             
             `INST_TYPE_J: begin // JAL
                 rd_rs1_addr = 5'h0;
                 rd_rs2_addr = 5'h0;
-                // JAL 行为: rd = PC + 4 (链接); PC = PC + imm (跳转)
-                // 这里让 ALU 计算 PC + 4 写入 rd
-                op1_out     = instr_addr_in; // PC
+                op1_out     = instr_addr_in; 
                 op2_out     = 32'd4;
             end
             
             `INST_TYPE_JALR: begin // JALR
                 rd_rs1_addr = rs1;
                 rd_rs2_addr = 5'h0;
-                // JALR 行为: rd = PC + 4; PC = (rs1 + imm) & ~1
-                // 同样让 ALU 计算 PC + 4 写入 rd
-                op1_out     = instr_addr_in; // PC
+                op1_out     = instr_addr_in; 
                 op2_out     = 32'd4;
-                // 跳转目标 rs1 + imm 将在 EX 阶段额外处理
             end
             
-            `INST_TYPE_U_LUI: begin // LUI: rd = imm
+            `INST_TYPE_U_LUI: begin // LUI
                 rd_rs1_addr = 5'h0;
                 rd_rs2_addr = 5'h0;
                 op1_out     = 32'h0;
                 op2_out     = imm;
             end
             
-            `INST_TYPE_U_AUIPC: begin // AUIPC: rd = PC + imm
+            `INST_TYPE_U_AUIPC: begin // AUIPC
                 rd_rs1_addr = 5'h0;
                 rd_rs2_addr = 5'h0;
-                op1_out     = instr_addr_in; // PC
+                op1_out     = instr_addr_in; 
                 op2_out     = imm;
             end
             
             default: begin
-                // 处理 NOP 或非法指令
                 rd_rs1_addr = 5'h0;
                 rd_rs2_addr = 5'h0;
                 op1_out     = 32'h0;

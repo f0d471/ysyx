@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module id2ex #(
     parameter AW = 32,

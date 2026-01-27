@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module writeback #(
     parameter DW = 32

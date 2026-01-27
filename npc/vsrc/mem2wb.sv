@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module mem2wb #(
     parameter AW = 32,
