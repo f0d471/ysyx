@@ -27,7 +27,7 @@ module writeback #(
                 wb_en   = 1'b1;
                 wb_data = mem_rdata_in;
             end
-            `INST_TYPE_I, `INST_TYPE_R_M, `INST_TYPE_U_LUI, `INST_TYPE_U_AUIPC, `INST_TYPE_J, `INST_TYPE_JALR: begin
+            `INST_TYPE_I, `INST_TYPE_R, `INST_TYPE_U_LUI, `INST_TYPE_U_AUIPC, `INST_TYPE_J, `INST_TYPE_JALR: begin
                 // ALU 运算 / JAL / JALR (Link PC) / LUI / AUIPC: 写回 ALU 结果
                 wb_en   = 1'b1;
                 wb_data = alu_result_in;

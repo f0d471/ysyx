@@ -1,10 +1,5 @@
 `include "define.sv"
 
-// DPI-C 接口定义
-// 修正：paddr_read 只接受地址，总是返回 4 字节
-import "DPI-C" function int paddr_read(input int addr);
-import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
-
 module memory #(
     parameter AW = 32,
     parameter DW = 32

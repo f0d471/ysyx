@@ -4,19 +4,19 @@
 // =================== 仿真功能配置面板 =================== //
 
 /*************  WAVE *************/ 
-#define CONFIG_WAVE
+//#define CONFIG_WAVE
 
 /************* SDB ***************/ 
 #define CONFIG_SDB
 
 /************ DIFFTEST ***********/ 
-#define CONFIG_DIFFTEST
+//#define CONFIG_DIFFTEST
 
 /************ ITRACE *************/ 
-#define CONFIG_ITRACE   
+//#define CONFIG_ITRACE   
 
 /************ MTRACE *************/ 
-#define CONFIG_MTRACE
+//#define CONFIG_MTRACE
 
 /************ DEVICE *************/ 
 //#define CONFIG_DEVICE    

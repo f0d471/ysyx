@@ -1,4 +1,4 @@
-`include "define.v"
+`include "define.sv"
 
 module execute #(
     parameter AW = 32,
@@ -37,7 +37,7 @@ module execute #(
                     `INST_ORI:   alu_res = op1_in | op2_in;
                     `INST_ANDI:  alu_res = op1_in & op2_in;
                     `INST_SLLI:  alu_res = op1_in << op2_in[4:0];
-                    `INST_SRLI, `INST_SRAI: begin // SRLI 和 SRAI 共享 funct3，靠 funct7 区分
+                    `INST_SRLI: begin // SRLI 和 SRAI 共享 funct3，靠 funct7 区分
                         if(funct7_in[5]) alu_res = $signed(op1_in) >>> op2_in[4:0]; // SRAI (算术右移)
                         else             alu_res = op1_in >> op2_in[4:0];           // SRLI (逻辑右移)
                     end
@@ -47,7 +47,7 @@ module execute #(
             
             `INST_TYPE_R: begin
                 case(funct3_in)
-                    `INST_ADD, `INST_SUB: begin 
+                    `INST_ADD: begin 
                         if(funct7_in[5]) alu_res = op1_in - op2_in; // SUB
                         else             alu_res = op1_in + op2_in; // ADD
                     end
@@ -55,7 +55,7 @@ module execute #(
                     `INST_SLT:  alu_res = ($signed(op1_in) < $signed(op2_in)) ? 32'd1 : 32'd0;
                     `INST_SLTU: alu_res = (op1_in < op2_in) ? 32'd1 : 32'd0;
                     `INST_XOR:  alu_res = op1_in ^ op2_in;
-                    `INST_SRL, `INST_SRA: begin 
+                    `INST_SRL: begin 
                         if(funct7_in[5]) alu_res = $signed(op1_in) >>> op2_in[4:0]; // SRA
                         else             alu_res = op1_in >> op2_in[4:0];           // SRL
                     end

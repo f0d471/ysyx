@@ -14,8 +14,8 @@ void difftest_init(const char *so_file) {
   handle = dlopen(so_file, RTLD_NOW);
   if (!handle) {
     fprintf(stderr, "dlopen error: %s\n", dlerror());
-    quit(1);
-  }
+    npc_state = NPC_ABORT; 
+    npc_quit();  }
 
   ref_memcpy     = (void (*)(uint32_t, void*, size_t, int)) dlsym(handle, "difftest_memcpy");
   ref_regcpy     = (void (*)(void*, int))                   dlsym(handle, "difftest_regcpy");
@@ -24,8 +24,8 @@ void difftest_init(const char *so_file) {
 
   if (!ref_memcpy || !ref_regcpy || !ref_exec) {
     fprintf(stderr, "dlsym error\n");
-    quit(1);
-  }
+    npc_state = NPC_ABORT; 
+    npc_quit();  }
 
   printf("DiffTest REF loaded: %s\n", so_file);
 }

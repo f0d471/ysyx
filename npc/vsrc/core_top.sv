@@ -1,6 +1,6 @@
 `include "define.sv"
 
-import "DPI-C" function int paddr_read(input int addr, input int len);
+import "DPI-C" function int paddr_read(input int addr);
 import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
 
 module top #(
@@ -11,16 +11,13 @@ module top #(
     input  logic          rst_n
 ); 
 
-// =========================================================================
-// 1. 全局连线定义 (Wires Definition)
-// =========================================================================
+// ================================== 全局连线定义 =======================================
 
-    // --- 跳转控制 (来自 EX 阶段) ---
-    // 当 EX 阶段判断需要跳转时，拉高此信号，同时刷新流水线
-    logic          ex_jump_flag;
-    logic [AW-1:0] ex_jump_target;
+    //  跳转控制 (来自 EX 阶段) 
+    logic          ex_jump_flag;      // 当 EX 阶段判断需要跳转时，拉高此信号，同时刷新流水线
+    logic [AW-1:0] ex_jump_target;    // 
 
-    // --- IF (取指) 阶段 ---
+    //  IF 
     logic [AW-1:0] pc_pointer;        // 当前 PC
     logic [DW-1:0] instruction;       // 取到的指令
 
@@ -44,11 +41,11 @@ module top #(
 
     // --- ID/EX 流水线寄存器输出 (EX 阶段输入) ---
     logic [AW-1:0] ex_pc;
-    logic [DW-1:0] ex_instr;          // (仅调试用)
+    logic [DW-1:0] ex_instr;          
     logic [DW-1:0] ex_op1;
     logic [DW-1:0] ex_op2;
-    logic [DW-1:0] ex_rs1_data;       // [新增] 原始 RS1 数据 (用于 JALR)
-    logic [DW-1:0] ex_rs2_data;       // 原始 RS2 数据 (用于 Store)
+    logic [DW-1:0] ex_rs1_data;       
+    logic [DW-1:0] ex_rs2_data;      
     logic [4:0]    ex_rd_addr;
     logic [DW-1:0] ex_imm;
     logic [6:0]    ex_opcode;
@@ -227,7 +224,7 @@ module top #(
         // Outputs
         .alu_result_out  (ex_alu_result),
         .jump_flag_out   (ex_jump_flag),   
-        .jump_target_out (ex_jump_target)  r
+        .jump_target_out (ex_jump_target)  
     );
 
     // Pipeline Reg
