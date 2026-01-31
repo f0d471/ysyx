@@ -30,6 +30,11 @@ static void restart() {
   /* Set the initial program counter. */
   cpu.pc = RESET_VECTOR;
 
+  cpu.mstatus = 0x1800;  // Spike 默认值，保证 difftest 一致
+  cpu.mepc    = 0;
+  cpu.mcause  = 0;
+  cpu.mtvec   = 0;
+
   /* The zero register is always 0. */
   cpu.gpr[0] = 0;
 }

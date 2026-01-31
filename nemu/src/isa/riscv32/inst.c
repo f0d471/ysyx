@@ -1,18 +1,3 @@
-/***************************************************************************************
-* Copyright (c) 2014-2024 Zihao Yu, Nanjing University
-*
-* NEMU is licensed under Mulan PSL v2.
-* You can use this software according to the terms and conditions of the Mulan PSL v2.
-* You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
-*
-* THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-* EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-* MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-*
-* See the Mulan PSL v2 for more details.
-***************************************************************************************/
-
 #include "local-include/reg.h"
 #include <cpu/cpu.h>
 #include <cpu/ifetch.h>
@@ -37,24 +22,24 @@ enum {
 #define immB() do { *imm = SEXT((BITS(i,31,31)<<12) | (BITS(i,7,7)<<11) | (BITS(i,30,25)<<5) | (BITS(i,11,8)<<1), 13); } while(0)
 #define immJ() do { *imm = SEXT((BITS(i, 31, 31) << 20) | (BITS(i, 19, 12) << 12) | (BITS(i, 20, 20) << 11) | (BITS(i, 30, 21) << 1), 21); } while (0)
 
-// static inline word_t csr_read(uint32_t csr) {
-//   switch (csr) {
-//     case 0x300: return cpu.mstatus;
-//     case 0x305: return cpu.mtvec;
-//     case 0x341: return cpu.mepc;
-//     case 0x342: return cpu.mcause;
-//     default:    return 0; // 其他 CSR 先返回 0
-//   }
-// }
-// static inline void csr_write(uint32_t csr, word_t val) {
-//   switch (csr) {
-//     case 0x300: cpu.mstatus = val; break;
-//     case 0x305: cpu.mtvec   = val; break;
-//     case 0x341: cpu.mepc    = val; break;
-//     case 0x342: cpu.mcause  = val; break;
-//     default:   /* 忽略未知 CSR 写 */ break;
-//   }
-// }
+static inline word_t csr_read(uint32_t csr) {
+  switch (csr) {
+    case 0x300: return cpu.mstatus;
+    case 0x305: return cpu.mtvec;
+    case 0x341: return cpu.mepc;
+    case 0x342: return cpu.mcause;
+    default:    return 0; // 其他 CSR 先返回 0
+  }
+}
+static inline void csr_write(uint32_t csr, word_t val) {
+  switch (csr) {
+    case 0x300: cpu.mstatus = val; break;
+    case 0x305: cpu.mtvec   = val; break;
+    case 0x341: cpu.mepc    = val; break;
+    case 0x342: cpu.mcause  = val; break;
+    default:    /* 忽略未知 CSR 写 */ break;
+  }
+}
 
 static void decode_operand(Decode *s, int *rd, word_t *src1, word_t *src2, word_t *imm, int type) {
   uint32_t i = s->isa.inst;
@@ -108,7 +93,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 010 ????? 0110011", slt,    r, R(rd) = (int32_t)src1 < (int32_t)src2);
   INSTPAT("0000000 ????? ????? 011 ????? 0110011", sltu,   r, R(rd) = (uint32_t)src1 < (uint32_t)src2);
 
-  //INSTPAT("0011000 00010 00000 000 00000 1110011", mret,   N, s->dnpc = cpu.mepc;);
+  INSTPAT("0011000 00010 00000 000 00000 1110011", mret,   N, s->dnpc = cpu.mepc;);
 
   //I
   INSTPAT("??????? ????? ????? 000 ????? 0010011", addi,   I, R(rd) = src1 + imm);
@@ -128,10 +113,8 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 100 ????? 0000011", lbu,    I, R(rd) = Mr(src1 + imm, 1));
   INSTPAT("??????? ????? ????? 101 ????? 0000011", lhu,    I, R(rd) = Mr(src1 + imm, 2));
   
-  //INSTPAT("???????????? ????? 001 ????? 1110011",  csrrw,  I, ({ word_t old = csr_read((uint32_t)imm); 
-  //  csr_write((uint32_t)imm, src1); R(rd) = old; }));
-  //INSTPAT("???????????? ????? 010 ????? 1110011",  csrrs,  I, ({ word_t old = csr_read((uint32_t)imm); 
-  //  if (src1 != 0){csr_write((uint32_t)imm, old | src1);} R(rd) = old; }));
+  INSTPAT("???????????? ????? 001 ????? 1110011",  csrrw,  I, ({ word_t old = csr_read((uint32_t)imm); csr_write((uint32_t)imm, src1); R(rd) = old; }));
+  INSTPAT("???????????? ????? 010 ????? 1110011",  csrrs,  I, ({ word_t old = csr_read((uint32_t)imm); if (src1 != 0){csr_write((uint32_t)imm, old | src1);} R(rd) = old; }));
 
   //S
   INSTPAT("??????? ????? ????? 000 ????? 0100011", sb_,    S, Mw(src1 + imm, 1, src2));

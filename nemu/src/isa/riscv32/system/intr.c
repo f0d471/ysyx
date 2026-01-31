@@ -16,11 +16,14 @@
 #include <isa.h>
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
-  /* TODO: Trigger an interrupt/exception with ``NO''.
-   * Then return the address of the interrupt/exception vector.
-   */
+  // 1. 保存触发异常时的 PC
+  cpu.mepc = epc;
 
-  return 0;
+  // 2. 记录异常原因
+  cpu.mcause = NO;
+
+  // 3. 返回异常入口地址 (mtvec 的值)
+  return cpu.mtvec;
 }
 
 word_t isa_query_intr() {

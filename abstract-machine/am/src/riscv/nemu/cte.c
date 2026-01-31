@@ -8,6 +8,15 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      // 11 是 RISC-V 规定的 M-mode Environment Call (ecall) 的异常号
+      case 11:
+        // 1. 设置事件类型为 YIELD (这是 yield 测试要求的)
+        ev.event = EVENT_YIELD; 
+        
+        // 2. 关键！跳过当前那条 ecall 指令
+        // 如果不加 4，mret 返回后会再次执行 ecall，造成死循环
+        c->mepc += 4; 
+        break;
       default: ev.event = EVENT_ERROR; break;
     }
 
