@@ -25,6 +25,44 @@
  */
 #define MAX_INST_TO_PRINT 10
 
+#ifdef CONFIG_IRINGBUF
+
+  #define IRB_N 128
+  typedef struct {
+    vaddr_t pc;
+    uint32_t inst;
+    char disasm[128];
+  } IRBEntry;
+
+  static IRBEntry irb[IRB_N];
+  static int irb_head = 0;
+  static int irb_cnt  = 0;
+
+  static inline void irb_record(vaddr_t pc, uint32_t inst, const char *disasm) {
+    IRBEntry *e = &irb[irb_head];
+    e->pc   = pc;
+    e->inst = inst;
+    // 安全复制，防止溢出
+    snprintf(e->disasm, sizeof(e->disasm), "%.*s", (int)sizeof(e->disasm)-1, disasm);
+    irb_head = (irb_head + 1) % IRB_N;
+    if (irb_cnt < IRB_N) irb_cnt++;
+  }
+
+  static void irb_dump(vaddr_t bad_pc) {
+    if (irb_cnt == 0) return;
+    int start = (irb_head - irb_cnt + IRB_N) % IRB_N;
+    Log("----- recent %d instructions (IRingBuf) -----", irb_cnt);
+    for (int i = 0; i < irb_cnt; i++) {
+      IRBEntry *e = &irb[(start + i) % IRB_N];
+      // 标记出错的那条指令
+      const char *mark = (e->pc == bad_pc) ? "-->" : "   ";
+      Log("%s " FMT_WORD ": %08x %s", mark, e->pc, e->inst, e->disasm);
+    }
+    Log("----- end IRingBuf dump -----");
+  }
+
+#endif // CONFIG_IRINGBUF
+
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
@@ -68,6 +106,35 @@ static void exec_once(Decode *s, vaddr_t pc) {
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst, ilen);
+#endif
+#ifdef CONFIG_IRINGBUF
+  // 如果 ITRACE 已经算好了，就直接抄；否则自己算一遍。
+  #ifdef CONFIG_ITRACE
+    // 情况 A: ITRACE 开了，直接复用 logbuf，省性能
+    irb_record(s->pc, s->isa.inst, s->logbuf);
+  #else
+    // 情况 B: ITRACE 没开，我们需要自己反汇编（这是必须的代价）
+    char temp_buf[128];
+    char *p_irb = temp_buf;
+    p_irb += snprintf(p_irb, 128, FMT_WORD ":", s->pc);
+    
+    int ilen_irb = s->snpc - s->pc;
+    uint8_t *inst_irb = (uint8_t *)&s->isa.inst;
+    for (int i = ilen_irb - 1; i >= 0; i --) {
+      p_irb += snprintf(p_irb, 4, " %02x", inst_irb[i]);
+    }
+    int space_len_irb = (4 - ilen_irb) * 3 + 1; // 简化处理，假设 max=4
+    if (space_len_irb > 0) {
+      memset(p_irb, ' ', space_len_irb);
+      p_irb += space_len_irb;
+    }
+
+    void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+    disassemble(p_irb, temp_buf + 128 - p_irb, 
+        MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst, ilen_irb);
+    
+    irb_record(s->pc, s->isa.inst, temp_buf);
+  #endif
 #endif
 }
 
@@ -122,6 +189,11 @@ void cpu_exec(uint64_t n) {
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
           nemu_state.halt_pc);
+
+      #ifdef CONFIG_IRINGBUF
+        irb_dump(nemu_state.halt_pc);
+      #endif
+
       // fall through
     case NEMU_QUIT: statistic();
   }

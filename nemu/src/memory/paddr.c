@@ -27,6 +27,17 @@ static uint8_t pmem[CONFIG_MSIZE] PG_ALIGN = {};
 uint8_t* guest_to_host(paddr_t paddr) { return pmem + paddr - CONFIG_MBASE; }
 paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 
+static inline void log_mtrace(char type, paddr_t addr, int len, word_t data) {
+#ifdef CONFIG_MTRACE
+    // 这里利用了短路求值，如果未定义 MTRACE，编译器会优化掉整个块
+    if (likely(!MTRACE_COND)) return;
+
+    // 格式化与记录逻辑封装在此
+    log_write("mtrace: %c  addr=" FMT_PADDR " len=%d val=" FMT_WORD "\n", 
+              type, addr, len, data);
+#endif
+}
+
 static word_t pmem_read(paddr_t addr, int len) {
   word_t ret = host_read(guest_to_host(addr), len);
   return ret;
@@ -51,14 +62,35 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if (likely(in_pmem(addr))) return pmem_read(addr, len);
-  IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
-  out_of_bound(addr);
-  return 0;
+  word_t ret = 0;
+
+  if (likely(in_pmem(addr))) {
+    ret = pmem_read(addr, len);
+  } else {
+    #ifdef CONFIG_DEVICE
+      ret = mmio_read(addr, len);
+    #else
+      out_of_bound(addr);
+      return 0;
+    #endif
+  }
+
+  log_mtrace('R', addr, len, ret);
+  return ret;
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
-  if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
-  IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
+  log_mtrace('W', addr, len, data);
+
+  if (likely(in_pmem(addr))) {
+    pmem_write(addr, len, data);
+    return;
+  }
+
+  #ifdef CONFIG_DEVICE
+    mmio_write(addr, len, data);
+    return;
+  #endif
+
   out_of_bound(addr);
 }

@@ -1,3 +1,5 @@
+#ifdef CONFIG_SDB
+
 #include <cstdio>
 #include <cstring>
 
@@ -33,3 +35,4 @@ uint32_t isa_reg_str2val(const char *s, bool *success) {
   *success = false;
   return 0;
 }
+#endif

@@ -1,3 +1,6 @@
+#ifdef CONFIG_SDB
+
+
 #ifndef __SDB_H__
 #define __SDB_H__
 
@@ -15,3 +18,5 @@ extern Command cmd_table[];
 extern const int NR_CMD;
 
 #endif // __SDB_H__
+
+#endif

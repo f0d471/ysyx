@@ -1,3 +1,5 @@
+#ifdef CONFIG_DIFFTEST
+
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,3 +65,5 @@ void difftest_step() {
     npc_quit();
   }
 }
+
+#endif

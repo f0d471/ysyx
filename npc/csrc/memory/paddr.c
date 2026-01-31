@@ -99,6 +99,7 @@ void pmem_write(uint32_t addr, int len, uint32_t data) {
 
 // ================= 硬件DPI-C调用接口 ================================
 extern "C" uint32_t paddr_read(uint32_t  addr) {
+    if (addr== 0) return 0;
   if (__builtin_expect(in_pmem(addr), 1)) return pmem_read(addr, 4);
   // IFDEF(CONFIG_DEVICE, return mmio_read(addr, 4));
   out_of_bound(addr,false);

@@ -18,7 +18,7 @@ module top #(
     logic [AW-1:0] ex_jump_target;    // 
 
     //  IF 
-    logic [AW-1:0] pc_pointer;        // 当前 PC
+    logic [AW-1:0] pc_pointer = 32'h80000000;        // 当前 PC
     logic [DW-1:0] instruction;       // 取到的指令
 
     // --- IF/ID 流水线寄存器输出 ---

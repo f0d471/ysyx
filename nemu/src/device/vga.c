@@ -72,8 +72,12 @@ static inline void update_screen() {
 #endif
 
 void vga_update_screen() {
-  // TODO: call `update_screen()` when the sync register is non-zero,
-  // then zero out the sync register
+  if (vgactl_port_base[1]) {
+    // 只有在定义了显示宏时才更新屏幕，防止编译错误
+    IFDEF(CONFIG_VGA_SHOW_SCREEN, update_screen());
+    // 清除同步标志位，表示刷新完成
+    vgactl_port_base[1] = 0;
+  }
 }
 
 void init_vga() {

@@ -22,6 +22,8 @@ always_ff @(posedge clk or negedge rst_n) begin
         pc_pointer <= jump_addr;
     else
         pc_pointer <= pc_pointer + 'h4;
+                $display("PC updated! New PC address = 0x%08h", pc_pointer);
+
 end
 
 endmodule

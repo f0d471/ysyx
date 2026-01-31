@@ -26,7 +26,7 @@ module memory #(
     // -----------------------------------------------------
     // 1. Read Logic (Combinational DPI-C Call)
     // -----------------------------------------------------
-    always_comb begin
+    always_ff @(posedge clk) begin
         rdata_raw = 32'h0;
         mem_rdata_out = 32'h0;
 

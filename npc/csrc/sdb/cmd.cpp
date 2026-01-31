@@ -1,3 +1,5 @@
+#ifdef CONFIG_SDB
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -109,3 +111,5 @@ static int cmd_help(char *args) {
     }
     return 0;
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef CONFIG_SDB
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -56,3 +58,5 @@ void sdb_mainloop() {
         }
     }
 }
+
+#endif
