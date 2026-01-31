@@ -8,6 +8,8 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
+      case 8:  // ecall from U
+      case 9:  // ecall from S
       // 11 是 RISC-V 规定的 M-mode Environment Call (ecall) 的异常号
       case 11:
         // 1. 设置事件类型为 YIELD (这是 yield 测试要求的)
@@ -40,7 +42,14 @@ bool cte_init(Context*(*handler)(Event, Context*)) {
 }
 
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
-  return NULL;
+  Context *c = (Context *)((uintptr_t)kstack.end - sizeof(Context));
+  memset(c, 0, sizeof(Context));
+  c->mepc = (uintptr_t)entry;
+  c->gpr[2] = (uintptr_t)kstack.end; // x2 = sp
+  c->gpr[10] = (uintptr_t)arg; // x10 = a0
+  c->mstatus = 0x1800; 
+
+  return c;
 }
 
 void yield() {
