@@ -7,7 +7,7 @@
 #define CONFIG_WAVE
 
 /************* SDB ***************/ 
-//#define CONFIG_SDB
+#define CONFIG_SDB
 
 /************ DIFFTEST ***********/ 
 //#define CONFIG_DIFFTEST

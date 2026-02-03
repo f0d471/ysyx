@@ -1,5 +1,6 @@
 `include "define.sv"
 
+import "DPI-C" function void trap(input int code, input int pc);
 import "DPI-C" function int paddr_read(input int addr);
 import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
 
@@ -8,294 +9,299 @@ module top #(
     parameter DW = 32  // 数据位宽
 )( 
     input  logic          clk,
-    input  logic          rst_n
+    input  logic          rst_n,
+
+    output logic [AW-1:0] pc,
+    output logic [DW-1:0] instr,
+    output logic [DW-1:0] debug_x10,
+    output logic [DW-1:0] regs [15:0] 
 ); 
 
 // ================================== 全局连线定义 =======================================
 
-    //  跳转控制 (来自 EX 阶段) 
-    logic          ex_jump_flag;      // 当 EX 阶段判断需要跳转时，拉高此信号，同时刷新流水线
-    logic [AW-1:0] ex_jump_target;    // 
+// ---------------- IF Stage ----------------
+// logic [DW-1:0]  pc;
+// logic [DW-1:0]  instr;
 
-    //  IF 
-    logic [AW-1:0] pc_pointer = 32'h80000000;        // 当前 PC
-    logic [DW-1:0] instruction;       // 取到的指令
+// ---------------- IF / ID ----------------
+logic [AW-1:0]  instr_addr_out;
+logic [DW-1:0]  instr_out;
 
-    // --- IF/ID 流水线寄存器输出 ---
-    logic [AW-1:0] id_pc;             // 传给 ID 的 PC
-    logic [DW-1:0] id_instr;          // 传给 ID 的指令
+// ---------------- ID Stage ----------------
+logic [4:0]     decode_rs1_addr;
+logic [4:0]     decode_rs2_addr;
+logic [4:0]     decode_rd_addr;
 
-    // --- ID (译码) 阶段 ---
-    logic [4:0]    id_rs1_addr;       // 读寄存器地址 1
-    logic [4:0]    id_rs2_addr;       // 读寄存器地址 2
-    logic [DW-1:0] id_rs1_data;       // 读寄存器数据 1
-    logic [DW-1:0] id_rs2_data;       // 读寄存器数据 2
+logic [DW-1:0]  decode_imm;
+logic [1:0]     decode_op1_sel;
+logic [1:0]     decode_op2_sel;
 
-    logic [4:0]    id_rd_addr;        // 目标寄存器地址
-    logic [DW-1:0] id_op1;            // ALU 操作数 1
-    logic [DW-1:0] id_op2;            // ALU 操作数 2
-    logic [DW-1:0] id_imm;            // 立即数
-    logic [6:0]    id_opcode;         // 指令 Opcode
-    logic [2:0]    id_funct3;         // Funct3
-    logic [6:0]    id_funct7;         // Funct7
+logic [6:0]     decode_opcode;
+logic [2:0]     decode_funct3;
+logic [6:0]     decode_funct7;
 
-    // --- ID/EX 流水线寄存器输出 (EX 阶段输入) ---
-    logic [AW-1:0] ex_pc;
-    logic [DW-1:0] ex_instr;          
-    logic [DW-1:0] ex_op1;
-    logic [DW-1:0] ex_op2;
-    logic [DW-1:0] ex_rs1_data;       
-    logic [DW-1:0] ex_rs2_data;      
-    logic [4:0]    ex_rd_addr;
-    logic [DW-1:0] ex_imm;
-    logic [6:0]    ex_opcode;
-    logic [2:0]    ex_funct3;
-    logic [6:0]    ex_funct7;
+// ---------------- Register File ----------------
+logic [DW-1:0]  reg_rs1_data;
+logic [DW-1:0]  reg_rs2_data;
 
-    // --- EX (执行) 阶段输出 ---
-    logic [DW-1:0] ex_alu_result;     // ALU 计算结果
+// ---------------- ID / EX ----------------
+logic [AW-1:0]  id_instr_addr_out;
+logic [DW-1:0]  id_instr_out;
 
-    // --- EX/MEM 流水线寄存器输出 (MEM 阶段输入) ---
-    logic [AW-1:0] mem_pc;
-    logic [DW-1:0] mem_alu_result;    // 也是访存地址
-    logic [DW-1:0] mem_rs2_data;      // 写内存的数据
-    logic [4:0]    mem_rd_addr;
-    logic [6:0]    mem_opcode;
-    logic [2:0]    mem_funct3;
+logic [DW-1:0]  id_op1_out;
+logic [DW-1:0]  id_op2_out;
 
-    // --- MEM (访存) 阶段输出 ---
-    logic [DW-1:0] mem_mem_rdata;     // 从内存读出的数据
+logic [4:0]     id_rd_addr_out;
+logic [DW-1:0]  id_imm_out;
 
-    // --- MEM/WB 流水线寄存器输出 (WB 阶段输入) ---
-    logic [AW-1:0] wb_pc;
-    logic [DW-1:0] wb_alu_result;
-    logic [DW-1:0] wb_mem_rdata;
-    logic [4:0]    wb_rd_addr;
-    logic [6:0]    wb_opcode;
+logic [6:0]     id_opcode_out;
+logic [2:0]     id_funct3_out;
+logic [6:0]     id_funct7_out;
 
-    // --- WB (写回) 阶段输出 (连接回 Register File) ---
-    logic          wb_wr_en;          // 写使能
-    logic [4:0]    wb_wr_addr;        // 写地址
-    logic [DW-1:0] wb_wr_data;        // 写数据
+logic [DW-1:0]  id_rs1_data;
+logic [DW-1:0]  id_rs2_data;
 
-// =========================================================================
-// 2. 模块例化 (Module Instantiation)
-// =========================================================================
+// ---------------- EX Stage ----------------
+logic [DW-1:0]  ex_alu_result;
+logic           ex_jump_flag;
+logic [AW-1:0]  ex_jump_target;
+
+// ---------------- EX / MEM ----------------
+logic [DW-1:0]  ex_alu_result_out;
+logic [DW-1:0]  ex_rs2_data;
+logic [4:0]     ex_rd_addr;
+logic [6:0]     ex_opcode;
+logic [2:0]     ex_funct3;
+
+// ---------------- MEM Stage ----------------
+logic [DW-1:0]  mem_rdata;
+
+// ---------------- MEM / WB ----------------
+logic [DW-1:0]  mem_alu_result;
+logic [DW-1:0]  mem_rdata_out;
+logic [4:0]     mem_rd_addr;
+logic [6:0]     mem_opcode;
+
+// ---------------- WB Stage ----------------
+logic           wb_wr_en;
+logic [4:0]     wb_wr_addr;
+logic [DW-1:0]  wb_wr_data;
+
+// --------------- ebreak -------------------
+logic inst_ebreak;
+logic inst_ebreak_out;
+
+// ================================== 模块例化 =======================================
 
     // ---------------- Stage 1: Fetch (IF) ----------------
-    // PC 
     pc_counter #( 
-        .AW       (AW),
-        .RESET_PC (32'h80000000) 
+        .AW             (AW),
+        .RESET_PC       (32'h80000000) 
     ) u_pc_counter ( 
-        .clk        (clk),
-        .rst_n      (rst_n),
-        // 流水线暂停和跳转控制
-        .pc_stall   (1'b0),         
-        .jump_en    (ex_jump_flag),   
-        .jump_addr  (ex_jump_target),
-        // 输出的PC
-        .pc_pointer (pc_pointer) 
+        .clk            (clk),
+        .rst_n          (rst_n),
+
+        // from EX
+        // .pc_stall    (1'b0),  
+        .jump_en        (ex_jump_flag),   
+        .jump_addr      (ex_jump_target),
+        // to fetch
+        .pc             (pc) 
     );  
 
-    // 取指
     fetch #(
-        .AW (AW),  
-        .DW (DW)
+        .AW             (AW),  
+        .DW             (DW)
     ) u_fetch (                        
-        .clk       (clk),
-        .rst_n     (rst_n),
-        // PC
-        .pc_addr   (pc_pointer),
-        // 取出的指令
-        .instr_out (instruction)  
+        .clk            (clk),
+        .rst_n          (rst_n),
+
+        //from pc_counter
+        .pc_pointer     (pc),
+        // to if 
+        .instr_out      (instr)  
     ); 
 
-    // 
     if2id #(
         .AW (AW),  
         .DW (DW)   
     ) u_if2id ( 
-        .clk            (clk),
-        .rst_n          (rst_n),
-        // 流水线暂停和冲刷
-        .if_stall       (1'b0),         
-        .if_flush       (ex_jump_flag),
-        //data in
-        .instr_addr_in  (pc_pointer), 
-        .instr_in       (instruction),
-        //data out
-        .instr_addr_out (id_pc),
-        .instr_out      (id_instr)     
+        // from ex
+        // .if_stall    (1'b0),         
+        // .if_flush    (ex_jump_flag),
+        // from if
+        .instr_addr_in  (pc), 
+        .instr_in       (instr),
+        // to id
+        .instr_addr_out (instr_addr_out),
+        .instr_out      (instr_out)     
     );  
 
     // ---------------- Stage 2: Decode (ID) ----------------
-    // 寄存器堆
-    register #(
-        .DW (DW)
-    ) u_register (
-        .clk      (clk),
-        .rst_n    (rst_n),
-        // 读端口 (来自 Decoder)
-        .rs1_addr (id_rs1_addr),
-        .rs2_addr (id_rs2_addr),
-        .rs1_data (id_rs1_data), 
-        .rs2_data (id_rs2_data), 
-        // 写端口 (来自 WB 阶段)
-        .wr_en    (wb_wr_en),
-        .wr_addr  (wb_wr_addr),
-        .wr_data  (wb_wr_data)
-    );
-
-    // 4. 译码器
     decode #(
-        .AW (AW),
-        .DW (DW)
+        .AW(AW),
+        .DW(DW)
     ) u_decode (
-        .instr_addr_in (id_pc),
-        .instr_in      (id_instr),
-        // RegFile 接口
-        .rd_rs1_addr   (id_rs1_addr), 
-        .rd_rs2_addr   (id_rs2_addr),
-
-        .rd_rs1_data   (id_rs1_data), 
-        .rd_rs2_data   (id_rs2_data), 
-        // 解码结果 -> ID/EX
-        .rd_addr_out   (id_rd_addr),
-        .op1_out       (id_op1),
-        .op2_out       (id_op2),
-        .imm_out       (id_imm),
-        // to execute
-        .opcode_out    (id_opcode),
-        .funct3_out    (id_funct3),
-        .funct7_out    (id_funct7)
+        // from if
+        .instr_addr_in  (instr_addr_out),
+        .instr_in       (instr_out),
+        // to reg
+        .rd_rs1_addr    (decode_rs1_addr),
+        .rd_rs2_addr    (decode_rs2_addr),
+        // to id2ex
+        .rd_addr_out    (decode_rd_addr),
+        .imm_out        (decode_imm),
+        .op1_sel_out    (decode_op1_sel),
+        .op2_sel_out    (decode_op2_sel),
+        // to ex
+        .opcode_out     (decode_opcode),
+        .funct3_out     (decode_funct3),
+        .funct7_out     (decode_funct7),
+        //erbreak
+        .inst_ebreak    (inst_ebreak)
     );
 
-    // Pipeline Reg
-    id2ex #(
-        .AW (AW),
-        .DW (DW)
-    ) u_id2ex ( 
+    reg_file #(
+        .DW(DW)
+    ) u_reg_file (
         .clk            (clk),
         .rst_n          (rst_n),
+        // read from decode
+        .rs1_addr       (decode_rs1_addr),
+        .rs2_addr       (decode_rs2_addr),
+        // read to ex
+        .rs1_data       (reg_rs1_data),
+        .rs2_data       (reg_rs2_data),
+        // write from wb
+        .wr_en          (wb_wr_en),
+        .wr_addr        (wb_wr_addr),
+        .wr_data        (wb_wr_data),
+        // for test
+        .debug_x10      (debug_x10),
+        .regs           (regs)
+    );
 
-        .id_stall       (1'b0),
-        .id_flush       (ex_jump_flag), 
-        // Inputs
-        .instr_addr_in  (id_pc),
-        .instr_in       (id_instr),
-        .op1_in         (id_op1),
-        .op2_in         (id_op2),
-        .rs1_data_in    (id_rs1_data),  
-        .rs2_data_in    (id_rs2_data),  
-        .rd_addr_in     (id_rd_addr),
-        .imm_in         (id_imm),
-        .opcode_in      (id_opcode),
-        .funct3_in      (id_funct3),
-        .funct7_in      (id_funct7),
-        // Outputs
-        .instr_addr_out (ex_pc),
-        .instr_out      (ex_instr),
-        .op1_out        (ex_op1),
-        .op2_out        (ex_op2),
-        .rs1_data_out   (ex_rs1_data),  
-        .rs2_data_out   (ex_rs2_data),
-        .rd_addr_out    (ex_rd_addr),
-        .imm_out        (ex_imm),
-        .opcode_out     (ex_opcode),
-        .funct3_out     (ex_funct3),
-        .funct7_out     (ex_funct7)
+    id2ex #(
+        .AW(AW),
+        .DW(DW)
+    ) u_id2ex (
+
+        // from if
+        .instr_addr_in  (instr_addr_out),  
+        .instr_in       (instr_out),
+        // from decode
+        .rd_addr_in     (decode_rd_addr),
+        .imm_in         (decode_imm),
+        .op1_sel_in     (decode_op1_sel),
+        .op2_sel_in     (decode_op2_sel),
+        .opcode_in      (decode_opcode),
+        .funct3_in      (decode_funct3),
+        .funct7_in      (decode_funct7),
+        // from register
+        .rs1_data_in    (reg_rs1_data),
+        .rs2_data_in    (reg_rs2_data),
+        // to ex
+        .instr_addr_out (id_instr_addr_out),
+        .instr_out      (id_instr_out),
+        .op1_out        (id_op1_out),
+        .op2_out        (id_op2_out),
+        .rd_addr_out    (id_rd_addr_out),
+        .imm_out        (id_imm_out),
+        .opcode_out     (id_opcode_out),
+        .funct3_out     (id_funct3_out),
+        .funct7_out     (id_funct7_out),
+        .rs1_data_out   (id_rs1_data),
+        .rs2_data_out   (id_rs2_data),
+        //erbeak
+        .inst_ebreak_in (inst_ebreak),
+        .inst_ebreak_out(inst_ebreak_out)
     );
 
     // ---------------- Stage 3: Execute (EX) ----------------
-    // 执行
     execute #(
         .AW (AW),
         .DW (DW)
     ) u_execute (
-        .pc_in           (ex_pc),
-        .op1_in          (ex_op1),
-        .op2_in          (ex_op2),
-        .rs1_data_in     (ex_rs1_data), 
-        .imm_in          (ex_imm),
-        .opcode_in       (ex_opcode),
-        .funct3_in       (ex_funct3),
-        .funct7_in       (ex_funct7),
-        // Outputs
+        .pc_in           (id_instr_addr_out),
+        .op1_in          (id_op1_out),
+        .op2_in          (id_op2_out),
+        .rs1_data_in     (id_rs1_data), 
+        .imm_in          (id_imm_out),
+        .opcode_in       (id_opcode_out),
+        .funct3_in       (id_funct3_out),
+        .funct7_in       (id_funct7_out),
+        // to mem
         .alu_result_out  (ex_alu_result),
+        // to pc
         .jump_flag_out   (ex_jump_flag),   
-        .jump_target_out (ex_jump_target)  
+        .jump_target_out (ex_jump_target),
+        //ebreak
+        .inst_ebreak_in  (inst_ebreak_out)
     );
 
-    // Pipeline Reg
     ex2mem #(
         .AW (AW),
         .DW (DW)
     ) u_ex2mem (
-        .clk            (clk),
-        .rst_n          (rst_n),
-        // Inputs
-        .pc_in          (ex_pc),
+        //from id
+        .rs2_data_in    (id_rs2_data),
+        .pc_in          (id_instr_addr_out),
+        .rd_addr_in     (id_rd_addr_out),
+        .opcode_in      (id_opcode_out),
+        .funct3_in      (id_funct3_out),
+        // from ex
         .alu_result_in  (ex_alu_result),
-        .rs2_data_in    (ex_rs2_data),
-        .rd_addr_in     (ex_rd_addr),
-        .opcode_in      (ex_opcode),
-        .funct3_in      (ex_funct3),
-        // Outputs
-        .pc_out         (mem_pc),
-        .alu_result_out (mem_alu_result),
-        .rs2_data_out   (mem_rs2_data),
-        .rd_addr_out    (mem_rd_addr),
-        .opcode_out     (mem_opcode),
-        .funct3_out     (mem_funct3)
+        // to mem
+        .alu_result_out (ex_alu_result_out),
+        .rs2_data_out   (ex_rs2_data),
+        .rd_addr_out    (ex_rd_addr),
+        .opcode_out     (ex_opcode),
+        .funct3_out     (ex_funct3)
     );
 
-    // 访存单元 
+    // ---------------- Stage 4: Load-Store (LS) ----------------
     memory #(
         .AW (AW),
         .DW (DW)
     ) u_memory (
         .clk            (clk),
         .rst_n          (rst_n),
-        .alu_result_in  (mem_alu_result), 
-        .rs2_data_in    (mem_rs2_data),   
-        .opcode_in      (mem_opcode),
-        .funct3_in      (mem_funct3),
-        // Output
-        .mem_rdata_out  (mem_mem_rdata)  
+        // from ex
+        .alu_result_in  (ex_alu_result_out), 
+        .rs2_data_in    (ex_rs2_data),   
+        .opcode_in      (ex_opcode),
+        .funct3_in      (ex_funct3),
+        // to wb
+        .mem_rdata_out  (mem_rdata)  
     );
 
-    // ---------------- Pipeline Reg: MEM/WB ----------------
     mem2wb #(
         .AW (AW),
         .DW (DW)
     ) u_mem2wb (
-        .clk            (clk),
-        .rst_n          (rst_n),
-        // Inputs
-        .pc_in          (mem_pc),
-        .alu_result_in  (mem_alu_result),
-        .mem_rdata_in   (mem_mem_rdata),
-        .rd_addr_in     (mem_rd_addr),
-        .opcode_in      (mem_opcode),
-        // Outputs
-        .pc_out         (wb_pc),
-        .alu_result_out (wb_alu_result),
-        .mem_rdata_out  (wb_mem_rdata),
-        .rd_addr_out    (wb_rd_addr),
-        .opcode_out     (wb_opcode)
+        // from ex
+        .alu_result_in  (ex_alu_result_out),
+        .rd_addr_in     (ex_rd_addr),
+        .opcode_in      (ex_opcode),
+        // from mem
+        .mem_rdata_in   (mem_rdata),
+        // to wb
+        .alu_result_out (mem_alu_result),
+        .mem_rdata_out  (mem_rdata_out),
+        .opcode_out     (mem_opcode),
+        .rd_addr_out    (mem_rd_addr)
     );
 
     // ---------------- Stage 5: Writeback (WB) ----------------
-    // 7. 写回选择逻辑
     writeback #(
         .DW (DW)
     ) u_writeback (
-        .alu_result_in (wb_alu_result),
-        .mem_rdata_in  (wb_mem_rdata),
-        .opcode_in     (wb_opcode),
-        .rd_addr_in    (wb_rd_addr),
-        // Outputs -> 回连到 Register File
+        // from wb
+        .alu_result_in (mem_alu_result),
+        .mem_rdata_in  (mem_rdata_out),
+        .opcode_in     (mem_opcode),
+        .rd_addr_in    (mem_rd_addr),
+        // to reg
         .wb_en         (wb_wr_en),
         .wb_addr       (wb_wr_addr),
         .wb_data       (wb_wr_data)

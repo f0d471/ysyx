@@ -1,9 +1,11 @@
+NPC_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
 TOPNAME = top
 
 VERILATOR = verilator
 
 VERILATOR_CFLAGS += -MMD --build -cc \
-				-O3 --x-assign fast --x-initial fast --noassert \
+				-O0 --x-assign fast --x-initial fast --noassert \
 				--trace \
 				-I./vsrc
 
@@ -23,14 +25,15 @@ $(shell mkdir -p $(BUILD_DIR))
 VSRCS = $(shell find $(abspath ./vsrc) -name "*.sv")
 CSRCS = $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
 
+CFLAGS = -g \
+        -I$(NPC_DIR)/csrc \
+        -I$(NPC_DIR)/csrc/include \
+        -I$(NPC_DIR)/csrc/config \
+        -I$(NPC_DIR)/csrc/sdb \
+        -I$(OBJ_DIR)
 
-CFLAGS   += -I$(abspath ./csrc) \
-			-I$(abspath ./csrc/include) \
-			-I$(abspath ./csrc/config) \
-			-I$(abspath ./csrc/sdb) \
-			-I$(OBJ_DIR)
 # === capstone 路径设置 ===
-CFLAGS   += -I$(abspath ../nemu/tools/capstone/repo/include)
+CFLAGS += -I$(abspath ../nemu/tools/capstone/repo/include)
 
 LDFLAGS  += -lreadline -lncurses -ldl
 LDFLAGS  += $(abspath ../nemu/tools/capstone/repo/libcapstone.so.5)
@@ -43,11 +46,16 @@ $(BIN): $(VSRCS) $(CSRCS)
 		--top-module $(TOPNAME) $^ \
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN)) \
 		--LDFLAGS "$(LDFLAGS)" \
-		--CFLAGS "$(CFLAGS)"
+		--CFLAGS "$(CFLAGS)"  
 
 run: $(BIN)
 	@echo "[NPC] Running with image: $(RUN_IMAGE)"  
 	LD_LIBRARY_PATH=$(abspath ../nemu/tools/capstone/repo) $(BIN) $(RUN_IMAGE)
+
+gdb: $(BIN)
+	@echo "[NPC] Running under gdb with image: $(RUN_IMAGE)"
+	LD_LIBRARY_PATH=$(abspath ../nemu/tools/capstone/repo) \
+	gdb -s $(BIN) --args $(BIN) $(RUN_IMAGE)
 
 clean:
 	rm -rf $(BUILD_DIR)

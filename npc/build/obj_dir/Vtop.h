@@ -15,6 +15,7 @@ class Vtop__Syms;
 class Vtop___024root;
 class VerilatedVcdC;
 class Vtop___024unit;
+class Vtop_top;
 
 
 // This class is the main interface to the Verilated model
@@ -34,10 +35,15 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop VL_NOT_FINAL : public VerilatedModel {
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
     VL_IN8(&rst_n,0,0);
+    VL_OUT(&pc,31,0);
+    VL_OUT(&instr,31,0);
+    VL_OUT(&debug_x10,31,0);
+    VL_OUT((&regs)[16],31,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.
     // Otherwise the application code can consider these internals.
+    Vtop_top* const __PVT__top;
     Vtop___024unit* const __PVT____024unit;
 
     // Root instance pointer to allow access to model internals,

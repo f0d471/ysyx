@@ -27,7 +27,7 @@ static void single_cycle() {
 
 // 复位
 static void reset(int n) {
-    top->rst_n = 1;
+    top->rst_n = 0;
     while (n-- > 0) {
         top->clk = 0; 
         top->eval(); 
@@ -37,7 +37,7 @@ static void reset(int n) {
         top->eval(); 
         if (tfp) tfp->dump(sim_time++);
     }
-    top->rst_n = 0;
+    top->rst_n = 1;
 }
 
 // =================== DPI-C: Trap =================== //
@@ -153,6 +153,8 @@ void cpu_exec(uint64_t n) {
 
     executed++;
     }
+
+    printf("PC = 08%08X",top->pc);
 
     if (Verilated::gotFinish()) {
         npc_state = NPC_END;

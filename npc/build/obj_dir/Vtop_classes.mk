@@ -26,15 +26,55 @@ VM_CLASSES_FAST += \
 	Vtop \
 	Vtop___024root__DepSet_h84412442__0 \
 	Vtop___024root__DepSet_heccd7ead__0 \
+	Vtop_top__DepSet_h0f993197__0 \
+	Vtop_if2id__DepSet_hae924ebc__0 \
+	Vtop_memory__DepSet_hf5a2896a__0 \
+	Vtop_writeback__DepSet_h9c0cf8ce__0 \
+	Vtop_reg_file__DepSet_he71db602__0 \
+	Vtop_mem2wb__DepSet_h8254321d__0 \
+	Vtop_fetch__DepSet_hece00146__0 \
+	Vtop_decode__DepSet_h626b6706__0 \
+	Vtop_execute__DepSet_h2e3646d3__0 \
 	Vtop___024unit__DepSet_hab9af801__0 \
+	Vtop_id2ex__DepSet_hae5c9c7d__0 \
+	Vtop_ex2mem__DepSet_h8f0339dc__0 \
+	Vtop_pc_counter__DepSet_h952d53ec__0 \
 
 # Generated module classes, non-fast-path, compile with low/medium optimization
 VM_CLASSES_SLOW += \
 	Vtop___024root__Slow \
 	Vtop___024root__DepSet_h84412442__0__Slow \
 	Vtop___024root__DepSet_heccd7ead__0__Slow \
+	Vtop_top__Slow \
+	Vtop_top__DepSet_h0f993197__0__Slow \
+	Vtop_top__DepSet_h6315917a__0__Slow \
+	Vtop_if2id__Slow \
+	Vtop_if2id__DepSet_hae924ebc__0__Slow \
+	Vtop_memory__Slow \
+	Vtop_memory__DepSet_hf5a2896a__0__Slow \
+	Vtop_memory__DepSet_h3cefd995__0__Slow \
+	Vtop_writeback__Slow \
+	Vtop_writeback__DepSet_h9c0cf8ce__0__Slow \
+	Vtop_reg_file__Slow \
+	Vtop_reg_file__DepSet_he71db602__0__Slow \
+	Vtop_mem2wb__Slow \
+	Vtop_mem2wb__DepSet_h8254321d__0__Slow \
+	Vtop_fetch__Slow \
+	Vtop_fetch__DepSet_hece00146__0__Slow \
+	Vtop_fetch__DepSet_h442e61a9__0__Slow \
+	Vtop_decode__Slow \
+	Vtop_decode__DepSet_h626b6706__0__Slow \
+	Vtop_execute__Slow \
+	Vtop_execute__DepSet_h2e3646d3__0__Slow \
+	Vtop_execute__DepSet_h827c1c3e__0__Slow \
 	Vtop___024unit__Slow \
 	Vtop___024unit__DepSet_hff17caec__0__Slow \
+	Vtop_id2ex__Slow \
+	Vtop_id2ex__DepSet_hae5c9c7d__0__Slow \
+	Vtop_ex2mem__Slow \
+	Vtop_ex2mem__DepSet_h8f0339dc__0__Slow \
+	Vtop_pc_counter__Slow \
+	Vtop_pc_counter__DepSet_h952d53ec__0__Slow \
 
 # Generated support classes, fast-path, compile with highest optimization
 VM_SUPPORT_FAST += \

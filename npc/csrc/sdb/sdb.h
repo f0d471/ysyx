@@ -1,10 +1,10 @@
-#ifdef CONFIG_SDB
+#include "common.h"  
 
+#ifdef CONFIG_SDB
 
 #ifndef __SDB_H__
 #define __SDB_H__
 
-#include "common.h"  
 
 typedef int (*CmdHandler)(char *args);  
 

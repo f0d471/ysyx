@@ -26,6 +26,15 @@ image: image-dep
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
 run: insert-arg
-	echo "TODO: add command here to run simulation"
+	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
+	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
+	@echo "[AM] Building and running NPC with Default.bin..."
+	@$(MAKE) -C $(NPC_HOME) run TEST_BIN=./test/Default.bin
+
+gdb: insert-arg
+	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
+	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
+	@echo "[AM] Building and running NPC under gdb with Default.bin..."
+	@$(MAKE) -C $(NPC_HOME) gdb TEST_BIN=./test/Default.bin
 
 .PHONY: insert-arg

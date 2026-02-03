@@ -15,17 +15,18 @@ module execute #(
     input  logic [6:0]    funct7_in,
     
     // Outputs to EX/MEM
-    output logic [DW-1:0] alu_result_out, // ALU 计算结果 (或内存地址)
+    output logic [DW-1:0] alu_result_out, // ALU计算结果或内存地址
     output logic          jump_flag_out,  // 是否发生跳转
-    output logic [AW-1:0] jump_target_out // 跳转目标地址
+    output logic [AW-1:0] jump_target_out, // 跳转目标地址
+
+    //ebreak
+    input  logic        inst_ebreak_in
 );
 
     logic [DW-1:0] alu_res;
     logic          branch_taken;
 
-    // -------------------------------------------------------------------------
-    // 1. ALU Logic
-    // -------------------------------------------------------------------------
+    // ----------------------------------- ALU --------------------------------------
     always_comb begin
         case(opcode_in)
             `INST_TYPE_I: begin
@@ -37,7 +38,7 @@ module execute #(
                     `INST_ORI:   alu_res = op1_in | op2_in;
                     `INST_ANDI:  alu_res = op1_in & op2_in;
                     `INST_SLLI:  alu_res = op1_in << op2_in[4:0];
-                    `INST_SRLI: begin // SRLI 和 SRAI 共享 funct3，靠 funct7 区分
+                    `INST_SRLI: begin 
                         if(funct7_in[5]) alu_res = $signed(op1_in) >>> op2_in[4:0]; // SRAI (算术右移)
                         else             alu_res = op1_in >> op2_in[4:0];           // SRLI (逻辑右移)
                     end
@@ -65,26 +66,21 @@ module execute #(
                 endcase
             end
 
-            // 访存
             `INST_TYPE_L, `INST_TYPE_S: begin
                 alu_res = op1_in + op2_in; // 计算内存地址: rs1 + imm
             end
 
-            // 跳转
             `INST_TYPE_J, `INST_TYPE_JALR: begin
                 alu_res = op1_in + op2_in; // 计算 Link Address: PC + 4
             end
 
-            //
             `INST_TYPE_U_LUI:   alu_res = op2_in; // imm
             `INST_TYPE_U_AUIPC: alu_res = op1_in + op2_in; // PC + imm
             default: alu_res = 32'h0;
         endcase
     end
 
-    // -------------------------------------------------------------------------
-    // 2. Branch Judgment (分支判断)
-    // -------------------------------------------------------------------------
+    // ---------------------------------- 分支判断 --------------------------------------
     always_comb begin
         if(opcode_in == `INST_TYPE_B) begin
             case(funct3_in)
@@ -101,9 +97,7 @@ module execute #(
         end
     end
 
-    // -------------------------------------------------------------------------
-    // 3. Jump/Branch Target Calculation (跳转目标计算)
-    // -------------------------------------------------------------------------
+    // -------------------------------- 跳转目标计算 -------------------------------------
     always_comb begin
         jump_flag_out   = 1'b0;
         jump_target_out = 32'h0;
@@ -122,6 +116,16 @@ module execute #(
         end
     end
 
+    // ebreak
+    always_comb begin
+        if (inst_ebreak_in) begin
+            // 触发 C++ 环境的 Trap
+            trap(op1_in, pc_in);
+        end
+    end
+
+    //shuchu
     assign alu_result_out = alu_res;
+
 
 endmodule

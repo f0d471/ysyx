@@ -1,10 +1,11 @@
+#include "common.h" 
+
 #ifdef CONFIG_SDB
 
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
 
-#include "common.h" 
 #include "sdb.h"
 
 static int cmd_c(char *args) {
@@ -33,7 +34,7 @@ static int cmd_si(char *args) {
     }
     
     cpu_exec(step);
-    printf(ANSI_FG_GREEN "pc: 0x%08x" ANSI_NONE " inst: 0x%08x\n", top->pc, top->inst);
+    printf(ANSI_FG_GREEN "pc: 0x%08x" ANSI_NONE " inst: 0x%08x\n", top->pc, top->instr);
     return 0;
 }
 
@@ -72,7 +73,7 @@ static int cmd_info(char *args) {
     if (args == NULL) {
         printf(ANSI_FG_RED "Missing argument. Usage: info r\n" ANSI_NONE);
     } else if (strcmp(args, "r") == 0) {
-        isa_reg_display(top);
+        isa_reg_display();
     } else {
         printf(ANSI_FG_RED "Unknown info target: %s\n" ANSI_NONE, args);
     }

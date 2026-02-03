@@ -1,3 +1,5 @@
+#include "common.h"
+
 #ifdef CONFIG_SDB
 
 #include <cstdio>
@@ -6,7 +8,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include "common.h"
 #include "sdb.h"
 
 void init_sdb() {

@@ -34,7 +34,8 @@ module writeback #(
             end
             // Store / Branch 不写回
             default: begin
-                wb_en = 1'b0;
+                wb_en   = 1'b0;
+                wb_data = 32'h0;
             end
         endcase
     end
