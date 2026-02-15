@@ -116,7 +116,7 @@ module execute #(
         end
     end
 
-    // ebreak
+    // ------------------------------- ebreak ------------------------------------
     always_comb begin
         if (inst_ebreak_in) begin
             // 触发 C++ 环境的 Trap
