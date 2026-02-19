@@ -14,7 +14,7 @@ static inline bool in_pmem(uint32_t addr) {
 }
 
 // 地址转换 
-static inline uint8_t* guest_to_host(uint32_t paddr) {
+uint8_t* guest_to_host(uint32_t paddr) {
     return pmem + paddr - CONFIG_MBASE;
 }
 

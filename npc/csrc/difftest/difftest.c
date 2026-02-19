@@ -1,10 +1,10 @@
+#include "common.h"
+
 #ifdef CONFIG_DIFFTEST
 
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "common.h"
 
 static void (*ref_memcpy)(uint32_t addr, void *buf, size_t n, int direction) = NULL;
 static void (*ref_regcpy)(void *dut, int direction) = NULL;

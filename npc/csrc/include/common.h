@@ -43,6 +43,8 @@ uint32_t isa_reg_str2val(const char *s, bool *success);
 void init_mem();
 void load_bin(const char *bin_file);
 
+uint8_t* guest_to_host(uint32_t paddr);
+
 // 供 SDB 使用的 C 环境接口
 uint32_t pmem_read(uint32_t addr, int len);
 void pmem_write(uint32_t addr, int len, uint32_t data);

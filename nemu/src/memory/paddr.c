@@ -17,6 +17,7 @@
 #include <memory/paddr.h>
 #include <device/mmio.h>
 #include <isa.h>
+#include <cpu/difftest.h>
 
 #if   defined(CONFIG_PMEM_MALLOC)
 static uint8_t *pmem = NULL;
@@ -68,6 +69,7 @@ word_t paddr_read(paddr_t addr, int len) {
     ret = pmem_read(addr, len);
   } else {
     #ifdef CONFIG_DEVICE
+      IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
       ret = mmio_read(addr, len);
     #else
       out_of_bound(addr);
@@ -88,6 +90,7 @@ void paddr_write(paddr_t addr, int len, word_t data) {
   }
 
   #ifdef CONFIG_DEVICE
+    IFDEF(CONFIG_DIFFTEST, difftest_skip_ref());
     mmio_write(addr, len, data);
     return;
   #endif

@@ -55,7 +55,7 @@ VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__0(Vtop_execut
                                      | (5U == (IData)(vlSelfRef.__PVT__funct3_in)))
                                      ? ((0U == (IData)(vlSelfRef.__PVT__funct3_in))
                                          ? (vlSelfRef.__PVT__op1_in 
-                                            + vlSelfRef.__PVT__op2_in)
+                                            - vlSelfRef.__PVT__op2_in)
                                          : ((2U == (IData)(vlSelfRef.__PVT__funct3_in))
                                              ? (VL_LTS_III(32, vlSelfRef.__PVT__op1_in, vlSelfRef.__PVT__op2_in)
                                                  ? 1U

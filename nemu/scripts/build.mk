@@ -26,6 +26,10 @@ CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
 LDFLAGS := -O2 $(LDFLAGS)
 
 OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
+# 如果是编译动态库，踢掉 nemu-main.o，防止冲突和生成可执行文件
+ifeq ($(SHARE),1)
+OBJS := $(filter-out $(OBJ_DIR)/src/nemu-main.o, $(OBJS))
+endif
 
 # Compilation patterns
 $(OBJ_DIR)/%.o: %.c
@@ -51,7 +55,7 @@ app: $(BINARY)
 
 $(BINARY):: $(OBJS) $(ARCHIVES)
 	@echo + LD $@
-	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS)
+	@$(LD) -o $@ $(OBJS) $(LDFLAGS) $(ARCHIVES) $(LIBS) $(if $(filter 1,$(SHARE)),-shared -fPIC,)
 
 clean:
 	-rm -rf $(BUILD_DIR)

@@ -83,16 +83,17 @@ void init_sim(int argc, char** argv) {
     // 加载 NEMU 的动态库
     difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
     // 把 NPC 的内存数据同步给 NEMU , direction = 1 表示从 NPC 复制到 NEMU
-    difftest_memcpy(0x80000000, pmem, PMEM_SIZE, 1);
-    // 把 NPC 的初始寄存器和PC状态同步给 NEMU
-    DiffContext ctx;
-    for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
-    ctx.pc = top->pc;
-    difftest_regcpy(&ctx, 1); 
+    difftest_memcpy(0x80000000, guest_to_host(0x80000000), CONFIG_MSIZE, 1);   
     #endif
 
-    // 硬件复位
     reset(10);
+
+    #ifdef CONFIG_DIFFTEST
+    DiffContext ctx;
+    for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
+    ctx.pc = top->pc;  // 此时 top->pc 应该是正确的复位地址 (例如 0x80000000)
+    difftest_regcpy(&ctx, 1); 
+    #endif
 }
 
 void npc_quit() {
