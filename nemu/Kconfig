@@ -200,6 +200,20 @@ config DTRACE_COND
       Define the condition for recording device trace.
       Example: "true"
 
+config ETRACE
+    bool "Enable Exception Trace"
+    default n
+    help
+      Enable exception trace logging for hardware exceptions and traps (e.g., ecall).
+
+config ETRACE_COND
+    string "Exception Trace Condition"
+    default "true"
+    depends on ETRACE
+    help
+      Define the condition for recording exception trace.
+      Example: "true"
+      
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"

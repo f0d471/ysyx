@@ -14,6 +14,17 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <utils.h>
+
+static inline void log_etrace(vaddr_t epc, word_t NO, vaddr_t dnpc) {
+#ifdef CONFIG_ETRACE
+    if (likely(!ETRACE_COND)) return;
+
+    // 格式化输出异常踪迹：记录发生异常的 PC，异常号(Cause)，以及跳转的目标 PC
+    TRACE_LOG("[ETRACE] Exception Triggered: epc = 0x%08x, Cause/NO = %d, Jump to = 0x%08x\n", 
+              epc, NO, dnpc);
+#endif
+}
 
 word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   // 1. 保存触发异常时的 PC
@@ -21,6 +32,8 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
 
   // 2. 记录异常原因
   cpu.mcause = NO;
+
+  log_etrace(epc, NO, cpu.mtvec);
 
   // 3. 返回异常入口地址 (mtvec 的值)
   return cpu.mtvec;
