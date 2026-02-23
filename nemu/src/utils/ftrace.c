@@ -16,6 +16,10 @@ typedef struct {
 static FuncSymbol func_syms[MAX_FUNCS];
 static int func_sym_cnt = 0;
 
+#ifdef CONFIG_FTRACE
+    static int ftrace_depth = 0;
+#endif
+
 void init_ftrace(const char *elf_file) {
     if (elf_file == NULL) {
         Log("No ELF file given, ftrace will not work.");
@@ -116,4 +120,29 @@ const char* ftrace_get_func_name(paddr_t addr) {
         }
     }
     return "???";
+}
+
+// ================= 解耦封装：记录 Call 操作 =================
+void log_ftrace_call(paddr_t pc, paddr_t dnpc) {
+#ifdef CONFIG_FTRACE
+    // 如果条件不满足，直接返回
+    if (likely(!FTRACE_COND)) return;
+
+    const char* func_name = ftrace_get_func_name(dnpc);
+    TRACE_LOG("[FTRACE] 0x%08x: %*scall [%s@0x%08x]\n", pc, ftrace_depth * 2, "", func_name, dnpc);
+    ftrace_depth++;
+#endif
+}
+
+// ================= 解耦封装：记录 Ret 操作 =================
+void log_ftrace_ret(paddr_t pc) {
+#ifdef CONFIG_FTRACE
+    if (likely(!FTRACE_COND)) return;
+
+    ftrace_depth--;
+    if (ftrace_depth < 0) ftrace_depth = 0; // 防止深度为负
+    
+    const char* func_name = ftrace_get_func_name(pc);
+    TRACE_LOG("[FTRACE] 0x%08x: %*sret  [%s]\n", pc, ftrace_depth * 2, "", func_name);
+#endif
 }

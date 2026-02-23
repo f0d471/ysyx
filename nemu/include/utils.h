@@ -82,4 +82,7 @@ extern FILE *trace_fp;
     if (trace_fp) { fprintf(trace_fp, __VA_ARGS__); fflush(trace_fp); } \
   } while (0)
 
+void log_ftrace_call(paddr_t pc, paddr_t dnpc);
+void log_ftrace_ret(paddr_t pc);
+
 #endif

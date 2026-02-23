@@ -172,6 +172,34 @@ config MTRACE_COND
       Define the condition for recording memory trace.
       Example: "addr >= 0x80000000"
             
+config FTRACE
+    bool "Enable Function Trace"
+    default n
+    help
+      Enable function trace logging for function calls and returns.
+
+config FTRACE_COND
+    string "Function Trace Condition"
+    default "true"
+    depends on FTRACE
+    help
+      Define the condition for recording function trace.
+      Example: "s->pc >= 0x80000000"
+
+config DTRACE
+    bool "Enable Device Trace"
+    default n
+    help
+      Enable device trace logging for MMIO and Port IO accesses.
+
+config DTRACE_COND
+    string "Device Trace Condition"
+    default "true"
+    depends on DTRACE
+    help
+      Define the condition for recording device trace.
+      Example: "true"
+
 config DIFFTEST
   depends on TARGET_NATIVE_ELF
   bool "Enable differential testing"
