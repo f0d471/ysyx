@@ -33,8 +33,12 @@ static inline void log_mtrace(char type, paddr_t addr, int len, word_t data) {
     // 这里利用了短路求值，如果未定义 MTRACE，编译器会优化掉整个块
     if (likely(!MTRACE_COND)) return;
 
+    if (type == 'R' && addr == cpu.pc) {
+        return;
+    }
+    
     // 格式化与记录逻辑封装在此
-    log_write("mtrace: %c  addr=" FMT_PADDR " len=%d val=" FMT_WORD "\n", 
+    TRACE_LOG("mtrace: %c  addr=" FMT_PADDR " len=%d val=" FMT_WORD "\n", 
               type, addr, len, data);
 #endif
 }

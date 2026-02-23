@@ -19,6 +19,7 @@ extern uint64_t g_nr_guest_inst;
 
 #ifndef CONFIG_TARGET_AM
 FILE *log_fp = NULL;
+FILE *trace_fp = NULL;
 
 void init_log(const char *log_file) {
   log_fp = stdout;
@@ -28,6 +29,11 @@ void init_log(const char *log_file) {
     log_fp = fp;
   }
   Log("Log is written to %s", log_file ? log_file : "stdout");
+
+  #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) 
+    trace_fp = fopen("nemu-trace.txt", "w");
+    Assert(trace_fp, "Can not open nemu-trace.txt");
+  #endif
 }
 
 bool log_enable() {

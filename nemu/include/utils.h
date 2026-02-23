@@ -73,5 +73,13 @@ uint64_t get_time();
     log_write(__VA_ARGS__); \
   } while (0)
 
+// 声明统一的 trace 文件指针
+extern FILE *trace_fp;
+
+// 定义统一的 TRACE_LOG 宏
+#define TRACE_LOG(...) \
+  do { \
+    if (trace_fp) { fprintf(trace_fp, __VA_ARGS__); fflush(trace_fp); } \
+  } while (0)
 
 #endif

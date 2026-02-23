@@ -2,11 +2,13 @@
 #include <cpu/cpu.h>
 #include <cpu/ifetch.h>
 #include <cpu/decode.h>
+#include <utils.h>
 
 #define R(i) gpr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
-bool is_fetch = false;
+extern const char* ftrace_get_func_name(paddr_t addr);
+static int ftrace_depth = 0;
 
 enum {
   TYPE_I, TYPE_U, TYPE_S, TYPE_J, TYPE_r, TYPE_B,
@@ -130,8 +132,40 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 111 ????? 1100011", bgeu,   B, if ((uint32_t)src1 >= (uint32_t)src2) s->dnpc = s->pc + imm);
 
   //J
-  INSTPAT("???????????????????? ????? 1101111",    jal,    J, R(rd) = s->pc+4; s->dnpc = s->pc+imm);
-  INSTPAT("???????????? ????? 000 ????? 1100111",  jalr,   I, R(rd) = s->snpc; s->dnpc = (src1 + imm) & ~1;);
+  INSTPAT("???????????????????? ????? 1101111",    jal,    J, {
+        R(rd) = s->pc + 4; 
+        s->dnpc = s->pc + imm;
+        // 目标寄存器是 x1(ra) 或 x5(t0) 则是函数调用
+        if (rd == 1 || rd == 5) {
+            const char* func_name = ftrace_get_func_name(s->dnpc);
+            // 使用 %*s 配合 ftrace_depth * 2 来实现动态空格缩进
+            TRACE_LOG("[FTRACE] 0x%08x: %*scall [%s@0x%08x]\n", s->pc, ftrace_depth * 2, "", func_name, s->dnpc);
+            ftrace_depth++;
+        }
+    });
+
+    INSTPAT("???????????? ????? 000 ????? 1100111",  jalr,   I, {
+        R(rd) = s->snpc; 
+        s->dnpc = (src1 + imm) & ~1;
+        
+        // 手动从指令中提取 rs1 的寄存器号
+        int jalr_rs1 = BITS(s->isa.inst, 19, 15);
+        
+        // 判断是否是 Call
+        if (rd == 1 || rd == 5) {
+            const char* func_name = ftrace_get_func_name(s->dnpc);
+            TRACE_LOG("[FTRACE] 0x%08x: %*scall [%s@0x%08x]\n", s->pc, ftrace_depth * 2, "", func_name, s->dnpc);
+            ftrace_depth++;
+        } 
+        // 判断是否是 Ret (目标存入 x0，跳转依据是 x1 或 x5)
+        else if (rd == 0 && (jalr_rs1 == 1 || jalr_rs1 == 5)) {
+            ftrace_depth--;
+            if (ftrace_depth < 0) ftrace_depth = 0; // 防止深度变为负数
+            // 注意：Ret 获取的是我们要离开的函数的原 PC，所以传 s->pc
+            const char* func_name = ftrace_get_func_name(s->pc);
+            TRACE_LOG("[FTRACE] 0x%08x: %*sret  [%s]\n", s->pc, ftrace_depth * 2, "", func_name);
+        }
+  });
 
   //U
   INSTPAT("??????? ????? ????? ??? ????? 0010111", auipc,  U, R(rd) = s->pc + imm);
@@ -149,8 +183,6 @@ static int decode_exec(Decode *s) {
 }
 
 int isa_exec_once(Decode *s) {
-  is_fetch = true;
   s->isa.inst = inst_fetch(&s->snpc, 4);
-  is_fetch = false;
   return decode_exec(s);
 }

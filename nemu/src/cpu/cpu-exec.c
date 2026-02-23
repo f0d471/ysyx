@@ -4,7 +4,7 @@
 * NEMU is licensed under Mulan PSL v2.
 * You can use this software according to the terms and conditions of the Mulan PSL v2.
 * You may obtain a copy of Mulan PSL v2 at:
-*          http://license.coscl.org.cn/MulanPSL2
+* http://license.coscl.org.cn/MulanPSL2
 *
 * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
 * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
@@ -51,14 +51,16 @@
   static void irb_dump(vaddr_t bad_pc) {
     if (irb_cnt == 0) return;
     int start = (irb_head - irb_cnt + IRB_N) % IRB_N;
-    Log("----- recent %d instructions (IRingBuf) -----", irb_cnt);
+    
+    TRACE_LOG("----- recent %d instructions (IRingBuf) -----\n", irb_cnt);
     for (int i = 0; i < irb_cnt; i++) {
       IRBEntry *e = &irb[(start + i) % IRB_N];
       // 标记出错的那条指令
       const char *mark = (e->pc == bad_pc) ? "-->" : "   ";
-      Log("%s " FMT_WORD ": %08x %s", mark, e->pc, e->inst, e->disasm);
+      // 注意：TRACE_LOG 内部用的是 fprintf，所以末尾必须自己加上 \n
+      TRACE_LOG("%s " FMT_WORD ": %08x %s\n", mark, e->pc, e->inst, e->disasm);
     }
-    Log("----- end IRingBuf dump -----");
+    TRACE_LOG("----- end IRingBuf dump -----\n");
   }
 
 #endif // CONFIG_IRINGBUF
@@ -72,7 +74,9 @@ void device_update();
 
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+  if (ITRACE_COND) { 
+    TRACE_LOG("[ITRACE] %s\n", _this->logbuf); 
+  }
 #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
