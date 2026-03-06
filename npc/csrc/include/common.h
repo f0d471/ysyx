@@ -85,8 +85,33 @@ void log_itrace();
 #ifdef CONFIG_MTRACE
 void init_trace(const char *filename);
 void trace_close();
-void log_mtrace(uint32_t addr, uint32_t data, int len, int is_write);
+void log_mtrace(uint32_t addr, uint32_t data,  int is_write);
 #endif
 
+#ifdef CONFIG_DTRACE
+void init_trace(const char *filename);
+void trace_close();
+void log_dtrace(char type, uint32_t addr, int len, uint32_t data);
+#endif
+
+#ifdef CONFIG_FTRACE
+void init_ftrace(const char *elf_file);
+void do_ftrace(uint32_t pc, uint32_t dnpc, uint32_t inst);
+#endif
+
+#ifdef CONFIG_DEVICE
+// 设备回调函数类型定义
+typedef void(*io_callback_t)(uint32_t offset, int len, bool is_write);
+
+// 注册 MMIO 映射
+void add_mmio_map(const char *name, uint32_t addr, uint8_t *space, uint32_t len, io_callback_t callback);
+
+// MMIO 读写接口
+uint32_t mmio_read(uint32_t addr, int len);
+void mmio_write(uint32_t addr, int len, uint32_t data);
+
+// 初始化所有设备
+void init_device();
+#endif
 
 #endif // __COMMON_H__

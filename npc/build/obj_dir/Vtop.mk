@@ -45,23 +45,27 @@ VM_USER_LDLIBS = \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
+	mmio \
+	serial \
 	difftest \
 	reg \
 	main \
 	paddr \
 	cmd \
 	sdb \
+	disasm \
 	trace \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
 	../.. \
 	../../csrc \
+	../../csrc/device \
 	../../csrc/difftest \
 	../../csrc/isa \
 	../../csrc/memory \
 	../../csrc/sdb \
-	../../csrc/trace \
+	../../csrc/utils \
 
 
 ### Default rules...
@@ -73,19 +77,25 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 ### Executable rules... (from --exe)
 VPATH += $(VM_USER_DIR)
 
+mmio.o: /home/normal/ysyx-workbench/npc/csrc/device/mmio.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+serial.o: /home/normal/ysyx-workbench/npc/csrc/device/serial.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 difftest.o: /home/normal/ysyx-workbench/npc/csrc/difftest/difftest.c 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 reg.o: /home/normal/ysyx-workbench/npc/csrc/isa/reg.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 main.o: /home/normal/ysyx-workbench/npc/csrc/main.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
-paddr.o: /home/normal/ysyx-workbench/npc/csrc/memory/paddr.c 
+paddr.o: /home/normal/ysyx-workbench/npc/csrc/memory/paddr.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 cmd.o: /home/normal/ysyx-workbench/npc/csrc/sdb/cmd.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 sdb.o: /home/normal/ysyx-workbench/npc/csrc/sdb/sdb.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
-trace.o: /home/normal/ysyx-workbench/npc/csrc/trace/trace.cpp 
+disasm.o: /home/normal/ysyx-workbench/npc/csrc/utils/disasm.cpp 
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
+trace.o: /home/normal/ysyx-workbench/npc/csrc/utils/trace.cpp 
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST)  -c -o $@ $<
 
 ### Link rules... (from --exe)

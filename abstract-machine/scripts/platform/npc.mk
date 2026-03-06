@@ -28,6 +28,7 @@ image: image-dep
 run: insert-arg
 	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
 	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
+	@cp $(IMAGE).elf $(NPC_HOME)/test/Default.elf
 	@echo "[AM] Building and running NPC with Default.bin..."
 	@$(MAKE) -C $(NPC_HOME) run TEST_BIN=./test/Default.bin
 

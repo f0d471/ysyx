@@ -4,6 +4,7 @@
 #include <cassert>
 #include <time.h>
 
+#include "Vtop.h"
 #include "common.h"
 
 static uint8_t pmem[CONFIG_MSIZE] = {};
@@ -11,6 +12,11 @@ static uint8_t pmem[CONFIG_MSIZE] = {};
 // 检查地址是否在合法范围内
 static inline bool in_pmem(uint32_t addr) {
     return addr >= CONFIG_MBASE && addr < CONFIG_MBASE + CONFIG_MSIZE;
+}
+
+// 检查是否为外设 (MMIO) 地址空间
+static inline bool is_mmio(uint32_t addr) {
+    return addr >= 0xa0000000 && addr <= 0xa1ffffff;
 }
 
 // 地址转换 
@@ -98,16 +104,37 @@ void pmem_write(uint32_t addr, int len, uint32_t data) {
 }
 
 // ================= 硬件DPI-C调用接口 ================================
-extern "C" uint32_t paddr_read(uint32_t  addr) {
-    if (addr== 0) return 0;
+extern "C" uint32_t paddr_read(uint32_t addr) {
+  if (addr == 0) return 0; // 保护一下，防止取指地址为 0 报错
+  
   if (__builtin_expect(in_pmem(addr), 1)) return pmem_read(addr, 4);
-  // IFDEF(CONFIG_DEVICE, return mmio_read(addr, 4));
-  out_of_bound(addr,false);
+
+  #ifdef CONFIG_DEVICE
+    if (is_mmio(addr)) {
+      uint32_t ret = mmio_read(addr, 4);
+      log_dtrace('R', addr, 4, ret); 
+      return ret;
+    }
+  #endif
+
+  out_of_bound(addr, false);
   return 0;
 }
 
-extern "C" void paddr_write(uint32_t  addr, int len, uint32_t data) {
-  if (__builtin_expect(in_pmem(addr), 1)) { pmem_write(addr, len, data); return; }
-  // IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
-  out_of_bound(addr,true);
+extern "C" void paddr_write(uint32_t addr, int len, uint32_t data) {
+  if (__builtin_expect(in_pmem(addr), 1)) { 
+      pmem_write(addr, len, data); 
+      return; 
+  }
+
+  #ifdef CONFIG_DEVICE
+    if (is_mmio(addr)) {
+        // === 接入 MMIO 框架 ===
+        mmio_write(addr, len, data);
+        log_dtrace('W', addr, len, data);
+        return;
+    }
+  #endif
+
+  out_of_bound(addr, true);
 }

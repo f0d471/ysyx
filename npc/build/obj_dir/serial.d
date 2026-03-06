@@ -1,4 +1,4 @@
-trace.o: /home/normal/ysyx-workbench/npc/csrc/utils/trace.cpp \
+serial.o: /home/normal/ysyx-workbench/npc/csrc/device/serial.cpp \
  /home/normal/ysyx-workbench/npc/csrc/include/common.h Vtop.h \
  /usr/share/verilator/include/verilated.h \
  /usr/share/verilator/include/verilatedos.h \

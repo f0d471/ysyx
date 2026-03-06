@@ -38,7 +38,7 @@ static inline void log_mtrace(char type, paddr_t addr, int len, word_t data) {
     }
     
     // 格式化与记录逻辑封装在此
-    TRACE_LOG("mtrace: %c  addr=" FMT_PADDR " len=%d val=" FMT_WORD "\n", 
+    TRACE_LOG("[Mtrace] %c  addr=" FMT_PADDR " len=%d val=" FMT_WORD "\n", 
               type, addr, len, data);
 #endif
 }
