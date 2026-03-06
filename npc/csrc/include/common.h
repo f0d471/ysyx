@@ -25,6 +25,7 @@ void npc_quit();
 
 // 全局变量声明 
 extern Vtop* top;
+extern bool difftest_skip;
 extern NPCState npc_state;
 extern uint64_t sim_time;
 
@@ -71,6 +72,7 @@ struct DiffContext {
 void difftest_init(const char *so_file);
 void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
 void difftest_regcpy(void *dut, int direction);
+void difftest_skip_ref();
 void difftest_step();
 #endif
 

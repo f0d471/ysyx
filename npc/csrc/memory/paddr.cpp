@@ -113,6 +113,11 @@ extern "C" uint32_t paddr_read(uint32_t addr) {
     if (is_mmio(addr)) {
       uint32_t ret = mmio_read(addr, 4);
       log_dtrace('R', addr, 4, ret); 
+
+      #ifdef CONFIG_DIFFTEST
+        difftest_skip_ref(); 
+      #endif
+
       return ret;
     }
   #endif
@@ -132,6 +137,11 @@ extern "C" void paddr_write(uint32_t addr, int len, uint32_t data) {
         // === 接入 MMIO 框架 ===
         mmio_write(addr, len, data);
         log_dtrace('W', addr, len, data);
+
+        #ifdef CONFIG_DIFFTEST
+          difftest_skip_ref(); 
+        #endif
+
         return;
     }
   #endif

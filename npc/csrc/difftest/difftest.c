@@ -44,6 +44,11 @@ void difftest_exec(uint64_t n) {
   ref_exec(n);
 }
 
+bool difftest_skip = false;
+void difftest_skip_ref() {
+  difftest_skip = true;
+}
+
 void difftest_step() {
   difftest_exec(1);
 

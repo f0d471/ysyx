@@ -62,46 +62,51 @@ void init_sim(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
     top = new Vtop;
 
+    // 
+    #ifdef CONFIG_DEVICE
+      init_device();
+    #endif
+
     // 初始化 内存 & 加载程序
     init_mem();
     load_bin(img_file);
 
     // 初始化 波形
     #ifdef CONFIG_WAVE
-    Verilated::traceEverOn(true);
-    tfp = new VerilatedVcdC;
-    top->trace(tfp, 99);
-    tfp->open("wave.vcd");
-    printf("VCD Waveform enabled.\n");
+      Verilated::traceEverOn(true);
+      tfp = new VerilatedVcdC;
+      top->trace(tfp, 99);
+      tfp->open("wave.vcd");
+      printf("VCD Waveform enabled.\n");
     #endif
 
     // 初始化 踪迹
     #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) || defined(CONFIG_DTRACE) || defined(CONFIG_FTRACE)
-    init_trace("npc-trace.txt"); 
+      init_trace("npc-trace.txt"); 
     #endif
 
     // 初始化 反汇编库
     #ifdef CONFIG_ITRACE
-    init_disasm(); 
+      init_disasm(); 
     #endif
     
     // 初始化 ftrace 
     #ifdef CONFIG_FTRACE
-    char elf_file[256];
-    strncpy(elf_file, img_file, sizeof(elf_file));
-    char *ext = strrchr(elf_file, '.');
-    if (ext && strcmp(ext, ".bin") == 0) {
-        strcpy(ext, ".elf"); // 魔术：把 .bin 强行改成 .elf
-    }
-    init_ftrace(elf_file);
+      char elf_file[256];
+      strncpy(elf_file, img_file, sizeof(elf_file));
+      char *ext = strrchr(elf_file, '.');
+      if (ext && strcmp(ext, ".bin") == 0) {
+          strcpy(ext, ".elf"); // 魔术：把 .bin 强行改成 .elf
+      }
+      init_ftrace(elf_file);
     #endif
 
     // 初始化 difftest
     #ifdef CONFIG_DIFFTEST
-    // 加载 NEMU 的动态库
-    difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
-    // 把 NPC 的内存数据同步给 NEMU , direction = 1 表示从 NPC 复制到 NEMU
-    difftest_memcpy(0x80000000, guest_to_host(0x80000000), CONFIG_MSIZE, 1);   
+      // 加载 NEMU 的动态库
+      difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
+      // 把 NPC 的内存数据同步给 NEMU , direction = 1 表示从 NPC 复制到 NEMU
+      difftest_memcpy(0x80000000, guest_to_host(0x80000000), CONFIG_MSIZE, 1);   
     #endif
 
     // 复位
@@ -109,10 +114,10 @@ void init_sim(int argc, char** argv) {
 
     // 调用difftest
     #ifdef CONFIG_DIFFTEST
-    DiffContext ctx;
-    for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
-    ctx.pc = top->pc;  // 此时 top->pc 应该是正确的复位地址 (例如 0x80000000)
-    difftest_regcpy(&ctx, 1); 
+      DiffContext ctx;
+      for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
+      ctx.pc = top->pc;  // 此时 top->pc 应该是正确的复位地址 (例如 0x80000000)
+      difftest_regcpy(&ctx, 1); 
     #endif
 }
 
@@ -166,7 +171,7 @@ void cpu_exec(uint64_t n) {
             
         // --- ITRACE ---
         #ifdef CONFIG_ITRACE
-            log_itrace(); 
+          log_itrace(); 
         #endif
 
         single_cycle(); 
@@ -176,12 +181,21 @@ void cpu_exec(uint64_t n) {
 
         // --- FTRACE ---
         #ifdef CONFIG_FTRACE
-        do_ftrace(current_pc, next_pc, current_inst);
+          do_ftrace(current_pc, next_pc, current_inst);
         #endif
 
         // --- DIFFTEST ---
         #ifdef CONFIG_DIFFTEST
-            difftest_step();
+          if (difftest_skip) {
+              // 如果访问了外设，不让 NEMU 执行，而是直接把 NPC 的当前状态强塞给 NEMU
+              DiffContext ctx;
+              for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
+              ctx.pc = next_pc; 
+              difftest_regcpy(&ctx, 1); // 1 表示方向：从 NPC 拷贝给 NEMU
+              difftest_skip = false;    // 标志位清零
+          } else {
+              difftest_step();          // 正常指令，让 NEMU 走一步并检查
+          }
         #endif
 
         executed++;
