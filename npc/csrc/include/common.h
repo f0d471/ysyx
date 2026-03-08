@@ -37,7 +37,7 @@ void isa_reg_display();
 uint32_t isa_reg_str2val(const char *s, bool *success); 
 
 // ================= 内存配置宏 =================
-#define CONFIG_MSIZE 0x8000000  // 128MB 
+#define CONFIG_MSIZE 0x10000000   // 128MB 
 #define CONFIG_MBASE 0x80000000
 
 // ================= 内存接口声明 =================

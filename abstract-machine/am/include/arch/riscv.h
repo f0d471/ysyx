@@ -10,7 +10,7 @@
 struct Context {
   union {
     void *pdir;
-    uintptr_t gpr[32];
+    uintptr_t gpr[NR_REGS];
   };
   uintptr_t mcause, mstatus, mepc;
 };

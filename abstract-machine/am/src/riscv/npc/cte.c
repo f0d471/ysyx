@@ -5,23 +5,26 @@
 static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {
-if (user_handler) {
+  if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case 11: // Environment call from M-mode
-        // 检查 a7 (即 gpr[17]) 寄存器的值
-        if (c->gpr[17] == -1) {
+      case 11: 
+        // 根据架构选择检查 a7 (gpr[17]) 还是 a5 (gpr[15])
+#ifdef __riscv_e
+        if (c->gpr[15] == -1) { // RV32E: a5 是 x15
+#else
+        if (c->gpr[17] == -1) { // RV32I: a7 是 x17
+#endif
           ev.event = EVENT_YIELD;
         } else {
           ev.event = EVENT_SYSCALL;
         }
-        c->mepc += 4; // 跨过 ecall 指令
+        c->mepc += 4; 
         break;
       default: 
         ev.event = EVENT_ERROR; 
         break;
     }
-
     c = user_handler(ev, c);
     assert(c != NULL);
   }
