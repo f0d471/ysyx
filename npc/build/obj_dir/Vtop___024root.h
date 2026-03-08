@@ -28,6 +28,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __VicoContinue;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_memory____PVT__clk__0;
+    CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_csr_file____PVT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_reg_file____PVT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_reg_file____PVT__rst_n__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_pc_counter____PVT__clk__0;
@@ -46,12 +47,12 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     IData/*31:0*/ __VactIterCount;
     IData/*31:0*/ __VnbaIterCount;
     VL_OUT(regs[16],31,0);
-    VlUnpacked<CData/*0:0*/, 5> __Vm_traceActivity;
+    VlUnpacked<CData/*0:0*/, 7> __Vm_traceActivity;
     VlTriggerVec<1> __VstlTriggered;
     VlTriggerVec<1> __VicoTriggered;
-    VlTriggerVec<5> __VactTriggered;
-    VlTriggerVec<5> __VpreTriggered;
-    VlTriggerVec<5> __VnbaTriggered;
+    VlTriggerVec<6> __VactTriggered;
+    VlTriggerVec<6> __VpreTriggered;
+    VlTriggerVec<6> __VnbaTriggered;
 
     // INTERNAL VARIABLES
     Vtop__Syms* const vlSymsp;

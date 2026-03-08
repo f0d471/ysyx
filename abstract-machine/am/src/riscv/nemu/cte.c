@@ -8,24 +8,20 @@ Context* __am_irq_handle(Context *c) {
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
-      case 8:  // ecall from U
-      case 9:  // ecall from S
-      // 11 是 RISC-V 规定的 M-mode Environment Call (ecall) 的异常号
-      case 11:
-        // 1. 设置事件类型为 YIELD (这是 yield 测试要求的)
-        ev.event = EVENT_YIELD; 
-        
-        // 2. 关键！跳过当前那条 ecall 指令
-        // 如果不加 4，mret 返回后会再次执行 ecall，造成死循环
+      case 11: 
+        // 必须检查 a7 (gpr[17]) 的值是否为 -1
+        if (c->gpr[17] == -1) {
+          ev.event = EVENT_YIELD;
+        } else {
+          ev.event = EVENT_SYSCALL; // 为将来的系统调用预留
+        }
         c->mepc += 4; 
         break;
       default: ev.event = EVENT_ERROR; break;
     }
-
     c = user_handler(ev, c);
     assert(c != NULL);
   }
-
   return c;
 }
 

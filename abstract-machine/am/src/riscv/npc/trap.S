@@ -31,7 +31,7 @@ f(30) f(31)
 #define PUSH(n) STORE concat(x, n), (n * XLEN)(sp);
 #define POP(n)  LOAD  concat(x, n), (n * XLEN)(sp);
 
-#define CONTEXT_SIZE  ((NR_REGS + 3 + 1) * XLEN)
+#define CONTEXT_SIZE  ((NR_REGS + 3) * XLEN)
 #define OFFSET_SP     ( 2 * XLEN)
 #define OFFSET_CAUSE  ((NR_REGS + 0) * XLEN)
 #define OFFSET_STATUS ((NR_REGS + 1) * XLEN)
@@ -44,6 +44,9 @@ __am_asm_trap:
 
   MAP(REGS, PUSH)
 
+  addi t0, sp, CONTEXT_SIZE    
+  STORE t0, OFFSET_SP(sp)      
+
   csrr t0, mcause
   csrr t1, mstatus
   csrr t2, mepc
@@ -54,6 +57,8 @@ __am_asm_trap:
 
   mv a0, sp
   call __am_irq_handle
+
+  mv sp, a0
 
   LOAD t1, OFFSET_STATUS(sp)
   LOAD t2, OFFSET_EPC(sp)

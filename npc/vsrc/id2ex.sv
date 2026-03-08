@@ -36,8 +36,21 @@ module id2ex #(
     output logic [DW-1:0] rs2_data_out,
 
     //ebreak
-    input logic inst_ebreak_in,
-    output logic inst_ebreak_out
+    input  logic          inst_ebreak_in,
+    output logic          inst_ebreak_out,
+
+    // --- [新增] CSR & 异常相关控制信号 ---
+    input  logic [11:0]   csr_addr_in,
+    input  logic          inst_csrrw_in,
+    input  logic          inst_csrrs_in,
+    input  logic          inst_ecall_in,
+    input  logic          inst_mret_in,
+
+    output logic [11:0]   csr_addr_out,
+    output logic          inst_csrrw_out,
+    output logic          inst_csrrs_out,
+    output logic          inst_ecall_out,
+    output logic          inst_mret_out
 );  
 
     // op1 select
@@ -51,83 +64,37 @@ module id2ex #(
     localparam logic [1:0] OP2_4   = 2'b10;
 
     always_comb begin
-        // // 默认值
-        // instr_addr_out = 'h0;
-        // instr_out      = `INST_NOP;
-        // op1_out        = 'h0;
-        // op2_out        = 'h0;
-        // rd_addr_out    = 5'h0;
-        // imm_out        = 'h0;
-        // opcode_out     = 7'h0;
-        // funct3_out     = 3'h0;
-        // funct7_out     = 7'h0;
-        // rs1_data_out   = 32'h0;
-        // rs2_data_out   = 32'h0;
+        instr_addr_out  = instr_addr_in;
+        instr_out       = instr_in;
+        rd_addr_out     = rd_addr_in;
+        imm_out         = imm_in;
+        opcode_out      = opcode_in;
+        funct3_out      = funct3_in;
+        funct7_out      = funct7_in;
+        rs1_data_out    = rs1_data_in;
+        rs2_data_out    = rs2_data_in;
+        inst_ebreak_out = inst_ebreak_in;
 
-        // if (!rst_n) begin            
-        //     instr_addr_out = 'h0;
-        //     instr_out      = `INST_NOP;
-        //     op1_out        = 'h0;
-        //     op2_out        = 'h0;
-        //     rd_addr_out    = 5'h0;
-        //     imm_out        = 'h0;
-        //     opcode_out     = 7'h0;
-        //     funct3_out     = 3'h0;
-        //     funct7_out     = 7'h0;
-        //     rs1_data_out   = 32'h0;
-        //     rs2_data_out   = 32'h0;
-        // end
-        // else if (id_flush) begin
-        //     instr_addr_out = 'h0;
-        //     instr_out      = `INST_NOP;
-        //     op1_out        = 'h0;
-        //     op2_out        = 'h0;
-        //     rd_addr_out    = 5'h0;
-        //     imm_out        = 'h0;
-        //     opcode_out     = 7'h0;
-        //     funct3_out     = 3'h0;
-        //     funct7_out     = 7'h0;
-        //     rs1_data_out   =
-        //     rs2_data_out   =
-        // end
-        // else if (id_stall) begin
-        //     instr_addr_out = 'h0;
-        //     instr_out      = `INST_NOP;
-        //     op1_out        = 'h0;
-        //     op2_out        = 'h0;
-        //     rd_addr_out    = 5'h0;
-        //     imm_out        = 'h0;
-        //     opcode_out     = 7'h0;
-        //     funct3_out     = 3'h0;
-        //     funct7_out     = 7'h0;
-        //     rs1_data_out
-        //     rs2_data_out 
-        // end
-        // else begin
-            instr_addr_out = instr_addr_in;
-            instr_out      = instr_in;
-            rd_addr_out    = rd_addr_in;
-            imm_out        = imm_in;
-            opcode_out     = opcode_in;
-            funct3_out     = funct3_in;
-            funct7_out     = funct7_in;
-            rs1_data_out   = rs1_data_in;
-            rs2_data_out   = rs2_data_in;
-            inst_ebreak_out= inst_ebreak_in;
+        // --- [新增] 透传 CSR 相关信号 ---
+        csr_addr_out    = csr_addr_in;
+        inst_csrrw_out  = inst_csrrw_in;
+        inst_csrrs_out  = inst_csrrs_in;
+        inst_ecall_out  = inst_ecall_in;
+        inst_mret_out   = inst_mret_in;
 
-            case(op1_sel_in)
-                OP1_RS1:  op1_out = rs1_data_in;  // 选择rs1原始数据
-                OP1_PC:   op1_out = instr_addr_in; // 选择PC值
-                OP1_ZERO: op1_out = 32'h0;        // 选择0
-                default:  op1_out = 32'h0;
-            endcase
+        case(op1_sel_in)
+            OP1_RS1:  op1_out = rs1_data_in;  // 选择rs1原始数据
+            OP1_PC:   op1_out = instr_addr_in; // 选择PC值
+            OP1_ZERO: op1_out = 32'h0;        // 选择0
+            default:  op1_out = 32'h0;
+        endcase
 
-            case(op2_sel_in)
-                OP2_RS2:  op2_out = rs2_data_in;  // 直接使用register输入的原始数据
-                OP2_IMM:  op2_out = imm_in;       // 直接使用decode输入的立即数
-                OP2_4:    op2_out = 32'd4;        // 固定值，用于返回地址计算
-                default:  op2_out = 32'h0;
-            endcase
-        end
-    // end
+        case(op2_sel_in)
+            OP2_RS2:  op2_out = rs2_data_in;  // 直接使用register输入的原始数据
+            OP2_IMM:  op2_out = imm_in;       // 直接使用decode输入的立即数
+            OP2_4:    op2_out = 32'd4;        // 固定值，用于返回地址计算
+            default:  op2_out = 32'h0;
+        endcase
+    end
+
 endmodule

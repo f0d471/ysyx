@@ -14,9 +14,16 @@ VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__0(Vtop_execut
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___stl_sequent__TOP__top__u_execute__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
+    vlSelfRef.__PVT__trap_valid = vlSelfRef.__PVT__inst_ecall;
+    vlSelfRef.__PVT__trap_pc = vlSelfRef.__PVT__pc_in;
+    vlSelfRef.__PVT__csr_waddr = vlSelfRef.__PVT__csr_addr_in;
+    vlSelfRef.__PVT__csr_raddr = vlSelfRef.__PVT__csr_addr_in;
     if (vlSelfRef.__PVT__inst_ebreak_in) {
         Vtop___024unit____Vdpiimwrap_trap_TOP____024unit(vlSelfRef.__PVT__op1_in, vlSelfRef.__PVT__pc_in);
     }
+    vlSelfRef.__PVT__csr_wen = ((IData)(vlSelfRef.__PVT__inst_csrrw) 
+                                | ((IData)(vlSelfRef.__PVT__inst_csrrs) 
+                                   & (0U != vlSelfRef.__PVT__op1_in)));
     vlSelfRef.__PVT__branch_taken = ((0x63U == (IData)(vlSelfRef.__PVT__opcode_in)) 
                                      && ((0U == (IData)(vlSelfRef.__PVT__funct3_in))
                                           ? (vlSelfRef.__PVT__op1_in 
@@ -219,7 +226,13 @@ VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__0(Vtop_execut
                                                       : 0U))))));
     vlSelfRef.__PVT__jump_flag_out = 0U;
     vlSelfRef.__PVT__jump_target_out = 0U;
-    if ((0x6fU == (IData)(vlSelfRef.__PVT__opcode_in))) {
+    if (vlSelfRef.__PVT__inst_ecall) {
+        vlSelfRef.__PVT__jump_flag_out = 1U;
+        vlSelfRef.__PVT__jump_target_out = vlSelfRef.__PVT__trap_mtvec;
+    } else if (vlSelfRef.__PVT__inst_mret) {
+        vlSelfRef.__PVT__jump_flag_out = 1U;
+        vlSelfRef.__PVT__jump_target_out = vlSelfRef.__PVT__trap_mepc;
+    } else if ((0x6fU == (IData)(vlSelfRef.__PVT__opcode_in))) {
         vlSelfRef.__PVT__jump_flag_out = 1U;
         vlSelfRef.__PVT__jump_target_out = (vlSelfRef.__PVT__pc_in 
                                             + vlSelfRef.__PVT__imm_in);
@@ -233,5 +246,4 @@ VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__0(Vtop_execut
         vlSelfRef.__PVT__jump_target_out = (vlSelfRef.__PVT__pc_in 
                                             + vlSelfRef.__PVT__imm_in);
     }
-    vlSelfRef.__PVT__alu_result_out = vlSelfRef.__PVT__alu_res;
 }

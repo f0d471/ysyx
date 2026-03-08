@@ -21,6 +21,11 @@ VL_ATTR_COLD void Vtop_id2ex___stl_sequent__TOP__top__u_id2ex__0(Vtop_id2ex* vlS
     vlSelfRef.__PVT__rs1_data_out = vlSelfRef.__PVT__rs1_data_in;
     vlSelfRef.__PVT__rs2_data_out = vlSelfRef.__PVT__rs2_data_in;
     vlSelfRef.__PVT__inst_ebreak_out = vlSelfRef.__PVT__inst_ebreak_in;
+    vlSelfRef.__PVT__csr_addr_out = vlSelfRef.__PVT__csr_addr_in;
+    vlSelfRef.__PVT__inst_csrrw_out = vlSelfRef.__PVT__inst_csrrw_in;
+    vlSelfRef.__PVT__inst_csrrs_out = vlSelfRef.__PVT__inst_csrrs_in;
+    vlSelfRef.__PVT__inst_ecall_out = vlSelfRef.__PVT__inst_ecall_in;
+    vlSelfRef.__PVT__inst_mret_out = vlSelfRef.__PVT__inst_mret_in;
     vlSelfRef.__PVT__op1_out = ((0U == (IData)(vlSelfRef.__PVT__op1_sel_in))
                                  ? vlSelfRef.__PVT__rs1_data_in
                                  : ((1U == (IData)(vlSelfRef.__PVT__op1_sel_in))
@@ -64,4 +69,14 @@ VL_ATTR_COLD void Vtop_id2ex___ctor_var_reset(Vtop_id2ex* vlSelf) {
     vlSelf->__PVT__rs2_data_out = 0;
     vlSelf->__PVT__inst_ebreak_in = 0;
     vlSelf->__PVT__inst_ebreak_out = 0;
+    vlSelf->__PVT__csr_addr_in = 0;
+    vlSelf->__PVT__inst_csrrw_in = 0;
+    vlSelf->__PVT__inst_csrrs_in = 0;
+    vlSelf->__PVT__inst_ecall_in = 0;
+    vlSelf->__PVT__inst_mret_in = 0;
+    vlSelf->__PVT__csr_addr_out = 0;
+    vlSelf->__PVT__inst_csrrw_out = 0;
+    vlSelf->__PVT__inst_csrrs_out = 0;
+    vlSelf->__PVT__inst_ecall_out = 0;
+    vlSelf->__PVT__inst_mret_out = 0;
 }

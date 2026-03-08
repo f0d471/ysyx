@@ -19,6 +19,7 @@
 #include "Vtop_if2id.h"
 #include "Vtop_memory.h"
 #include "Vtop_writeback.h"
+#include "Vtop_csr_file.h"
 #include "Vtop_reg_file.h"
 #include "Vtop_mem2wb.h"
 #include "Vtop_fetch.h"
@@ -45,6 +46,7 @@ class alignas(VL_CACHE_LINE_BYTES)Vtop__Syms final : public VerilatedSyms {
     Vtop___024root                 TOP;
     Vtop___024unit                 TOP____024unit;
     Vtop_top                       TOP__top;
+    Vtop_csr_file                  TOP__top__u_csr_file;
     Vtop_decode                    TOP__top__u_decode;
     Vtop_ex2mem                    TOP__top__u_ex2mem;
     Vtop_execute                   TOP__top__u_execute;

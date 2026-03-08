@@ -23,7 +23,14 @@ module decode #(
     output logic [6:0]    funct7_out,
 
     // ebreak
-    output logic inst_ebreak
+    output logic inst_ebreak,
+
+    // CSR 
+    output logic [11:0]   csr_addr_out,  // 提取的 12 位 CSR 地址
+    output logic          inst_csrrw,    // 是否为 csrrw 指令
+    output logic          inst_csrrs,    // 是否为 csrrs 指令
+    output logic          inst_ecall,    // 是否为 ecall 指令
+    output logic          inst_mret      // 是否为 mret 指令
 );
 
     logic [6:0] opcode;
@@ -48,9 +55,28 @@ module decode #(
     assign funct7_out  = funct7;
     assign imm_out     = imm;
 
-    //ebreak
+    // --- [新增] CSR 地址提取 ---
+    // 对于 SYSTEM (I-Type) 指令，CSR 地址存放在 [31:20]
+    assign csr_addr_out = instr_in[31:20];
+
+    // ebreak
     wire is_ebreak = (instr_in == 32'h00100073); // ebreak 的机器码
     assign inst_ebreak = is_ebreak;
+
+    // --- [新增] SYSTEM 指令译码逻辑 ---
+    wire is_system = (opcode == 7'b1110011);
+    
+    // CSRRW: funct3 = 3'b001
+    assign inst_csrrw = is_system && (funct3 == 3'b001);
+    // CSRRS: funct3 = 3'b010
+    assign inst_csrrs = is_system && (funct3 == 3'b010);
+    
+    // 特权/异常指令: funct3 = 3'b000 且依赖 funct12 (即 csr_addr_out) 来区分
+    // ECALL: funct12 = 12'h000 (且 rs1=0, rd=0)
+    assign inst_ecall = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
+    // MRET:  funct12 = 12'h302 (且 rs1=0, rd=0)
+    assign inst_mret  = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
+
 
     // 立即数生成 
     always_comb begin
@@ -170,8 +196,18 @@ module decode #(
 
                     op1_sel_out = OP1_RS1; // 让 op1_in 拿到 a0 的值
                     op2_sel_out = OP2_RS2;
-                end else begin
-                    // 处理其他 CSR 指令 (暂时留空或默认)
+                end 
+                else if (inst_csrrw || inst_csrrs) begin
+                    // --- [新增] CSRRW / CSRRS 的通用寄存器读取 ---
+                    // 这两条指令都需要读取 rs1 寄存器的值 (用于写入 CSR 或设置 CSR 位)
+                    rd_rs1_addr = rs1;
+                    rd_rs2_addr = 5'h0;
+
+                    op1_sel_out = OP1_RS1; // 把 rs1 的值通过 op1 传给 EX 阶段
+                    op2_sel_out = OP2_RS2; // 这里没用到 op2，随便设个默认值即可
+                end
+                else begin
+                    // 处理 ecall, mret 等不涉及通用寄存器读取的指令
                     rd_rs1_addr = 5'h0;
                     rd_rs2_addr = 5'h0;
                     op1_sel_out = OP1_ZERO;

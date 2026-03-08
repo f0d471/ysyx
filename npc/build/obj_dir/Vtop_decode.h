@@ -23,6 +23,10 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_decode final : public VerilatedModule {
     VL_OUT8(__PVT__funct3_out,2,0);
     VL_OUT8(__PVT__funct7_out,6,0);
     VL_OUT8(__PVT__inst_ebreak,0,0);
+    VL_OUT8(__PVT__inst_csrrw,0,0);
+    VL_OUT8(__PVT__inst_csrrs,0,0);
+    VL_OUT8(__PVT__inst_ecall,0,0);
+    VL_OUT8(__PVT__inst_mret,0,0);
     CData/*6:0*/ __PVT__opcode;
     CData/*4:0*/ __PVT__rd;
     CData/*2:0*/ __PVT__funct3;
@@ -30,6 +34,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_decode final : public VerilatedModule {
     CData/*4:0*/ __PVT__rs2;
     CData/*6:0*/ __PVT__funct7;
     CData/*0:0*/ __PVT__is_ebreak;
+    CData/*0:0*/ __PVT__is_system;
+    VL_OUT16(__PVT__csr_addr_out,11,0);
     VL_IN(__PVT__instr_addr_in,31,0);
     VL_IN(__PVT__instr_in,31,0);
     VL_OUT(__PVT__imm_out,31,0);

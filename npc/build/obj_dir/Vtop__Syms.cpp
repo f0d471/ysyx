@@ -8,6 +8,7 @@
 #include "Vtop_if2id.h"
 #include "Vtop_memory.h"
 #include "Vtop_writeback.h"
+#include "Vtop_csr_file.h"
 #include "Vtop_reg_file.h"
 #include "Vtop_mem2wb.h"
 #include "Vtop_fetch.h"
@@ -31,6 +32,7 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     , TOP{this, namep}
     , TOP____024unit{this, Verilated::catName(namep, "$unit")}
     , TOP__top{this, Verilated::catName(namep, "top")}
+    , TOP__top__u_csr_file{this, Verilated::catName(namep, "top.u_csr_file")}
     , TOP__top__u_decode{this, Verilated::catName(namep, "top.u_decode")}
     , TOP__top__u_ex2mem{this, Verilated::catName(namep, "top.u_ex2mem")}
     , TOP__top__u_execute{this, Verilated::catName(namep, "top.u_execute")}
@@ -51,6 +53,7 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     // Setup each module's pointers to their submodules
     TOP.__PVT____024unit = &TOP____024unit;
     TOP.__PVT__top = &TOP__top;
+    TOP__top.__PVT__u_csr_file = &TOP__top__u_csr_file;
     TOP__top.__PVT__u_decode = &TOP__top__u_decode;
     TOP__top.__PVT__u_ex2mem = &TOP__top__u_ex2mem;
     TOP__top.__PVT__u_execute = &TOP__top__u_execute;
@@ -66,6 +69,7 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     TOP.__Vconfigure(true);
     TOP____024unit.__Vconfigure(true);
     TOP__top.__Vconfigure(true);
+    TOP__top__u_csr_file.__Vconfigure(true);
     TOP__top__u_decode.__Vconfigure(true);
     TOP__top__u_ex2mem.__Vconfigure(true);
     TOP__top__u_execute.__Vconfigure(true);

@@ -26,6 +26,16 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_id2ex final : public VerilatedModule {
     VL_OUT8(__PVT__funct7_out,6,0);
     VL_IN8(__PVT__inst_ebreak_in,0,0);
     VL_OUT8(__PVT__inst_ebreak_out,0,0);
+    VL_IN8(__PVT__inst_csrrw_in,0,0);
+    VL_IN8(__PVT__inst_csrrs_in,0,0);
+    VL_IN8(__PVT__inst_ecall_in,0,0);
+    VL_IN8(__PVT__inst_mret_in,0,0);
+    VL_OUT8(__PVT__inst_csrrw_out,0,0);
+    VL_OUT8(__PVT__inst_csrrs_out,0,0);
+    VL_OUT8(__PVT__inst_ecall_out,0,0);
+    VL_OUT8(__PVT__inst_mret_out,0,0);
+    VL_IN16(__PVT__csr_addr_in,11,0);
+    VL_OUT16(__PVT__csr_addr_out,11,0);
     VL_IN(__PVT__instr_addr_in,31,0);
     VL_IN(__PVT__instr_in,31,0);
     VL_IN(__PVT__imm_in,31,0);

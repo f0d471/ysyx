@@ -8,14 +8,11 @@
 #endif
 
 struct Context {
-  // [Fix] 调整顺序以匹配 trap.S 的压栈顺序
-  // 1. gpr[NR_REGS] 放在最前面 (Offset: 0 ~ 31*4)
-  uintptr_t gpr[NR_REGS]; 
-  
-  // 2. 紧接着是 mcause, mstatus, mepc (Offset: 32*4, 33*4, 34*4)
-  uintptr_t mcause, mstatus, mepc; 
-  
-  void *pdir; // 地址空间指针 (DiffTest 用，通常放在最后)
+  union {
+    void *pdir;
+    uintptr_t gpr[32];
+  };
+  uintptr_t mcause, mstatus, mepc;
 };
 
 #ifdef __riscv_e

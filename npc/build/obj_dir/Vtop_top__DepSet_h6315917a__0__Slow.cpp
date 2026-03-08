@@ -30,6 +30,11 @@ VL_ATTR_COLD void Vtop_top___ctor_var_reset(Vtop_top* vlSelf) {
     vlSelf->__PVT__decode_opcode = 0;
     vlSelf->__PVT__decode_funct3 = 0;
     vlSelf->__PVT__decode_funct7 = 0;
+    vlSelf->__PVT__decode_csr_addr = 0;
+    vlSelf->__PVT__decode_inst_csrrw = 0;
+    vlSelf->__PVT__decode_inst_csrrs = 0;
+    vlSelf->__PVT__decode_inst_ecall = 0;
+    vlSelf->__PVT__decode_inst_mret = 0;
     vlSelf->__PVT__reg_rs1_data = 0;
     vlSelf->__PVT__reg_rs2_data = 0;
     vlSelf->__PVT__id_instr_addr_out = 0;
@@ -43,6 +48,11 @@ VL_ATTR_COLD void Vtop_top___ctor_var_reset(Vtop_top* vlSelf) {
     vlSelf->__PVT__id_funct7_out = 0;
     vlSelf->__PVT__id_rs1_data = 0;
     vlSelf->__PVT__id_rs2_data = 0;
+    vlSelf->__PVT__id_csr_addr = 0;
+    vlSelf->__PVT__id_inst_csrrw = 0;
+    vlSelf->__PVT__id_inst_csrrs = 0;
+    vlSelf->__PVT__id_inst_ecall = 0;
+    vlSelf->__PVT__id_inst_mret = 0;
     vlSelf->__PVT__ex_alu_result = 0;
     vlSelf->__PVT__ex_jump_flag = 0;
     vlSelf->__PVT__ex_jump_target = 0;
@@ -61,4 +71,15 @@ VL_ATTR_COLD void Vtop_top___ctor_var_reset(Vtop_top* vlSelf) {
     vlSelf->__PVT__wb_wr_data = 0;
     vlSelf->__PVT__inst_ebreak = 0;
     vlSelf->__PVT__inst_ebreak_out = 0;
+    vlSelf->__PVT__csr_raddr = 0;
+    vlSelf->__PVT__csr_rdata = 0;
+    vlSelf->__PVT__csr_wen = 0;
+    vlSelf->__PVT__csr_waddr = 0;
+    vlSelf->__PVT__csr_wdata = 0;
+    vlSelf->__PVT__trap_valid = 0;
+    vlSelf->__PVT__trap_pc = 0;
+    vlSelf->__PVT__trap_cause = 0;
+    vlSelf->__PVT__trap_mtvec = 0;
+    vlSelf->__PVT__trap_mepc = 0;
+    vlSelf->__Vcellinp__u_csr_file__rst = 0;
 }

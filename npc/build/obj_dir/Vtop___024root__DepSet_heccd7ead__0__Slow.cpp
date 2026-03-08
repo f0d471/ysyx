@@ -108,16 +108,19 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__act(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         'act' region trigger index 0 is active: @(posedge top.u_memory.clk)\n");
     }
     if ((2ULL & vlSelfRef.__VactTriggered.word(0U))) {
-        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge top.u_reg_file.clk)\n");
+        VL_DBG_MSGF("         'act' region trigger index 1 is active: @(posedge top.u_csr_file.clk)\n");
     }
     if ((4ULL & vlSelfRef.__VactTriggered.word(0U))) {
-        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(negedge top.u_reg_file.rst_n)\n");
+        VL_DBG_MSGF("         'act' region trigger index 2 is active: @(posedge top.u_reg_file.clk)\n");
     }
     if ((8ULL & vlSelfRef.__VactTriggered.word(0U))) {
-        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(posedge top.u_pc_counter.clk)\n");
+        VL_DBG_MSGF("         'act' region trigger index 3 is active: @(negedge top.u_reg_file.rst_n)\n");
     }
     if ((0x10ULL & vlSelfRef.__VactTriggered.word(0U))) {
-        VL_DBG_MSGF("         'act' region trigger index 4 is active: @(negedge top.u_pc_counter.rst_n)\n");
+        VL_DBG_MSGF("         'act' region trigger index 4 is active: @(posedge top.u_pc_counter.clk)\n");
+    }
+    if ((0x20ULL & vlSelfRef.__VactTriggered.word(0U))) {
+        VL_DBG_MSGF("         'act' region trigger index 5 is active: @(negedge top.u_pc_counter.rst_n)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -136,16 +139,19 @@ VL_ATTR_COLD void Vtop___024root___dump_triggers__nba(Vtop___024root* vlSelf) {
         VL_DBG_MSGF("         'nba' region trigger index 0 is active: @(posedge top.u_memory.clk)\n");
     }
     if ((2ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
-        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge top.u_reg_file.clk)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 1 is active: @(posedge top.u_csr_file.clk)\n");
     }
     if ((4ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
-        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(negedge top.u_reg_file.rst_n)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 2 is active: @(posedge top.u_reg_file.clk)\n");
     }
     if ((8ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
-        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(posedge top.u_pc_counter.clk)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 3 is active: @(negedge top.u_reg_file.rst_n)\n");
     }
     if ((0x10ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
-        VL_DBG_MSGF("         'nba' region trigger index 4 is active: @(negedge top.u_pc_counter.rst_n)\n");
+        VL_DBG_MSGF("         'nba' region trigger index 4 is active: @(posedge top.u_pc_counter.clk)\n");
+    }
+    if ((0x20ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+        VL_DBG_MSGF("         'nba' region trigger index 5 is active: @(negedge top.u_pc_counter.rst_n)\n");
     }
 }
 #endif  // VL_DEBUG
@@ -161,6 +167,8 @@ VL_ATTR_COLD void Vtop___024root____Vm_traceActivitySetAll(Vtop___024root* vlSel
     vlSelfRef.__Vm_traceActivity[2U] = 1U;
     vlSelfRef.__Vm_traceActivity[3U] = 1U;
     vlSelfRef.__Vm_traceActivity[4U] = 1U;
+    vlSelfRef.__Vm_traceActivity[5U] = 1U;
+    vlSelfRef.__Vm_traceActivity[6U] = 1U;
 }
 
 VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
@@ -178,11 +186,12 @@ VL_ATTR_COLD void Vtop___024root___ctor_var_reset(Vtop___024root* vlSelf) {
         vlSelf->regs[__Vi0] = 0;
     }
     vlSelf->__Vtrigprevexpr___TOP__top__u_memory____PVT__clk__0 = 0;
+    vlSelf->__Vtrigprevexpr___TOP__top__u_csr_file____PVT__clk__0 = 0;
     vlSelf->__Vtrigprevexpr___TOP__top__u_reg_file____PVT__clk__0 = 0;
     vlSelf->__Vtrigprevexpr___TOP__top__u_reg_file____PVT__rst_n__0 = 0;
     vlSelf->__Vtrigprevexpr___TOP__top__u_pc_counter____PVT__clk__0 = 0;
     vlSelf->__Vtrigprevexpr___TOP__top__u_pc_counter____PVT__rst_n__0 = 0;
-    for (int __Vi0 = 0; __Vi0 < 5; ++__Vi0) {
+    for (int __Vi0 = 0; __Vi0 < 7; ++__Vi0) {
         vlSelf->__Vm_traceActivity[__Vi0] = 0;
     }
 }

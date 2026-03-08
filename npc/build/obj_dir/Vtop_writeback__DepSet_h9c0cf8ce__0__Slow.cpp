@@ -17,12 +17,13 @@ VL_ATTR_COLD void Vtop_writeback___stl_sequent__TOP__top__u_writeback__0(Vtop_wr
     if ((3U == (IData)(vlSelfRef.__PVT__opcode_in))) {
         vlSelfRef.__PVT__wb_en = 1U;
         vlSelfRef.__PVT__wb_data = vlSelfRef.__PVT__mem_rdata_in;
-    } else if (((((((0x13U == (IData)(vlSelfRef.__PVT__opcode_in)) 
-                    || (0x33U == (IData)(vlSelfRef.__PVT__opcode_in))) 
-                   || (0x37U == (IData)(vlSelfRef.__PVT__opcode_in))) 
-                  || (0x17U == (IData)(vlSelfRef.__PVT__opcode_in))) 
-                 || (0x6fU == (IData)(vlSelfRef.__PVT__opcode_in))) 
-                || (0x67U == (IData)(vlSelfRef.__PVT__opcode_in)))) {
+    } else if ((((((((0x13U == (IData)(vlSelfRef.__PVT__opcode_in)) 
+                     || (0x33U == (IData)(vlSelfRef.__PVT__opcode_in))) 
+                    || (0x37U == (IData)(vlSelfRef.__PVT__opcode_in))) 
+                   || (0x17U == (IData)(vlSelfRef.__PVT__opcode_in))) 
+                  || (0x6fU == (IData)(vlSelfRef.__PVT__opcode_in))) 
+                 || (0x67U == (IData)(vlSelfRef.__PVT__opcode_in))) 
+                || (0x73U == (IData)(vlSelfRef.__PVT__opcode_in)))) {
         vlSelfRef.__PVT__wb_en = 1U;
         vlSelfRef.__PVT__wb_data = vlSelfRef.__PVT__alu_result_in;
     } else {
