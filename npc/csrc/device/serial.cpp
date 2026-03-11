@@ -22,8 +22,3 @@ void init_serial() {
     add_mmio_map("serial", SERIAL_PORT, serial_base, 8, serial_io_handler);
 }
 
-// 统一的设备初始化入口
-void init_device() {
-    init_serial();
-    // 未来如果开发了 RTC，可以在这里加 init_rtc();
-}

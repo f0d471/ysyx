@@ -19,10 +19,10 @@
 #define CONFIG_MTRACE
 
 /************ DTRACE *************/ 
-#define CONFIG_DTRACE
+//#define CONFIG_DTRACE
 
 /************ ETRACE *************/ 
-#define CONFIG_ETRACE
+//#define CONFIG_ETRACE
 
 /************ FTRACE *************/ 
 #define CONFIG_FTRACE

@@ -77,3 +77,19 @@ void mmio_write(uint32_t addr, int len, uint32_t data) {
     // 2. 触发回调，让设备干活
     if (map->callback) map->callback(offset, len, true);
 }
+
+extern void init_serial();
+extern void init_timer();
+
+void init_device() {
+    // 可以在这里加一个日志打印，方便调试
+    printf("Initializing devices...\n");
+    
+    // 初始化所有挂载在 MMIO 上的设备
+    init_serial();
+    init_timer();
+    
+    // 以后开发新设备，继续往这里加即可：
+    // init_vga();
+    // init_keyboard();
+}

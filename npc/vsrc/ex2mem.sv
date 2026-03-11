@@ -1,40 +1,37 @@
 `include "define.sv"
 
-module ex2mem #(
-    parameter AW = 32,
-    parameter DW = 32
-)(
-    // input  logic          mem_stall, // 预留给内存暂停
+module pipe_reg_ex2mem (
+    input  logic     clk,
+    input  logic     rst_n,
+    input  logic     flush,     // 预留（当前流水线跳转不影响这一级）
 
-    // 来自 EX 阶段
-    input  logic [AW-1:0] pc_in,
-    input  logic [DW-1:0] alu_result_in,
-    input  logic [DW-1:0] rs2_data_in, // Store Data
-    input  logic [4:0]    rd_addr_in,
-    input  logic [6:0]    opcode_in,
-    input  logic [2:0]    funct3_in,
+    // 上游（EX）
+    input  logic     up_valid,
+    output logic     up_ready,
+    input  ex_mem_t  up_data,
 
-    // 发往 MEM 阶段
-    output logic [DW-1:0] alu_result_out,
-    output logic [DW-1:0] rs2_data_out,
-    output logic [4:0]    rd_addr_out,
-    output logic [6:0]    opcode_out,
-    output logic [2:0]    funct3_out
+    // 下游（MEM）
+    output logic     dn_valid,
+    input  logic     dn_ready,
+    output ex_mem_t  dn_data
 );
+    ex_mem_t data_q;
+    logic    valid_q;
 
-    always_comb begin
-        // if(!rst_n) begin
-        //     alu_result_out = 'h0;
-        //     rs2_data_out   = 'h0;
-        //     rd_addr_out    = 5'h0;
-        //     opcode_out     = `INST_TYPE_I; // NOP
-        //     funct3_out     = 3'h0;
-        // end else begin
-            alu_result_out = alu_result_in;
-            rs2_data_out   = rs2_data_in;
-            rd_addr_out    = rd_addr_in;
-            opcode_out     = opcode_in;
-            funct3_out     = funct3_in;
+    assign up_ready = dn_ready | ~valid_q;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n || flush) begin
+            valid_q        <= 1'b0;
+            data_q         <= '0;
         end
-    // end
+        else if (up_ready) begin
+            valid_q        <= up_valid;
+            data_q         <= up_data;
+        end
+    end
+
+    assign dn_valid = valid_q;
+    assign dn_data  = data_q;
+
 endmodule

@@ -1,37 +1,39 @@
 `include "define.sv" 
 
-module if2id #(
-    parameter AW = `AW, 
-    parameter DW = `DW
-)( 
-    // // from ex
-    // input  logic          if_stall,  // 暂停
-    // input  logic          if_flush,  // 清空
-    // from if
-    input  logic [AW-1:0] instr_addr_in, 
-    input  logic [DW-1:0] instr_in,
-    // to id    
-    output logic [AW-1:0] instr_addr_out, 
-    output logic [DW-1:0] instr_out       
-);  
+module pipe_reg_if2id (
+    input  logic    clk,
+    input  logic    rst_n,
+    input  logic    flush,
+    input  logic    stall,     // ← 新增：保持当前值（hold current value）
 
-always_comb  begin
-    // if (!rst_n) begin
-    //     instr_addr_out = 'h0;
-    //     instr_out      = `INST_NOP; 
-    // end 
-    // else if (if_flush) begin
-    //     instr_addr_out <= 'h0;
-    //     instr_out      <= `INST_NOP; // 清空时插入气泡
-    // end 
-    // else if (if_stall) begin
-    //     instr_addr_out <= instr_addr_out;
-    //     instr_out      <= instr_out;
-    // end 
-    // else begin
-        instr_addr_out = instr_addr_in;
-        instr_out      = instr_in;
-    // end
-end
-    
+    input  logic    up_valid,
+    output logic    up_ready,
+    input  if_id_t  up_data,
+
+    output logic    dn_valid,
+    input  logic    dn_ready,
+    output if_id_t  dn_data
+);
+    if_id_t  data_q;
+    logic    valid_q;
+
+    assign up_ready = dn_ready | ~valid_q;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n || flush) begin
+            valid_q <= 1'b0;
+            data_q  <= '0;
+        end
+        else if (stall) begin
+            // 保持（hold）：valid_q和data_q维持原值（无操作）
+        end
+        else if (up_ready) begin
+            valid_q <= up_valid;
+            data_q  <= up_data;
+        end
+    end
+
+    assign dn_valid = valid_q;
+    assign dn_data  = data_q;
+
 endmodule

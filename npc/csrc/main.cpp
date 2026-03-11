@@ -62,7 +62,7 @@ void init_sim(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
     top = new Vtop;
 
-    // 
+    // 初始化外设
     #ifdef CONFIG_DEVICE
       init_device();
     #endif

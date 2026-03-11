@@ -1,3 +1,6 @@
+`ifndef DEFINE_SV
+`define DEFINE_SV
+
 `define AW 				  32
 `define DW 				  32
 
@@ -85,3 +88,48 @@
 `define INST_MRET         32'h30200073  // 系统指令（SYSTEM类型）
 `define INST_RET          32'h00008067  // JALR x0, x1, 0（I型）
 
+// -------- IF → ID 通道 --------
+typedef struct packed {
+    logic [31:0] pc;
+    logic [31:0] instr;
+} if_id_t;
+
+// -------- ID → EX 通道 --------
+typedef struct packed {
+    logic [31:0] pc;
+    logic [31:0] instr;
+    logic [31:0] op1;
+    logic [31:0] op2;
+    logic [4:0]  rd_addr;
+    logic [31:0] imm;
+    logic [6:0]  opcode;
+    logic [2:0]  funct3;
+    logic [6:0]  funct7;
+    logic [31:0] rs1_data;
+    logic [31:0] rs2_data;
+    logic [11:0] csr_addr;
+    logic        inst_csrrw;
+    logic        inst_csrrs;
+    logic        inst_ecall;
+    logic        inst_mret;
+    logic        inst_ebreak;
+} id_ex_t;
+
+// -------- EX → MEM 通道 --------
+typedef struct packed {
+    logic [31:0] alu_result;
+    logic [31:0] rs2_data;
+    logic [4:0]  rd_addr;
+    logic [6:0]  opcode;
+    logic [2:0]  funct3;
+} ex_mem_t;
+
+// -------- MEM → WB 通道 --------
+typedef struct packed {
+    logic [31:0] alu_result;
+    logic [31:0] mem_rdata;
+    logic [4:0]  rd_addr;
+    logic [6:0]  opcode;
+} mem_wb_t;
+
+`endif // DEFINE_SV

@@ -14,8 +14,8 @@ module decode #(
     // To Execute 
     output logic [4:0]    rd_addr_out,   // 目标寄存器 (rd)
     output logic [DW-1:0] imm_out,       // 立即数
-    output logic [1:0]      op1_sel_out,   // op1选择控制：0=0，1=rs1，2=PC，3=PC+4（扩展用）
-    output logic [1:0]      op2_sel_out,   // op2选择控制：0=0，1=rs2，2=imm，3=4（返回地址用）
+    output logic [1:0]    op1_sel_out,   // op1选择控制：0=0，1=rs1，2=PC，3=PC+4（扩展用）
+    output logic [1:0]    op2_sel_out,   // op2选择控制：0=0，1=rs2，2=imm，3=4（返回地址用）
     
     // To Execute for decode
     output logic [6:0]    opcode_out,
