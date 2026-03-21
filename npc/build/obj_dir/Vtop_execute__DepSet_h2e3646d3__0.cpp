@@ -8,10 +8,10 @@
 
 void Vtop___024unit____Vdpiimwrap_trap_TOP____024unit(IData/*31:0*/ code, IData/*31:0*/ pc);
 
-VL_INLINE_OPT void Vtop_execute___nba_sequent__TOP__top__u_execute__0(Vtop_execute* vlSelf) {
+VL_INLINE_OPT void Vtop_execute___nba_sequent__TOP__top__u_core__u_execute__0(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___nba_sequent__TOP__top__u_execute__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___nba_sequent__TOP__top__u_core__u_execute__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__trap_valid = vlSelfRef.__PVT__inst_ecall;

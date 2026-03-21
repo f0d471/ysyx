@@ -23,10 +23,10 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_pipe_reg_mem2wb final : public Verilated
     VL_IN8(__PVT__dn_ready,0,0);
     CData/*0:0*/ __PVT__valid_q;
     CData/*0:0*/ __Vdly__valid_q;
-    VL_INW(__PVT__up_data,75,0,3);
-    VL_OUTW(__PVT__dn_data,75,0,3);
-    VlWide<3>/*75:0*/ __PVT__data_q;
-    VlWide<3>/*75:0*/ __Vdly__data_q;
+    VL_INW(__PVT__up_data,139,0,5);
+    VL_OUTW(__PVT__dn_data,139,0,5);
+    VlWide<5>/*139:0*/ __PVT__data_q;
+    VlWide<5>/*139:0*/ __Vdly__data_q;
 
     // INTERNAL VARIABLES
     Vtop__Syms* const vlSymsp;

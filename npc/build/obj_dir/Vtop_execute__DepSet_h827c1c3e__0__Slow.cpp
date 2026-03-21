@@ -5,19 +5,19 @@
 #include "Vtop__pch.h"
 #include "Vtop_execute.h"
 
-VL_ATTR_COLD void Vtop_execute___eval_initial__TOP__top__u_execute(Vtop_execute* vlSelf) {
+VL_ATTR_COLD void Vtop_execute___eval_initial__TOP__top__u_core__u_execute(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___eval_initial__TOP__top__u_execute\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___eval_initial__TOP__top__u_core__u_execute\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__trap_cause = 0xbU;
 }
 
-VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__1(Vtop_execute* vlSelf) {
+VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_core__u_execute__1(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___stl_sequent__TOP__top__u_execute__1\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___stl_sequent__TOP__top__u_core__u_execute__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__csr_wdata = ((IData)(vlSelfRef.__PVT__inst_csrrw)
@@ -33,7 +33,7 @@ VL_ATTR_COLD void Vtop_execute___stl_sequent__TOP__top__u_execute__1(Vtop_execut
 VL_ATTR_COLD void Vtop_execute___ctor_var_reset(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___ctor_var_reset\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___ctor_var_reset\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelf->__PVT__pc_in = 0;

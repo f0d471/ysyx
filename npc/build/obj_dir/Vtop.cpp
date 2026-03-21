@@ -12,9 +12,14 @@ Vtop::Vtop(VerilatedContext* _vcontextp__, const char* _vcname__)
     , vlSymsp{new Vtop__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst_n{vlSymsp->TOP.rst_n}
+    , debug_wb_have{vlSymsp->TOP.debug_wb_have}
+    , debug_wb_ena{vlSymsp->TOP.debug_wb_ena}
+    , debug_wb_addr{vlSymsp->TOP.debug_wb_addr}
     , pc{vlSymsp->TOP.pc}
     , instr{vlSymsp->TOP.instr}
-    , debug_x10{vlSymsp->TOP.debug_x10}
+    , debug_wb_pc{vlSymsp->TOP.debug_wb_pc}
+    , debug_wb_instr{vlSymsp->TOP.debug_wb_instr}
+    , debug_wb_data{vlSymsp->TOP.debug_wb_data}
     , regs{vlSymsp->TOP.regs}
     , __PVT__top{vlSymsp->TOP.__PVT__top}
     , __PVT____024unit{vlSymsp->TOP.__PVT____024unit}

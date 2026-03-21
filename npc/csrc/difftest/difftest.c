@@ -49,20 +49,13 @@ void difftest_skip_ref() {
   difftest_skip = true;
 }
 
-// ★★★ 多周期版本的 difftest_step ★★★
-// 改动：
-//   1. 接收 commit_pc 参数（提交指令的 PC），用于定位出错位置
-//   2. 不再比较 top->pc（那是 IF 级 PC，流水线中领先提交好几拍）
-//   3. 只比较 GPR（寄存器堆在 WB 写回后，是"已提交"的架构状态）
-//   4. 可选：用 commit_pc 与 NEMU 执行前的 PC 做同步校验
 void difftest_step(uint32_t commit_pc) {
-  // ★ 可选：在 NEMU 执行前，检查 NEMU 的 PC 是否和 DUT commit_pc 一致
-  //   如果不一致，说明两边的执行序列已经分叉
+  // 执行前校验：NEMU 的 PC 应该和 DUT 提交的 PC 一致
   DiffContext ref_before;
-  difftest_regcpy(&ref_before, false);  // direction=false: 从 NEMU 读出
+  difftest_regcpy(&ref_before, false);
   if (ref_before.pc != commit_pc) {
-    printf("[DiffTest] PC sync error! DUT committing pc=0x%08x, "
-           "but NEMU is at pc=0x%08x\n", commit_pc, ref_before.pc);
+    printf("[DiffTest] PC sync error! DUT commit_pc=0x%08x, "
+           "NEMU pc=0x%08x\n", commit_pc, ref_before.pc);
     npc_state = NPC_ABORT; 
     npc_quit();
   }
@@ -70,11 +63,9 @@ void difftest_step(uint32_t commit_pc) {
   // 让 NEMU 执行一条指令
   difftest_exec(1);
  
-  // 读出 NEMU 执行后的状态
+  // 比较 GPR
   DiffContext ref;
   difftest_regcpy(&ref, false); 
- 
-  // ★ 比较 GPR（DUT 的 regs 是 WB 写回后的架构状态）
   for (int i = 0; i < 16; i++) {
     if (top->regs[i] != ref.gpr[i]) {
       printf("[DiffTest] Reg x%d mismatch: DUT=0x%08x REF=0x%08x "
@@ -84,13 +75,8 @@ void difftest_step(uint32_t commit_pc) {
       npc_quit();
     }
   }
- 
-  // ★ 注意：这里不再比较 top->pc 和 ref.pc
-  //   因为 top->pc 是 IF 级的 PC（已经跑到后面好几条了），
-  //   而 ref.pc 是 NEMU 的下一条要执行的 PC。
-  //   两者在流水线中不同步是正常的。
-  //   如果需要比较 PC，应该在下一次 commit 时检查 commit_pc == ref.pc
-  //   （就是上面 ref_before.pc 的检查做的事情）
+  // ★ 不比较 top->pc（IF 级 PC ≠ 提交 PC）
+  // PC 同步性在下一次 commit 的 ref_before 检查中隐式保证
 }
 
 #endif

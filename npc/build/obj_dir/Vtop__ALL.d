@@ -8,10 +8,10 @@ Vtop__ALL.o: Vtop__ALL.cpp Vtop.cpp Vtop__pch.h \
  /usr/share/verilator/include/verilated.h \
  /usr/share/verilator/include/verilated_sym_props.h \
  /usr/share/verilator/include/vltstd/svdpi.h Vtop__Syms.h Vtop.h \
- Vtop___024root.h Vtop_top.h Vtop___024unit.h Vtop_pipe_reg_if2id.h \
- Vtop_memory.h Vtop_writeback.h Vtop_csr_file.h Vtop_reg_file.h \
- Vtop_pipe_reg_mem2wb.h Vtop_forward_unit.h Vtop_fetch.h Vtop_decode.h \
- Vtop_hazard_unit.h Vtop_execute.h Vtop_pipe_reg_id2ex.h \
+ Vtop___024root.h Vtop_top.h Vtop___024unit.h Vtop_core.h \
+ Vtop_pipe_reg_if2id.h Vtop_memory.h Vtop_writeback.h Vtop_csr_file.h \
+ Vtop_reg_file.h Vtop_pipe_reg_mem2wb.h Vtop_forward_unit.h Vtop_fetch.h \
+ Vtop_decode.h Vtop_hazard_unit.h Vtop_execute.h Vtop_pipe_reg_id2ex.h \
  Vtop_pipe_reg_ex2mem.h Vtop_pc_counter.h \
  /usr/share/verilator/include/verilated_vcd_c.h \
  /usr/share/verilator/include/verilated_trace.h \
@@ -19,6 +19,7 @@ Vtop__ALL.o: Vtop__ALL.cpp Vtop.cpp Vtop__pch.h \
  Vtop___024root__DepSet_heccd7ead__0.cpp \
  Vtop_top__DepSet_h0f993197__0.cpp \
  Vtop___024unit__DepSet_hab9af801__0.cpp \
+ Vtop_core__DepSet_h7dcb518f__0.cpp \
  Vtop_pipe_reg_if2id__DepSet_h0a246a71__0.cpp \
  Vtop_memory__DepSet_hf5a2896a__0.cpp \
  Vtop_writeback__DepSet_h9c0cf8ce__0.cpp \
@@ -38,8 +39,9 @@ Vtop__ALL.o: Vtop__ALL.cpp Vtop.cpp Vtop__pch.h \
  Vtop___024root__DepSet_heccd7ead__0__Slow.cpp Vtop_top__Slow.cpp \
  Vtop_top__DepSet_h0f993197__0__Slow.cpp \
  Vtop_top__DepSet_h6315917a__0__Slow.cpp Vtop___024unit__Slow.cpp \
- Vtop___024unit__DepSet_hff17caec__0__Slow.cpp \
- Vtop_pipe_reg_if2id__Slow.cpp \
+ Vtop___024unit__DepSet_hff17caec__0__Slow.cpp Vtop_core__Slow.cpp \
+ Vtop_core__DepSet_h7dcb518f__0__Slow.cpp \
+ Vtop_core__DepSet_hb5473172__0__Slow.cpp Vtop_pipe_reg_if2id__Slow.cpp \
  Vtop_pipe_reg_if2id__DepSet_h0a246a71__0__Slow.cpp Vtop_memory__Slow.cpp \
  Vtop_memory__DepSet_hf5a2896a__0__Slow.cpp \
  Vtop_memory__DepSet_h3cefd995__0__Slow.cpp Vtop_writeback__Slow.cpp \

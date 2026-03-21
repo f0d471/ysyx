@@ -5,19 +5,19 @@
 #include "Vtop__pch.h"
 #include "Vtop_pc_counter.h"
 
-VL_ATTR_COLD void Vtop_pc_counter___eval_static__TOP__top__u_pc_counter(Vtop_pc_counter* vlSelf) {
+VL_ATTR_COLD void Vtop_pc_counter___eval_static__TOP__top__u_core__u_pc_counter(Vtop_pc_counter* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pc_counter___eval_static__TOP__top__u_pc_counter\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pc_counter___eval_static__TOP__top__u_core__u_pc_counter\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__pc_pointer = 0x80000000U;
 }
 
-VL_ATTR_COLD void Vtop_pc_counter___stl_sequent__TOP__top__u_pc_counter__0(Vtop_pc_counter* vlSelf) {
+VL_ATTR_COLD void Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0(Vtop_pc_counter* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pc_counter___stl_sequent__TOP__top__u_pc_counter__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__pc = vlSelfRef.__PVT__pc_pointer;
@@ -26,7 +26,7 @@ VL_ATTR_COLD void Vtop_pc_counter___stl_sequent__TOP__top__u_pc_counter__0(Vtop_
 VL_ATTR_COLD void Vtop_pc_counter___ctor_var_reset(Vtop_pc_counter* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pc_counter___ctor_var_reset\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pc_counter___ctor_var_reset\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelf->__PVT__clk = 0;

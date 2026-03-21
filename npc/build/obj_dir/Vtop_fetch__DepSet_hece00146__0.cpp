@@ -8,10 +8,10 @@
 
 void Vtop___024unit____Vdpiimwrap_paddr_read_TOP____024unit(IData/*31:0*/ addr, IData/*31:0*/ &paddr_read__Vfuncrtn);
 
-VL_INLINE_OPT void Vtop_fetch___ico_sequent__TOP__top__u_fetch__0(Vtop_fetch* vlSelf) {
+VL_INLINE_OPT void Vtop_fetch___ico_sequent__TOP__top__u_core__u_fetch__0(Vtop_fetch* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_fetch___ico_sequent__TOP__top__u_fetch__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_fetch___ico_sequent__TOP__top__u_core__u_fetch__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     if (vlSelfRef.__PVT__rst_n) {
@@ -22,10 +22,10 @@ VL_INLINE_OPT void Vtop_fetch___ico_sequent__TOP__top__u_fetch__0(Vtop_fetch* vl
     }
 }
 
-VL_INLINE_OPT void Vtop_fetch___nba_sequent__TOP__top__u_fetch__0(Vtop_fetch* vlSelf) {
+VL_INLINE_OPT void Vtop_fetch___nba_sequent__TOP__top__u_core__u_fetch__0(Vtop_fetch* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_fetch___nba_sequent__TOP__top__u_fetch__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_fetch___nba_sequent__TOP__top__u_core__u_fetch__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     if (vlSelfRef.__PVT__rst_n) {

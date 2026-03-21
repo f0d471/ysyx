@@ -5,10 +5,10 @@
 #include "Vtop__pch.h"
 #include "Vtop_csr_file.h"
 
-VL_INLINE_OPT void Vtop_csr_file___nba_sequent__TOP__top__u_csr_file__0(Vtop_csr_file* vlSelf) {
+VL_INLINE_OPT void Vtop_csr_file___nba_sequent__TOP__top__u_core__u_csr_file__0(Vtop_csr_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_csr_file___nba_sequent__TOP__top__u_csr_file__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_csr_file___nba_sequent__TOP__top__u_core__u_csr_file__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__Vdly__mcycle_cnt = vlSelfRef.__PVT__mcycle_cnt;
@@ -48,10 +48,10 @@ VL_INLINE_OPT void Vtop_csr_file___nba_sequent__TOP__top__u_csr_file__0(Vtop_csr
     vlSelfRef.__PVT__trap_mepc = vlSelfRef.__PVT__mepc;
 }
 
-VL_INLINE_OPT void Vtop_csr_file___nba_comb__TOP__top__u_csr_file__0(Vtop_csr_file* vlSelf) {
+VL_INLINE_OPT void Vtop_csr_file___nba_comb__TOP__top__u_core__u_csr_file__0(Vtop_csr_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_csr_file___nba_comb__TOP__top__u_csr_file__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_csr_file___nba_comb__TOP__top__u_core__u_csr_file__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__csr_rdata = (((((((((0x300U == (IData)(vlSelfRef.__PVT__csr_raddr)) 

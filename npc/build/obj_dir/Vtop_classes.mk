@@ -28,6 +28,7 @@ VM_CLASSES_FAST += \
 	Vtop___024root__DepSet_heccd7ead__0 \
 	Vtop_top__DepSet_h0f993197__0 \
 	Vtop___024unit__DepSet_hab9af801__0 \
+	Vtop_core__DepSet_h7dcb518f__0 \
 	Vtop_pipe_reg_if2id__DepSet_h0a246a71__0 \
 	Vtop_memory__DepSet_hf5a2896a__0 \
 	Vtop_writeback__DepSet_h9c0cf8ce__0 \
@@ -55,6 +56,9 @@ VM_CLASSES_SLOW += \
 	Vtop_top__DepSet_h6315917a__0__Slow \
 	Vtop___024unit__Slow \
 	Vtop___024unit__DepSet_hff17caec__0__Slow \
+	Vtop_core__Slow \
+	Vtop_core__DepSet_h7dcb518f__0__Slow \
+	Vtop_core__DepSet_hb5473172__0__Slow \
 	Vtop_pipe_reg_if2id__Slow \
 	Vtop_pipe_reg_if2id__DepSet_h0a246a71__0__Slow \
 	Vtop_memory__Slow \

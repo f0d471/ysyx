@@ -5,10 +5,10 @@
 #include "Vtop__pch.h"
 #include "Vtop_forward_unit.h"
 
-VL_INLINE_OPT void Vtop_forward_unit___nba_comb__TOP__top__u_forward__0(Vtop_forward_unit* vlSelf) {
+VL_INLINE_OPT void Vtop_forward_unit___nba_comb__TOP__top__u_core__u_forward__0(Vtop_forward_unit* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_forward_unit___nba_comb__TOP__top__u_forward__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_forward_unit___nba_comb__TOP__top__u_core__u_forward__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__fwd_rs1_sel = (((([&]() {

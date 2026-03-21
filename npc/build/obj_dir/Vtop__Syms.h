@@ -17,6 +17,7 @@
 #include "Vtop___024root.h"
 #include "Vtop_top.h"
 #include "Vtop___024unit.h"
+#include "Vtop_core.h"
 #include "Vtop_pipe_reg_if2id.h"
 #include "Vtop_memory.h"
 #include "Vtop_writeback.h"
@@ -48,20 +49,21 @@ class alignas(VL_CACHE_LINE_BYTES)Vtop__Syms final : public VerilatedSyms {
     Vtop___024root                 TOP;
     Vtop___024unit                 TOP____024unit;
     Vtop_top                       TOP__top;
-    Vtop_csr_file                  TOP__top__u_csr_file;
-    Vtop_decode                    TOP__top__u_decode;
-    Vtop_pipe_reg_ex2mem           TOP__top__u_ex2mem;
-    Vtop_execute                   TOP__top__u_execute;
-    Vtop_fetch                     TOP__top__u_fetch;
-    Vtop_forward_unit              TOP__top__u_forward;
-    Vtop_hazard_unit               TOP__top__u_hazard;
-    Vtop_pipe_reg_id2ex            TOP__top__u_id2ex;
-    Vtop_pipe_reg_if2id            TOP__top__u_if2id;
-    Vtop_pipe_reg_mem2wb           TOP__top__u_mem2wb;
-    Vtop_memory                    TOP__top__u_memory;
-    Vtop_pc_counter                TOP__top__u_pc_counter;
-    Vtop_reg_file                  TOP__top__u_reg_file;
-    Vtop_writeback                 TOP__top__u_writeback;
+    Vtop_core                      TOP__top__u_core;
+    Vtop_csr_file                  TOP__top__u_core__u_csr_file;
+    Vtop_decode                    TOP__top__u_core__u_decode;
+    Vtop_pipe_reg_ex2mem           TOP__top__u_core__u_ex2mem;
+    Vtop_execute                   TOP__top__u_core__u_execute;
+    Vtop_fetch                     TOP__top__u_core__u_fetch;
+    Vtop_forward_unit              TOP__top__u_core__u_forward;
+    Vtop_hazard_unit               TOP__top__u_core__u_hazard;
+    Vtop_pipe_reg_id2ex            TOP__top__u_core__u_id2ex;
+    Vtop_pipe_reg_if2id            TOP__top__u_core__u_if2id;
+    Vtop_pipe_reg_mem2wb           TOP__top__u_core__u_mem2wb;
+    Vtop_memory                    TOP__top__u_core__u_memory;
+    Vtop_pc_counter                TOP__top__u_core__u_pc_counter;
+    Vtop_reg_file                  TOP__top__u_core__u_reg_file;
+    Vtop_writeback                 TOP__top__u_core__u_writeback;
 
     // CONSTRUCTORS
     Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* modelp);

@@ -8,10 +8,10 @@
 
 void Vtop___024unit____Vdpiimwrap_paddr_read_TOP____024unit(IData/*31:0*/ addr, IData/*31:0*/ &paddr_read__Vfuncrtn);
 
-VL_ATTR_COLD void Vtop_memory___stl_sequent__TOP__top__u_memory__0(Vtop_memory* vlSelf) {
+VL_ATTR_COLD void Vtop_memory___stl_sequent__TOP__top__u_core__u_memory__0(Vtop_memory* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_memory___stl_sequent__TOP__top__u_memory__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_memory___stl_sequent__TOP__top__u_core__u_memory__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__rdata_raw = 0U;

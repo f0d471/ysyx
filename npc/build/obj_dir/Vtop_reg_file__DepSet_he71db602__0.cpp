@@ -5,10 +5,10 @@
 #include "Vtop__pch.h"
 #include "Vtop_reg_file.h"
 
-VL_INLINE_OPT void Vtop_reg_file___nba_sequent__TOP__top__u_reg_file__0(Vtop_reg_file* vlSelf) {
+VL_INLINE_OPT void Vtop_reg_file___nba_sequent__TOP__top__u_core__u_reg_file__0(Vtop_reg_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_reg_file___nba_sequent__TOP__top__u_reg_file__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_reg_file___nba_sequent__TOP__top__u_core__u_reg_file__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__VdlySet__rf__v0 = 0U;
@@ -123,8 +123,6 @@ VL_INLINE_OPT void Vtop_reg_file___nba_sequent__TOP__top__u_reg_file__0(Vtop_reg
     if (vlSelfRef.__VdlySet__rf__v16) {
         vlSelfRef.__PVT__rf[0xfU] = 0U;
     }
-    vlSelfRef.__PVT__debug_x10 = vlSelfRef.__PVT__rf
-        [0xaU];
     vlSelfRef.__PVT__regs[0U] = vlSelfRef.__PVT__rf
         [0U];
     vlSelfRef.__PVT__regs[1U] = vlSelfRef.__PVT__rf
@@ -159,10 +157,10 @@ VL_INLINE_OPT void Vtop_reg_file___nba_sequent__TOP__top__u_reg_file__0(Vtop_reg
         [0xfU];
 }
 
-VL_INLINE_OPT void Vtop_reg_file___nba_comb__TOP__top__u_reg_file__0(Vtop_reg_file* vlSelf) {
+VL_INLINE_OPT void Vtop_reg_file___nba_comb__TOP__top__u_core__u_reg_file__0(Vtop_reg_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_reg_file___nba_comb__TOP__top__u_reg_file__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_reg_file___nba_comb__TOP__top__u_core__u_reg_file__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__rs1_data = (((0U == (IData)(vlSelfRef.__PVT__rs1_addr)) 

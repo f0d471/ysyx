@@ -5,10 +5,10 @@
 #include "Vtop__pch.h"
 #include "Vtop_decode.h"
 
-VL_INLINE_OPT void Vtop_decode___nba_sequent__TOP__top__u_decode__0(Vtop_decode* vlSelf) {
+VL_INLINE_OPT void Vtop_decode___nba_sequent__TOP__top__u_core__u_decode__0(Vtop_decode* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_decode___nba_sequent__TOP__top__u_decode__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_decode___nba_sequent__TOP__top__u_core__u_decode__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__rd = (0x1fU & VL_SEL_IIII(32, vlSelfRef.__PVT__instr_in, 7U, 5U));

@@ -165,49 +165,59 @@ void cpu_exec(uint64_t n) {
     uint64_t executed = 0;
 
     while (!Verilated::gotFinish() && executed < n) { 
-        // 获取执行前的 PC 和指令
-        uint32_t current_pc = top->pc;
-        uint32_t current_inst = top->instr;
-            
-        // --- ITRACE ---
-        #ifdef CONFIG_ITRACE
-          log_itrace(); 
-        #endif
 
         single_cycle(); 
 
-        // 获取执行后的目标 PC (dnpc)
-        uint32_t next_pc = top->pc;
+        if (top->debug_wb_have) {
+            uint32_t cpc   = top->debug_wb_pc;
+            uint32_t cinst = top->debug_wb_instr;
 
-        // --- FTRACE ---
-        #ifdef CONFIG_FTRACE
-          do_ftrace(current_pc, next_pc, current_inst);
-        #endif
+            #ifdef CONFIG_ITRACE
+            {
+                char asm_buf[128];
+                disassemble(asm_buf, sizeof(asm_buf), cpc, 
+                           (uint8_t *)&cinst, 4);
+                TRACE_LOG("[itrace] 0x%08x: 0x%08x  %s\n", 
+                         cpc, cinst, asm_buf);
+            }
+            #endif
 
-        // --- DIFFTEST ---
-        #ifdef CONFIG_DIFFTEST
-          if (difftest_skip) {
-              // 如果访问了外设，不让 NEMU 执行，而是直接把 NPC 的当前状态强塞给 NEMU
-              DiffContext ctx;
-              for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
-              ctx.pc = next_pc; 
-              difftest_regcpy(&ctx, 1); // 1 表示方向：从 NPC 拷贝给 NEMU
-              difftest_skip = false;    // 标志位清零
-          } else {
-              difftest_step();          // 正常指令，让 NEMU 走一步并检查
-          }
-        #endif
+            #ifdef CONFIG_FTRACE
+            {
+                static uint32_t last_pc = 0, last_inst = 0;
+                static bool has_last = false;
+                if (has_last) {
+                    do_ftrace(last_pc, cpc, last_inst);
+                }
+                last_pc = cpc;
+                last_inst = cinst;
+                has_last = true;
+            }
+            #endif
 
-        executed++;
+            #ifdef CONFIG_DIFFTEST
+              if (difftest_skip) {
+                  DiffContext ctx;
+                  for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
+                  ctx.pc = top->pc;
+                  difftest_regcpy(&ctx, 1);
+                  difftest_skip = false;
+              } else {
+                  difftest_step(cpc);
+              }
+            #endif
+
+            executed++;
         }
 
-        printf("PC = 08%08X",top->pc);
+        if (npc_state != NPC_RUNNING) break;
+    }
 
-        if (Verilated::gotFinish()) {
-            npc_state = NPC_END;
-        } 
-        else if (npc_state == NPC_RUNNING) {
-            npc_state = NPC_STOP; 
+    if (Verilated::gotFinish()) {
+        npc_state = NPC_END;
+    } 
+    else if (npc_state == NPC_RUNNING) {
+        npc_state = NPC_STOP; 
     }
 }
 

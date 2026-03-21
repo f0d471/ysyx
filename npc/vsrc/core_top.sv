@@ -4,7 +4,7 @@ import "DPI-C" function void trap(input int code, input int pc);
 import "DPI-C" function int paddr_read(input int addr);
 import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
 
-module top #(
+module core #(
     parameter AW = 32,
     parameter DW = 32
 )(
@@ -13,7 +13,15 @@ module top #(
     
     output logic [AW-1:0] pc,
     output logic [DW-1:0] instr,
-    output logic [DW-1:0] regs [15:0]
+    output logic [DW-1:0] regs [15:0],
+ 
+    // ★ Debug / Commit 信号（供 sim_top 传给 C++ 做 trace/difftest）
+    output logic          debug_wb_have,    // WB 级有有效指令提交
+    output logic [31:0]   debug_wb_pc,      // 提交指令的 PC
+    output logic [31:0]   debug_wb_instr,   // 提交指令本体
+    output logic          debug_wb_ena,     // 寄存器写使能
+    output logic [4:0]    debug_wb_addr,    // 写回寄存器号
+    output logic [31:0]   debug_wb_data     // 写回数据
 );
 
 //  握手通道信号
@@ -322,6 +330,8 @@ execute #(
     .trap_mepc       (trap_mepc)
 );
 
+assign ex_mem_up.pc         = id_ex_dn.pc;       // ★ 新增
+assign ex_mem_up.instr      = id_ex_dn.instr;    // ★ 新增
 assign ex_mem_up.alu_result = ex_alu_result;
 assign ex_mem_up.rs2_data   = id_ex_dn.rs2_data; // store 数据（已前递）
 assign ex_mem_up.rd_addr    = id_ex_dn.rd_addr;
@@ -365,6 +375,8 @@ memory #(
     .mem_rdata_out(mem_rdata)
 );
 
+assign mem_wb_up.pc         = ex_mem_dn.pc;       // ★ 新增
+assign mem_wb_up.instr      = ex_mem_dn.instr;    // ★ 新增
 assign mem_wb_up.alu_result = ex_mem_dn.alu_result;
 assign mem_wb_up.mem_rdata  = mem_rdata;
 assign mem_wb_up.rd_addr    = ex_mem_dn.rd_addr;
@@ -406,6 +418,12 @@ writeback #(
     .wb_data      (wb_wr_data)  // ← forward_unit 的 MEM/WB 前递数据源
 );
 
+assign debug_wb_have  = mem2wb_dn_valid;      // WB 级有有效指令
+assign debug_wb_pc    = mem_wb_dn.pc;
+assign debug_wb_instr = mem_wb_dn.instr;
+assign debug_wb_ena   = wb_wr_en;             // writeback 模块输出的写使能
+assign debug_wb_addr  = wb_wr_addr;           // writeback 模块输出的写回寄存器号
+assign debug_wb_data  = wb_wr_data;           // writeback 模块输出的写回数据
 
 // ===================================================================
 //  CSR File

@@ -5,26 +5,26 @@
 #include "Vtop__pch.h"
 #include "Vtop_pipe_reg_mem2wb.h"
 
-VL_INLINE_OPT void Vtop_pipe_reg_mem2wb___nba_sequent__TOP__top__u_mem2wb__0(Vtop_pipe_reg_mem2wb* vlSelf) {
+VL_INLINE_OPT void Vtop_pipe_reg_mem2wb___nba_sequent__TOP__top__u_core__u_mem2wb__0(Vtop_pipe_reg_mem2wb* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pipe_reg_mem2wb___nba_sequent__TOP__top__u_mem2wb__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pipe_reg_mem2wb___nba_sequent__TOP__top__u_core__u_mem2wb__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__Vdly__valid_q = vlSelfRef.__PVT__valid_q;
-    VL_ASSIGN_W(76,vlSelfRef.__Vdly__data_q, vlSelfRef.__PVT__data_q);
+    VL_ASSIGN_W(140,vlSelfRef.__Vdly__data_q, vlSelfRef.__PVT__data_q);
     if ((1U & ((~ (IData)(vlSelfRef.__PVT__rst_n)) 
                | (IData)(vlSelfRef.__PVT__flush)))) {
         vlSelfRef.__Vdly__valid_q = 0U;
-        VL_CONST_W_1X(76,vlSelfRef.__Vdly__data_q,0x00000000);
+        VL_CONST_W_1X(140,vlSelfRef.__Vdly__data_q,0x00000000);
     } else if (vlSelfRef.__PVT__up_ready) {
         vlSelfRef.__Vdly__valid_q = vlSelfRef.__PVT__up_valid;
-        VL_ASSIGN_W(76,vlSelfRef.__Vdly__data_q, vlSelfRef.__PVT__up_data);
+        VL_ASSIGN_W(140,vlSelfRef.__Vdly__data_q, vlSelfRef.__PVT__up_data);
     }
     vlSelfRef.__PVT__valid_q = vlSelfRef.__Vdly__valid_q;
-    VL_ASSIGN_W(76,vlSelfRef.__PVT__data_q, vlSelfRef.__Vdly__data_q);
+    VL_ASSIGN_W(140,vlSelfRef.__PVT__data_q, vlSelfRef.__Vdly__data_q);
     vlSelfRef.__PVT__dn_valid = vlSelfRef.__PVT__valid_q;
     vlSelfRef.__PVT__up_ready = (1U & ((IData)(vlSelfRef.__PVT__dn_ready) 
                                        | (~ (IData)(vlSelfRef.__PVT__valid_q))));
-    VL_ASSIGN_W(76,vlSelfRef.__PVT__dn_data, vlSelfRef.__PVT__data_q);
+    VL_ASSIGN_W(140,vlSelfRef.__PVT__dn_data, vlSelfRef.__PVT__data_q);
 }

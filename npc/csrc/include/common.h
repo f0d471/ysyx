@@ -73,8 +73,11 @@ void difftest_init(const char *so_file);
 void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
 void difftest_regcpy(void *dut, int direction);
 void difftest_skip_ref();
-void difftest_step();
+void difftest_step(uint32_t commit_pc);
 #endif
+
+
+void TRACE_LOG(const char *fmt, ...);
 
 #ifdef CONFIG_ITRACE
 extern "C" void init_disasm();

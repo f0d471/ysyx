@@ -5,10 +5,10 @@
 #include "Vtop__pch.h"
 #include "Vtop_execute.h"
 
-VL_INLINE_OPT void Vtop_execute___nba_comb__TOP__top__u_execute__0(Vtop_execute* vlSelf) {
+VL_INLINE_OPT void Vtop_execute___nba_comb__TOP__top__u_core__u_execute__0(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___nba_comb__TOP__top__u_execute__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___nba_comb__TOP__top__u_core__u_execute__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__jump_flag_out = 0U;
@@ -35,10 +35,10 @@ VL_INLINE_OPT void Vtop_execute___nba_comb__TOP__top__u_execute__0(Vtop_execute*
     }
 }
 
-VL_INLINE_OPT void Vtop_execute___nba_comb__TOP__top__u_execute__1(Vtop_execute* vlSelf) {
+VL_INLINE_OPT void Vtop_execute___nba_comb__TOP__top__u_core__u_execute__1(Vtop_execute* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_execute___nba_comb__TOP__top__u_execute__1\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_execute___nba_comb__TOP__top__u_core__u_execute__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__csr_wdata = ((IData)(vlSelfRef.__PVT__inst_csrrw)

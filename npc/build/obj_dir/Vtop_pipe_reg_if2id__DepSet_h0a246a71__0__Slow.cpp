@@ -5,20 +5,20 @@
 #include "Vtop__pch.h"
 #include "Vtop_pipe_reg_if2id.h"
 
-VL_ATTR_COLD void Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_if2id__0(Vtop_pipe_reg_if2id* vlSelf) {
+VL_ATTR_COLD void Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_core__u_if2id__0(Vtop_pipe_reg_if2id* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_if2id__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_core__u_if2id__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__dn_valid = vlSelfRef.__PVT__valid_q;
     vlSelfRef.__PVT__dn_data = vlSelfRef.__PVT__data_q;
 }
 
-VL_ATTR_COLD void Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_if2id__1(Vtop_pipe_reg_if2id* vlSelf) {
+VL_ATTR_COLD void Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_core__u_if2id__1(Vtop_pipe_reg_if2id* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_if2id__1\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_core__u_if2id__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__up_ready = (1U & ((IData)(vlSelfRef.__PVT__dn_ready) 
@@ -28,7 +28,7 @@ VL_ATTR_COLD void Vtop_pipe_reg_if2id___stl_sequent__TOP__top__u_if2id__1(Vtop_p
 VL_ATTR_COLD void Vtop_pipe_reg_if2id___ctor_var_reset(Vtop_pipe_reg_if2id* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_pipe_reg_if2id___ctor_var_reset\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_pipe_reg_if2id___ctor_var_reset\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelf->__PVT__clk = 0;

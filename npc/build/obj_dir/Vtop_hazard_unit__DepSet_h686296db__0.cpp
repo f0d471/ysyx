@@ -5,19 +5,19 @@
 #include "Vtop__pch.h"
 #include "Vtop_hazard_unit.h"
 
-VL_INLINE_OPT void Vtop_hazard_unit___nba_sequent__TOP__top__u_hazard__0(Vtop_hazard_unit* vlSelf) {
+VL_INLINE_OPT void Vtop_hazard_unit___nba_sequent__TOP__top__u_core__u_hazard__0(Vtop_hazard_unit* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_hazard_unit___nba_sequent__TOP__top__u_hazard__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_hazard_unit___nba_sequent__TOP__top__u_core__u_hazard__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__ex_is_load = (3U == (IData)(vlSelfRef.__PVT__ex_opcode));
 }
 
-VL_INLINE_OPT void Vtop_hazard_unit___nba_comb__TOP__top__u_hazard__0(Vtop_hazard_unit* vlSelf) {
+VL_INLINE_OPT void Vtop_hazard_unit___nba_comb__TOP__top__u_core__u_hazard__0(Vtop_hazard_unit* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_hazard_unit___nba_comb__TOP__top__u_hazard__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_hazard_unit___nba_comb__TOP__top__u_core__u_hazard__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__rs1_hazard = ((0U != (IData)(vlSelfRef.__PVT__ex_rd_addr)) 

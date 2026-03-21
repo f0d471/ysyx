@@ -8,7 +8,7 @@
 VL_ATTR_COLD void Vtop_memory___ctor_var_reset(Vtop_memory* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_memory___ctor_var_reset\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_memory___ctor_var_reset\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelf->__PVT__clk = 0;

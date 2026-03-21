@@ -41,7 +41,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_reg_file final : public VerilatedModule 
     VL_OUT(__PVT__rs1_data,31,0);
     VL_OUT(__PVT__rs2_data,31,0);
     VL_IN(__PVT__wr_data,31,0);
-    VL_OUT(__PVT__debug_x10,31,0);
     IData/*31:0*/ __PVT__unnamedblk1__DOT__i;
     IData/*31:0*/ __VdlyVal__rf__v0;
     VL_OUT(__PVT__regs[16],31,0);

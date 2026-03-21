@@ -5,14 +5,12 @@
 #include "Vtop__pch.h"
 #include "Vtop_reg_file.h"
 
-VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__0(Vtop_reg_file* vlSelf) {
+VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__0(Vtop_reg_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__0\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__debug_x10 = vlSelfRef.__PVT__rf
-        [0xaU];
     vlSelfRef.__PVT__regs[0U] = vlSelfRef.__PVT__rf
         [0U];
     vlSelfRef.__PVT__regs[1U] = vlSelfRef.__PVT__rf
@@ -47,10 +45,10 @@ VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__0(Vtop_reg_
         [0xfU];
 }
 
-VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__1(Vtop_reg_file* vlSelf) {
+VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__1(Vtop_reg_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__1\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__rs1_data = (((0U == (IData)(vlSelfRef.__PVT__rs1_addr)) 
@@ -66,7 +64,7 @@ VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_reg_file__1(Vtop_reg_
 VL_ATTR_COLD void Vtop_reg_file___ctor_var_reset(Vtop_reg_file* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_reg_file___ctor_var_reset\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_reg_file___ctor_var_reset\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelf->__PVT__clk = 0;
@@ -78,7 +76,6 @@ VL_ATTR_COLD void Vtop_reg_file___ctor_var_reset(Vtop_reg_file* vlSelf) {
     vlSelf->__PVT__wr_en = 0;
     vlSelf->__PVT__wr_addr = 0;
     vlSelf->__PVT__wr_data = 0;
-    vlSelf->__PVT__debug_x10 = 0;
     for (int __Vi0 = 0; __Vi0 < 16; ++__Vi0) {
         vlSelf->__PVT__regs[__Vi0] = 0;
     }
