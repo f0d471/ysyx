@@ -14,10 +14,10 @@ class Vtop_forward_unit;
 class Vtop_hazard_unit;
 class Vtop_memory;
 class Vtop_pc_counter;
-class Vtop_pipe_reg_ex2mem;
-class Vtop_pipe_reg_id2ex;
-class Vtop_pipe_reg_if2id;
-class Vtop_pipe_reg_mem2wb;
+class Vtop_pipe_reg__D107;
+class Vtop_pipe_reg__D40;
+class Vtop_pipe_reg__D8c;
+class Vtop_pipe_reg__D8f;
 class Vtop_reg_file;
 class Vtop_writeback;
 
@@ -29,16 +29,16 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
     // CELLS
     Vtop_pc_counter* __PVT__u_pc_counter;
     Vtop_fetch* __PVT__u_fetch;
-    Vtop_pipe_reg_if2id* __PVT__u_if2id;
+    Vtop_pipe_reg__D40* __PVT__u_if2id;
     Vtop_decode* __PVT__u_decode;
     Vtop_reg_file* __PVT__u_reg_file;
     Vtop_hazard_unit* __PVT__u_hazard;
     Vtop_forward_unit* __PVT__u_forward;
-    Vtop_pipe_reg_id2ex* __PVT__u_id2ex;
+    Vtop_pipe_reg__D107* __PVT__u_id2ex;
     Vtop_execute* __PVT__u_execute;
-    Vtop_pipe_reg_ex2mem* __PVT__u_ex2mem;
+    Vtop_pipe_reg__D8f* __PVT__u_ex2mem;
     Vtop_memory* __PVT__u_memory;
-    Vtop_pipe_reg_mem2wb* __PVT__u_mem2wb;
+    Vtop_pipe_reg__D8c* __PVT__u_mem2wb;
     Vtop_writeback* __PVT__u_writeback;
     Vtop_csr_file* __PVT__u_csr_file;
 
@@ -133,13 +133,19 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         IData/*31:0*/ __Vcellinp__u_pc_counter__jump_addr;
         IData/*31:0*/ __Vcellinp__u_decode__instr_in;
         IData/*31:0*/ __Vcellinp__u_decode__instr_addr_in;
+        VlWide<9>/*262:0*/ __Vcellout__u_id2ex__dn_data;
+        VlWide<9>/*262:0*/ __Vcellinp__u_id2ex__up_data;
         IData/*31:0*/ __Vcellinp__u_execute__imm_in;
         IData/*31:0*/ __Vcellinp__u_execute__rs1_data_in;
         IData/*31:0*/ __Vcellinp__u_execute__op2_in;
         IData/*31:0*/ __Vcellinp__u_execute__op1_in;
         IData/*31:0*/ __Vcellinp__u_execute__pc_in;
+        VlWide<5>/*142:0*/ __Vcellout__u_ex2mem__dn_data;
+        VlWide<5>/*142:0*/ __Vcellinp__u_ex2mem__up_data;
         IData/*31:0*/ __Vcellinp__u_memory__rs2_data_in;
         IData/*31:0*/ __Vcellinp__u_memory__alu_result_in;
+        VlWide<5>/*139:0*/ __Vcellout__u_mem2wb__dn_data;
+        VlWide<5>/*139:0*/ __Vcellinp__u_mem2wb__up_data;
         IData/*31:0*/ __Vcellinp__u_writeback__mem_rdata_in;
         IData/*31:0*/ __Vcellinp__u_writeback__alu_result_in;
         QData/*63:0*/ __PVT__if_id_up;
@@ -150,6 +156,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         VlWide<5>/*142:0*/ __PVT__ex_mem_dn;
         VlWide<5>/*139:0*/ __PVT__mem_wb_up;
         VlWide<5>/*139:0*/ __PVT__mem_wb_dn;
+        QData/*63:0*/ __Vcellout__u_if2id__dn_data;
+        QData/*63:0*/ __Vcellinp__u_if2id__up_data;
         VL_OUT(__PVT__regs[16],31,0);
     };
 

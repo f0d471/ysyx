@@ -29,21 +29,21 @@ VM_CLASSES_FAST += \
 	Vtop_top__DepSet_h0f993197__0 \
 	Vtop___024unit__DepSet_hab9af801__0 \
 	Vtop_core__DepSet_h7dcb518f__0 \
-	Vtop_pipe_reg_if2id__DepSet_h0a246a71__0 \
 	Vtop_memory__DepSet_hf5a2896a__0 \
 	Vtop_writeback__DepSet_h9c0cf8ce__0 \
 	Vtop_csr_file__DepSet_hf0fdf7be__0 \
 	Vtop_reg_file__DepSet_he71db602__0 \
-	Vtop_pipe_reg_mem2wb__DepSet_hb290ece2__0 \
 	Vtop_forward_unit__DepSet_h89dad57c__0 \
 	Vtop_fetch__DepSet_hece00146__0 \
 	Vtop_decode__DepSet_h626b6706__0 \
 	Vtop_hazard_unit__DepSet_h686296db__0 \
 	Vtop_execute__DepSet_h2e3646d3__0 \
 	Vtop_execute__DepSet_h827c1c3e__0 \
-	Vtop_pipe_reg_id2ex__DepSet_h8efae207__0 \
-	Vtop_pipe_reg_ex2mem__DepSet_hd1c03988__0 \
 	Vtop_pc_counter__DepSet_h952d53ec__0 \
+	Vtop_pipe_reg__D40__DepSet_h82352169__0 \
+	Vtop_pipe_reg__D107__DepSet_h9ad27b04__0 \
+	Vtop_pipe_reg__D8f__DepSet_hb88a48a3__0 \
+	Vtop_pipe_reg__D8c__DepSet_h5a062a67__0 \
 
 # Generated module classes, non-fast-path, compile with low/medium optimization
 VM_CLASSES_SLOW += \
@@ -59,8 +59,6 @@ VM_CLASSES_SLOW += \
 	Vtop_core__Slow \
 	Vtop_core__DepSet_h7dcb518f__0__Slow \
 	Vtop_core__DepSet_hb5473172__0__Slow \
-	Vtop_pipe_reg_if2id__Slow \
-	Vtop_pipe_reg_if2id__DepSet_h0a246a71__0__Slow \
 	Vtop_memory__Slow \
 	Vtop_memory__DepSet_hf5a2896a__0__Slow \
 	Vtop_memory__DepSet_h3cefd995__0__Slow \
@@ -70,8 +68,6 @@ VM_CLASSES_SLOW += \
 	Vtop_csr_file__DepSet_hf0fdf7be__0__Slow \
 	Vtop_reg_file__Slow \
 	Vtop_reg_file__DepSet_he71db602__0__Slow \
-	Vtop_pipe_reg_mem2wb__Slow \
-	Vtop_pipe_reg_mem2wb__DepSet_hb290ece2__0__Slow \
 	Vtop_forward_unit__Slow \
 	Vtop_forward_unit__DepSet_h89dad57c__0__Slow \
 	Vtop_fetch__Slow \
@@ -84,12 +80,16 @@ VM_CLASSES_SLOW += \
 	Vtop_execute__Slow \
 	Vtop_execute__DepSet_h2e3646d3__0__Slow \
 	Vtop_execute__DepSet_h827c1c3e__0__Slow \
-	Vtop_pipe_reg_id2ex__Slow \
-	Vtop_pipe_reg_id2ex__DepSet_h8efae207__0__Slow \
-	Vtop_pipe_reg_ex2mem__Slow \
-	Vtop_pipe_reg_ex2mem__DepSet_hd1c03988__0__Slow \
 	Vtop_pc_counter__Slow \
 	Vtop_pc_counter__DepSet_h952d53ec__0__Slow \
+	Vtop_pipe_reg__D40__Slow \
+	Vtop_pipe_reg__D40__DepSet_h82352169__0__Slow \
+	Vtop_pipe_reg__D107__Slow \
+	Vtop_pipe_reg__D107__DepSet_h9ad27b04__0__Slow \
+	Vtop_pipe_reg__D8f__Slow \
+	Vtop_pipe_reg__D8f__DepSet_hb88a48a3__0__Slow \
+	Vtop_pipe_reg__D8c__Slow \
+	Vtop_pipe_reg__D8c__DepSet_h5a062a67__0__Slow \
 
 # Generated support classes, fast-path, compile with highest optimization
 VM_SUPPORT_FAST += \

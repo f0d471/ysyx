@@ -83,6 +83,8 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__PVT__trap_mepc = 0;
     vlSelf->__Vcellinp__u_pc_counter__jump_addr = 0;
     vlSelf->__Vcellinp__u_pc_counter__jump_en = 0;
+    vlSelf->__Vcellout__u_if2id__dn_data = 0;
+    vlSelf->__Vcellinp__u_if2id__up_data = 0;
     vlSelf->__Vcellinp__u_decode__instr_in = 0;
     vlSelf->__Vcellinp__u_decode__instr_addr_in = 0;
     vlSelf->__Vcellinp__u_hazard__ex_rd_addr = 0;
@@ -93,6 +95,8 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__Vcellinp__u_forward__mem_rd_addr = 0;
     vlSelf->__Vcellinp__u_forward__ex_stage_opcode = 0;
     vlSelf->__Vcellinp__u_forward__ex_stage_rd_addr = 0;
+    VL_ZERO_RESET_W(263, vlSelf->__Vcellout__u_id2ex__dn_data);
+    VL_ZERO_RESET_W(263, vlSelf->__Vcellinp__u_id2ex__up_data);
     vlSelf->__Vcellinp__u_id2ex__flush = 0;
     vlSelf->__Vcellinp__u_execute__inst_mret = 0;
     vlSelf->__Vcellinp__u_execute__inst_ecall = 0;
@@ -108,10 +112,14 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__Vcellinp__u_execute__op2_in = 0;
     vlSelf->__Vcellinp__u_execute__op1_in = 0;
     vlSelf->__Vcellinp__u_execute__pc_in = 0;
+    VL_ZERO_RESET_W(143, vlSelf->__Vcellout__u_ex2mem__dn_data);
+    VL_ZERO_RESET_W(143, vlSelf->__Vcellinp__u_ex2mem__up_data);
     vlSelf->__Vcellinp__u_memory__funct3_in = 0;
     vlSelf->__Vcellinp__u_memory__opcode_in = 0;
     vlSelf->__Vcellinp__u_memory__rs2_data_in = 0;
     vlSelf->__Vcellinp__u_memory__alu_result_in = 0;
+    VL_ZERO_RESET_W(140, vlSelf->__Vcellout__u_mem2wb__dn_data);
+    VL_ZERO_RESET_W(140, vlSelf->__Vcellinp__u_mem2wb__up_data);
     vlSelf->__Vcellinp__u_writeback__rd_addr_in = 0;
     vlSelf->__Vcellinp__u_writeback__opcode_in = 0;
     vlSelf->__Vcellinp__u_writeback__mem_rdata_in = 0;

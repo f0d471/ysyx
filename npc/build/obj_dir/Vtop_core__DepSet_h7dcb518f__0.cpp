@@ -56,8 +56,9 @@ VL_INLINE_OPT void Vtop_core___ico_sequent__TOP__top__u_core__1(Vtop_core* vlSel
     // Body
     vlSelfRef.__PVT__instr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__instr_out;
     vlSelfRef.__PVT__if_id_up = VL_CONCAT_QII(64,32,32, vlSelfRef.__PVT__pc, vlSelfRef.__PVT__instr);
+    vlSelfRef.__Vcellinp__u_if2id__up_data = vlSelfRef.__PVT__if_id_up;
     vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_data 
-        = vlSelfRef.__PVT__if_id_up;
+        = vlSelfRef.__Vcellinp__u_if2id__up_data;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__0(Vtop_core* vlSelf) {
@@ -79,6 +80,7 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__1(Vtop_core* vlSel
     // Body
     vlSelfRef.__PVT__instr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__instr_out;
     vlSelfRef.__PVT__if_id_up = VL_CONCAT_QII(64,32,32, vlSelfRef.__PVT__pc, vlSelfRef.__PVT__instr);
+    vlSelfRef.__Vcellinp__u_if2id__up_data = vlSelfRef.__PVT__if_id_up;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__2(Vtop_core* vlSelf) {
@@ -140,11 +142,75 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__4(Vtop_core* vlSel
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__4\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__mem2wb_dn_valid = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_valid;
+    vlSelfRef.__PVT__mem2wb_up_ready = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_ready;
+    VL_ASSIGN_W(140,vlSelfRef.__Vcellout__u_mem2wb__dn_data, vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_data);
+    vlSelfRef.__PVT__debug_wb_have = vlSelfRef.__PVT__mem2wb_dn_valid;
+    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__dn_ready 
+        = vlSelfRef.__PVT__mem2wb_up_ready;
+    VL_ASSIGN_W(140,vlSelfRef.__PVT__mem_wb_dn, vlSelfRef.__Vcellout__u_mem2wb__dn_data);
+    vlSelfRef.__PVT__debug_wb_pc = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x6cU, 0x20U);
+    vlSelfRef.__PVT__debug_wb_instr = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x4cU, 0x20U);
+    vlSelfRef.__Vcellinp__u_writeback__rd_addr_in = 
+        (0x1fU & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 7U, 5U));
+    vlSelfRef.__Vcellinp__u_writeback__opcode_in = 
+        (0x7fU & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0U, 7U));
+    vlSelfRef.__Vcellinp__u_writeback__mem_rdata_in 
+        = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0xcU, 0x20U);
+    vlSelfRef.__Vcellinp__u_writeback__alu_result_in 
+        = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x2cU, 0x20U);
+    vlSelfRef.__Vcellinp__u_forward__wb_opcode = (0x7fU 
+                                                  & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0U, 7U));
+    vlSelfRef.__Vcellinp__u_forward__wb_rd_addr = (0x1fU 
+                                                   & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 7U, 5U));
+    vlSymsp->TOP__top__u_core__u_writeback.__PVT__rd_addr_in 
+        = vlSelfRef.__Vcellinp__u_writeback__rd_addr_in;
+    vlSymsp->TOP__top__u_core__u_writeback.__PVT__opcode_in 
+        = vlSelfRef.__Vcellinp__u_writeback__opcode_in;
+    vlSymsp->TOP__top__u_core__u_writeback.__PVT__mem_rdata_in 
+        = vlSelfRef.__Vcellinp__u_writeback__mem_rdata_in;
+    vlSymsp->TOP__top__u_core__u_writeback.__PVT__alu_result_in 
+        = vlSelfRef.__Vcellinp__u_writeback__alu_result_in;
+    vlSymsp->TOP__top__u_core__u_forward.__PVT__wb_opcode 
+        = vlSelfRef.__Vcellinp__u_forward__wb_opcode;
+    vlSymsp->TOP__top__u_core__u_forward.__PVT__wb_rd_addr 
+        = vlSelfRef.__Vcellinp__u_forward__wb_rd_addr;
+}
+
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__5(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__5\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__wb_wr_addr = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_addr;
+    vlSelfRef.__PVT__wb_wr_en = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_en;
+    vlSelfRef.__PVT__wb_wr_data = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_data;
+    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_addr 
+        = vlSelfRef.__PVT__wb_wr_addr;
+    vlSelfRef.__PVT__debug_wb_addr = vlSelfRef.__PVT__wb_wr_addr;
+    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_en 
+        = vlSelfRef.__PVT__wb_wr_en;
+    vlSelfRef.__PVT__debug_wb_ena = vlSelfRef.__PVT__wb_wr_en;
+    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_data 
+        = vlSelfRef.__PVT__wb_wr_data;
+    vlSelfRef.__PVT__debug_wb_data = vlSelfRef.__PVT__wb_wr_data;
+}
+
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__6(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__6\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
     VlWide<3>/*95:0*/ __Vtemp_1;
     // Body
     vlSelfRef.__PVT__ex2mem_dn_valid = vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__dn_valid;
-    VL_ASSIGN_W(143,vlSelfRef.__PVT__ex_mem_dn, vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__dn_data);
+    VL_ASSIGN_W(143,vlSelfRef.__Vcellout__u_ex2mem__dn_data, vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__dn_data);
+    vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_valid 
+        = vlSelfRef.__PVT__ex2mem_dn_valid;
+    VL_ASSIGN_W(143,vlSelfRef.__PVT__ex_mem_dn, vlSelfRef.__Vcellout__u_ex2mem__dn_data);
     vlSelfRef.__Vcellinp__u_memory__rs2_data_in = VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0xfU, 0x20U);
     VL_CONCAT_WQI(96,64,32, __Vtemp_1, VL_CONCAT_QII(64,32,32, 
                                                      VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0x6fU, 0x20U), 
@@ -175,10 +241,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__4(Vtop_core* vlSel
         = vlSelfRef.__Vcellinp__u_forward__mem_rd_addr;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__5(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__7(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__5\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__7\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__mem_rdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__mem_rdata_out;
@@ -189,66 +255,8 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__5(Vtop_core* vlSel
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0xaU, 5U)), 
                                                 (0x7fU 
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U)))));
-}
-
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__6(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__6\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSelfRef.__PVT__mem2wb_dn_valid = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_valid;
-    vlSelfRef.__PVT__mem2wb_up_ready = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_ready;
-    VL_ASSIGN_W(140,vlSelfRef.__PVT__mem_wb_dn, vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_data);
-    vlSelfRef.__PVT__debug_wb_have = vlSelfRef.__PVT__mem2wb_dn_valid;
-    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__dn_ready 
-        = vlSelfRef.__PVT__mem2wb_up_ready;
-    vlSelfRef.__PVT__debug_wb_pc = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x6cU, 0x20U);
-    vlSelfRef.__PVT__debug_wb_instr = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x4cU, 0x20U);
-    vlSelfRef.__Vcellinp__u_writeback__rd_addr_in = 
-        (0x1fU & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 7U, 5U));
-    vlSelfRef.__Vcellinp__u_writeback__opcode_in = 
-        (0x7fU & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0U, 7U));
-    vlSelfRef.__Vcellinp__u_writeback__mem_rdata_in 
-        = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0xcU, 0x20U);
-    vlSelfRef.__Vcellinp__u_writeback__alu_result_in 
-        = VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0x2cU, 0x20U);
-    vlSelfRef.__Vcellinp__u_forward__wb_opcode = (0x7fU 
-                                                  & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 0U, 7U));
-    vlSelfRef.__Vcellinp__u_forward__wb_rd_addr = (0x1fU 
-                                                   & VL_SEL_IWII(140, vlSelfRef.__PVT__mem_wb_dn, 7U, 5U));
-    vlSymsp->TOP__top__u_core__u_writeback.__PVT__rd_addr_in 
-        = vlSelfRef.__Vcellinp__u_writeback__rd_addr_in;
-    vlSymsp->TOP__top__u_core__u_writeback.__PVT__opcode_in 
-        = vlSelfRef.__Vcellinp__u_writeback__opcode_in;
-    vlSymsp->TOP__top__u_core__u_writeback.__PVT__mem_rdata_in 
-        = vlSelfRef.__Vcellinp__u_writeback__mem_rdata_in;
-    vlSymsp->TOP__top__u_core__u_writeback.__PVT__alu_result_in 
-        = vlSelfRef.__Vcellinp__u_writeback__alu_result_in;
-    vlSymsp->TOP__top__u_core__u_forward.__PVT__wb_opcode 
-        = vlSelfRef.__Vcellinp__u_forward__wb_opcode;
-    vlSymsp->TOP__top__u_core__u_forward.__PVT__wb_rd_addr 
-        = vlSelfRef.__Vcellinp__u_forward__wb_rd_addr;
-}
-
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__7(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__7\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSelfRef.__PVT__wb_wr_addr = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_addr;
-    vlSelfRef.__PVT__wb_wr_en = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_en;
-    vlSelfRef.__PVT__wb_wr_data = vlSymsp->TOP__top__u_core__u_writeback.__PVT__wb_data;
-    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_addr 
-        = vlSelfRef.__PVT__wb_wr_addr;
-    vlSelfRef.__PVT__debug_wb_addr = vlSelfRef.__PVT__wb_wr_addr;
-    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_en 
-        = vlSelfRef.__PVT__wb_wr_en;
-    vlSelfRef.__PVT__debug_wb_ena = vlSelfRef.__PVT__wb_wr_en;
-    vlSymsp->TOP__top__u_core__u_reg_file.__PVT__wr_data 
-        = vlSelfRef.__PVT__wb_wr_data;
-    vlSelfRef.__PVT__debug_wb_data = vlSelfRef.__PVT__wb_wr_data;
+    VL_ASSIGN_W(140,vlSelfRef.__Vcellinp__u_mem2wb__up_data, vlSelfRef.__PVT__mem_wb_up);
+    VL_ASSIGN_W(140,vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_data, vlSelfRef.__Vcellinp__u_mem2wb__up_data);
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSelf) {
@@ -258,9 +266,12 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSel
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__id2ex_dn_valid = vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_valid;
-    VL_ASSIGN_W(263,vlSelfRef.__PVT__id_ex_dn, vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_data);
+    VL_ASSIGN_W(263,vlSelfRef.__Vcellout__u_id2ex__dn_data, vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_data);
     vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_valid 
         = vlSelfRef.__PVT__id2ex_dn_valid;
+    VL_ASSIGN_W(263,vlSelfRef.__PVT__id_ex_dn, vlSelfRef.__Vcellout__u_id2ex__dn_data);
+    vlSelfRef.__Vcellinp__u_execute__inst_ebreak_in 
+        = (1U & VL_BITSEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0U));
     VL_ASSIGNSEL_WQ(143,44,3U, vlSelfRef.__PVT__ex_mem_up, 
                     VL_CONCAT_QII(44,32,12, VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x11U, 0x20U), 
                                   VL_CONCAT_III(12,5,7, 
@@ -270,8 +281,6 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSel
                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x5bU, 7U)))));
     VL_ASSIGNSEL_WI(143,3,0U, vlSelfRef.__PVT__ex_mem_up, 
                     (7U & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x58U, 3U)));
-    vlSelfRef.__Vcellinp__u_execute__inst_ebreak_in 
-        = (1U & VL_BITSEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0U));
     vlSelfRef.__Vcellinp__u_hazard__ex_opcode = (0x7fU 
                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x5bU, 7U));
     vlSelfRef.__Vcellinp__u_execute__inst_mret = (1U 
@@ -370,9 +379,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__10(Vtop_core* vlSe
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__if2id_dn_valid = vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_valid;
-    vlSelfRef.__PVT__if_id_dn = vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_data;
+    vlSelfRef.__Vcellout__u_if2id__dn_data = vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_data;
     vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_valid 
         = vlSelfRef.__PVT__if2id_dn_valid;
+    vlSelfRef.__PVT__if_id_dn = vlSelfRef.__Vcellout__u_if2id__dn_data;
     vlSelfRef.__Vcellinp__u_decode__instr_addr_in = 
         VL_SEL_IQII(64, vlSelfRef.__PVT__if_id_dn, 0x20U, 0x20U);
     vlSelfRef.__Vcellinp__u_decode__instr_in = VL_SEL_IQII(64, vlSelfRef.__PVT__if_id_dn, 0U, 0x20U);
@@ -423,17 +433,6 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__11(Vtop_core* vlSe
         = vlSelfRef.__PVT__decode_rs2_addr;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__12(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__12\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_valid 
-        = vlSelfRef.__PVT__ex2mem_dn_valid;
-    VL_ASSIGN_W(140,vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_data, vlSelfRef.__PVT__mem_wb_up);
-}
-
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__0(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
@@ -476,17 +475,18 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__2(Vtop_core* vlSelf) 
                                                      VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0xe7U, 0x20U), 
                                                      VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0xc7U, 0x20U)), vlSelfRef.__PVT__ex_alu_result);
     VL_ASSIGNSEL_WW(143,96,0x2fU, vlSelfRef.__PVT__ex_mem_up, __Vtemp_1);
-    VL_ASSIGN_W(143,vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_data, vlSelfRef.__PVT__ex_mem_up);
+    VL_ASSIGN_W(143,vlSelfRef.__Vcellinp__u_ex2mem__up_data, vlSelfRef.__PVT__ex_mem_up);
+    VL_ASSIGN_W(143,vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_data, vlSelfRef.__Vcellinp__u_ex2mem__up_data);
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__13(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__12(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__13\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__12\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_data 
-        = vlSelfRef.__PVT__if_id_up;
+        = vlSelfRef.__Vcellinp__u_if2id__up_data;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__3(Vtop_core* vlSelf) {
@@ -614,7 +614,8 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__9(Vtop_core* vlSelf) 
                   VL_CONCAT_QIQ(44,5,39, (IData)(vlSelfRef.__PVT__decode_rd_addr), 
                                 VL_CONCAT_QII(39,32,7, vlSelfRef.__PVT__decode_imm, (IData)(vlSelfRef.__PVT__decode_opcode))));
     VL_ASSIGNSEL_WW(263,76,0x5bU, vlSelfRef.__PVT__id_ex_up, __Vtemp_3);
-    VL_ASSIGN_W(263,vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_data, vlSelfRef.__PVT__id_ex_up);
+    VL_ASSIGN_W(263,vlSelfRef.__Vcellinp__u_id2ex__up_data, vlSelfRef.__PVT__id_ex_up);
+    VL_ASSIGN_W(263,vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_data, vlSelfRef.__Vcellinp__u_id2ex__up_data);
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__10(Vtop_core* vlSelf) {

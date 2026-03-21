@@ -127,12 +127,12 @@ assign if_id_up.instr = instr;
 //  IF/ID 流水线寄存器
 // ===================================================================
 
-pipe_reg_if2id u_if2id (
+pipe_reg #(.DW($bits(if_id_t))) u_if2id (
     .clk      (clk),
     .rst_n    (rst_n),
     .flush    (ex_jump_flag),
-    .stall    (load_stall),    // ← 替换~load_stall，通过stall端口实现保持（hold）
-    .up_valid (1'b1),          // ← 恒为1（stall由stall端口处理）
+    .stall    (load_stall),
+    .up_valid (1'b1),
     .up_ready (if2id_up_ready),
     .up_data  (if_id_up),
     .dn_valid (if2id_dn_valid),
@@ -277,15 +277,14 @@ assign id_ex_up.inst_ebreak = decode_inst_ebreak;
 //  load_stall 时 flush，插入气泡（NOP），不让错误数据进 EX
 // ===================================================================
 
-pipe_reg_id2ex u_id2ex (
+pipe_reg #(.DW($bits(id_ex_t))) u_id2ex (
     .clk      (clk),
     .rst_n    (rst_n),
     .flush    (ex_jump_flag | load_stall),
-
+    .stall    (1'b0),
     .up_valid (if2id_dn_valid),
     .up_ready (id2ex_up_ready),
     .up_data  (id_ex_up),
-
     .dn_valid (id2ex_dn_valid),
     .dn_ready (ex2mem_up_ready),
     .dn_data  (id_ex_dn)
@@ -343,20 +342,18 @@ assign ex_mem_up.funct3     = id_ex_dn.funct3;
 //  EX/MEM 流水线寄存器
 // ===================================================================
 
-pipe_reg_ex2mem u_ex2mem (
+pipe_reg #(.DW($bits(ex_mem_t))) u_ex2mem (
     .clk      (clk),
     .rst_n    (rst_n),
     .flush    (1'b0),
-
+    .stall    (1'b0),
     .up_valid (id2ex_dn_valid),
     .up_ready (ex2mem_up_ready),
     .up_data  (ex_mem_up),
-
     .dn_valid (ex2mem_dn_valid),
     .dn_ready (mem2wb_up_ready),
     .dn_data  (ex_mem_dn)
 );
-
 
 // ===================================================================
 //  Stage 4 : Memory (MEM)
@@ -387,17 +384,16 @@ assign mem_wb_up.opcode     = ex_mem_dn.opcode;
 //  MEM/WB 流水线寄存器
 // ===================================================================
 
-pipe_reg_mem2wb u_mem2wb (
+pipe_reg #(.DW($bits(mem_wb_t))) u_mem2wb (
     .clk      (clk),
     .rst_n    (rst_n),
     .flush    (1'b0),
-
+    .stall    (1'b0),
     .up_valid (ex2mem_dn_valid),
     .up_ready (mem2wb_up_ready),
     .up_data  (mem_wb_up),
-
     .dn_valid (mem2wb_dn_valid),
-    .dn_ready (1'b1),          // WB 纯组合，永远 ready
+    .dn_ready (1'b1),
     .dn_data  (mem_wb_dn)
 );
 
