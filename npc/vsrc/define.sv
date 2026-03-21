@@ -117,6 +117,8 @@ typedef struct packed {
 
 // -------- EX → MEM 通道 --------
 typedef struct packed {
+    logic [31:0] pc;         
+    logic [31:0] instr;     
     logic [31:0] alu_result;
     logic [31:0] rs2_data;
     logic [4:0]  rd_addr;
@@ -126,6 +128,8 @@ typedef struct packed {
 
 // -------- MEM → WB 通道 --------
 typedef struct packed {
+    logic [31:0] pc;          // ★ 新增
+    logic [31:0] instr;       // ★ 新增
     logic [31:0] alu_result;
     logic [31:0] mem_rdata;
     logic [4:0]  rd_addr;

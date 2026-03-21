@@ -15,7 +15,6 @@ module reg_file #(
     input  logic [4:0]  wr_addr,    
     input  logic [31:0] wr_data,
     //for test
-    output logic [DW-1:0] debug_x10,
     output logic [DW-1:0] regs [15:0]   
 );
 
@@ -36,7 +35,6 @@ module reg_file #(
     // 读
     assign rs1_data = ((rs1_addr == 5'd0) || (rs1_addr >= 5'd16)) ? 32'b0 : rf[rs1_addr[3:0]];
     assign rs2_data = ((rs2_addr == 5'd0) || (rs2_addr >= 5'd16)) ? 32'b0 : rf[rs2_addr[3:0]];
-    assign debug_x10 = rf[10];
 
       genvar i;
     generate

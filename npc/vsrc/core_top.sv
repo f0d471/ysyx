@@ -10,9 +10,9 @@ module top #(
 )(
     input  logic          clk,
     input  logic          rst_n,
+    
     output logic [AW-1:0] pc,
     output logic [DW-1:0] instr,
-    output logic [DW-1:0] debug_x10,
     output logic [DW-1:0] regs [15:0]
 );
 
@@ -172,7 +172,6 @@ reg_file #(
     .wr_en    (wb_wr_en),
     .wr_addr  (wb_wr_addr),
     .wr_data  (wb_wr_data),
-    .debug_x10(debug_x10),
     .regs     (regs)
 );
 
