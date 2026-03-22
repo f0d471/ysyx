@@ -1,0 +1,75 @@
+# ========================
+# Editor & OS configuration
+# ========================
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+compile_commands.json
+.ccls-cache/
+.cache/
+
+# ========================
+# C/C++ build artifacts
+# ========================
+*.o
+*.a
+*.so
+*.elf
+*.bin
+*.hex
+*.img
+
+# ========================
+# Logs and Simulator Outputs
+# ========================
+*.log
+*.vcd
+*.fsdb
+*.fst
+
+# ========================
+# Cscope and CTags
+# ========================
+tags
+cscope.out
+cscope.in.out
+cscope.po.out
+
+# ========================
+# Subproject Directories
+# ========================
+# NEMU
+nemu/build/
+
+# Abstract-Machine & Kernels
+abstract-machine/build/
+am-kernels/**/build/
+
+# OS and Navy Apps
+nanos-lite/build/
+navy-apps/build/
+navy-apps/fsimg/build/
+navy-apps/fsimg/bin/
+navy-apps/fsimg/share/
+
+# NPC (Chisel/Verilator)
+npc/build/
+npc/obj_dir/
+npc/target/
+npc/project/target/
+npc/project/project/
+
+# NVBoard
+nvboard/build/
+
+# ysyxSoC
+ysyxSoC/target/
+ysyxSoC/project/target/
+ysyxSoC/rocket-chip/build/
+ysyxSoC/rocket-chip/target/
+
+# Python Cache
+__pycache__/
+*.pyc
