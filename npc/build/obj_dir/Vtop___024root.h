@@ -22,7 +22,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     VL_IN8(clk,0,0);
     VL_IN8(rst_n,0,0);
     VL_OUT8(debug_wb_have,0,0);
-    VL_OUT8(debug_wb_ena,0,0);
+    VL_OUT8(debug_wb_en,0,0);
     VL_OUT8(debug_wb_addr,4,0);
     CData/*0:0*/ __VstlExecute;
     CData/*0:0*/ __VstlFirstIteration;
@@ -30,10 +30,14 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     CData/*0:0*/ __VicoExecute;
     CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __VicoContinue;
+    CData/*0:0*/ __Vtrigprevexpr___TOP__top__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_memory____PVT__clk__0;
+    CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_memory____PVT__rst_n__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_csr_file____PVT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_reg_file____PVT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_reg_file____PVT__rst_n__0;
+    CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_fetch____PVT__clk__0;
+    CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_fetch____PVT__rst_n__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_pc_counter____PVT__clk__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_pc_counter____PVT__rst_n__0;
     CData/*0:0*/ __Vtrigprevexpr___TOP__top__u_core__u_if2id____PVT__clk__0;
@@ -60,12 +64,12 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop___024root final : public VerilatedModule
     IData/*31:0*/ __VactIterCount;
     IData/*31:0*/ __VnbaIterCount;
     VL_OUT(regs[16],31,0);
-    VlUnpacked<CData/*0:0*/, 16> __Vm_traceActivity;
+    VlUnpacked<CData/*0:0*/, 20> __Vm_traceActivity;
     VlTriggerVec<1> __VstlTriggered;
     VlTriggerVec<1> __VicoTriggered;
-    VlTriggerVec<14> __VactTriggered;
-    VlTriggerVec<14> __VpreTriggered;
-    VlTriggerVec<14> __VnbaTriggered;
+    VlTriggerVec<18> __VactTriggered;
+    VlTriggerVec<18> __VpreTriggered;
+    VlTriggerVec<18> __VnbaTriggered;
 
     // INTERNAL VARIABLES
     Vtop__Syms* const vlSymsp;

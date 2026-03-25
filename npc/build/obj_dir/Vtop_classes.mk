@@ -29,12 +29,12 @@ VM_CLASSES_FAST += \
 	Vtop_top__DepSet_h0f993197__0 \
 	Vtop___024unit__DepSet_hab9af801__0 \
 	Vtop_core__DepSet_h7dcb518f__0 \
-	Vtop_memory__DepSet_hf5a2896a__0 \
+	Vtop_memory__DepSet_h3cefd995__0 \
 	Vtop_writeback__DepSet_h9c0cf8ce__0 \
 	Vtop_csr_file__DepSet_hf0fdf7be__0 \
 	Vtop_reg_file__DepSet_he71db602__0 \
 	Vtop_forward_unit__DepSet_h89dad57c__0 \
-	Vtop_fetch__DepSet_hece00146__0 \
+	Vtop_fetch__DepSet_h442e61a9__0 \
 	Vtop_decode__DepSet_h626b6706__0 \
 	Vtop_hazard_unit__DepSet_h686296db__0 \
 	Vtop_execute__DepSet_h2e3646d3__0 \
@@ -60,7 +60,6 @@ VM_CLASSES_SLOW += \
 	Vtop_core__DepSet_h7dcb518f__0__Slow \
 	Vtop_core__DepSet_hb5473172__0__Slow \
 	Vtop_memory__Slow \
-	Vtop_memory__DepSet_hf5a2896a__0__Slow \
 	Vtop_memory__DepSet_h3cefd995__0__Slow \
 	Vtop_writeback__Slow \
 	Vtop_writeback__DepSet_h9c0cf8ce__0__Slow \
@@ -71,7 +70,6 @@ VM_CLASSES_SLOW += \
 	Vtop_forward_unit__Slow \
 	Vtop_forward_unit__DepSet_h89dad57c__0__Slow \
 	Vtop_fetch__Slow \
-	Vtop_fetch__DepSet_hece00146__0__Slow \
 	Vtop_fetch__DepSet_h442e61a9__0__Slow \
 	Vtop_decode__Slow \
 	Vtop_decode__DepSet_h626b6706__0__Slow \

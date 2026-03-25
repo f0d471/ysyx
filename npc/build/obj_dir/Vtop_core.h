@@ -32,6 +32,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
     Vtop_pipe_reg__D40* __PVT__u_if2id;
     Vtop_decode* __PVT__u_decode;
     Vtop_reg_file* __PVT__u_reg_file;
+    Vtop_csr_file* __PVT__u_csr_file;
     Vtop_hazard_unit* __PVT__u_hazard;
     Vtop_forward_unit* __PVT__u_forward;
     Vtop_pipe_reg__D107* __PVT__u_id2ex;
@@ -40,15 +41,16 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
     Vtop_memory* __PVT__u_memory;
     Vtop_pipe_reg__D8c* __PVT__u_mem2wb;
     Vtop_writeback* __PVT__u_writeback;
-    Vtop_csr_file* __PVT__u_csr_file;
 
     // DESIGN SPECIFIC STATE
     // Anonymous structures to workaround compiler member-count bugs
     struct {
         VL_IN8(__PVT__clk,0,0);
         VL_IN8(__PVT__rst_n,0,0);
+        VL_OUT8(__PVT__lsu_wen,0,0);
+        VL_OUT8(__PVT__lsu_wmask,3,0);
         VL_OUT8(__PVT__debug_wb_have,0,0);
-        VL_OUT8(__PVT__debug_wb_ena,0,0);
+        VL_OUT8(__PVT__debug_wb_en,0,0);
         VL_OUT8(__PVT__debug_wb_addr,4,0);
         CData/*0:0*/ __PVT__if2id_up_ready;
         CData/*0:0*/ __PVT__if2id_dn_valid;
@@ -77,17 +79,21 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         CData/*0:0*/ __PVT__load_stall;
         CData/*1:0*/ __PVT__fwd_rs1_sel;
         CData/*1:0*/ __PVT__fwd_rs2_sel;
+        CData/*0:0*/ __PVT__ifu_valid;
+        CData/*0:0*/ __PVT__lsu_busy;
         CData/*0:0*/ __PVT__csr_wen;
         CData/*0:0*/ __PVT__trap_valid;
-        CData/*0:0*/ __Vcellinp__u_pc_counter__jump_en;
+        CData/*0:0*/ __Vcellinp__u_pc_counter__pc_hold;
+        CData/*0:0*/ __Vcellinp__u_if2id__stall;
+        CData/*0:0*/ __Vcellinp__u_csr_file__rst;
         CData/*4:0*/ __Vcellinp__u_hazard__ex_rd_addr;
         CData/*6:0*/ __Vcellinp__u_hazard__ex_opcode;
-        CData/*6:0*/ __Vcellinp__u_forward__wb_opcode;
         CData/*4:0*/ __Vcellinp__u_forward__wb_rd_addr;
-        CData/*6:0*/ __Vcellinp__u_forward__mem_opcode;
+        CData/*6:0*/ __Vcellinp__u_forward__wb_opcode;
         CData/*4:0*/ __Vcellinp__u_forward__mem_rd_addr;
-        CData/*6:0*/ __Vcellinp__u_forward__ex_stage_opcode;
+        CData/*6:0*/ __Vcellinp__u_forward__mem_opcode;
         CData/*4:0*/ __Vcellinp__u_forward__ex_stage_rd_addr;
+        CData/*6:0*/ __Vcellinp__u_forward__ex_stage_opcode;
         CData/*0:0*/ __Vcellinp__u_id2ex__flush;
         CData/*0:0*/ __Vcellinp__u_execute__inst_mret;
         CData/*0:0*/ __Vcellinp__u_execute__inst_ecall;
@@ -99,18 +105,23 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         CData/*6:0*/ __Vcellinp__u_execute__opcode_in;
         CData/*2:0*/ __Vcellinp__u_memory__funct3_in;
         CData/*6:0*/ __Vcellinp__u_memory__opcode_in;
+        CData/*0:0*/ __Vcellinp__u_mem2wb__up_valid;
         CData/*4:0*/ __Vcellinp__u_writeback__rd_addr_in;
         CData/*6:0*/ __Vcellinp__u_writeback__opcode_in;
-        CData/*0:0*/ __Vcellinp__u_csr_file__rst;
         SData/*11:0*/ __PVT__decode_csr_addr;
+    };
+    struct {
         SData/*11:0*/ __PVT__csr_raddr;
         SData/*11:0*/ __PVT__csr_waddr;
         SData/*11:0*/ __Vcellinp__u_execute__csr_addr_in;
         VL_OUT(__PVT__pc,31,0);
         VL_OUT(__PVT__instr,31,0);
+        VL_OUT(__PVT__ifu_raddr,31,0);
+        VL_IN(__PVT__ifu_rdata,31,0);
+        VL_OUT(__PVT__lsu_addr,31,0);
+        VL_OUT(__PVT__lsu_wdata,31,0);
+        VL_IN(__PVT__lsu_rdata,31,0);
         VL_OUT(__PVT__debug_wb_pc,31,0);
-    };
-    struct {
         VL_OUT(__PVT__debug_wb_instr,31,0);
         VL_OUT(__PVT__debug_wb_data,31,0);
         IData/*31:0*/ __PVT__decode_imm;
@@ -130,9 +141,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         IData/*31:0*/ __PVT__trap_cause;
         IData/*31:0*/ __PVT__trap_mtvec;
         IData/*31:0*/ __PVT__trap_mepc;
-        IData/*31:0*/ __Vcellinp__u_pc_counter__jump_addr;
         IData/*31:0*/ __Vcellinp__u_decode__instr_in;
         IData/*31:0*/ __Vcellinp__u_decode__instr_addr_in;
+        IData/*31:0*/ __Vcellinp__u_forward__ex_mem_alu_result;
         VlWide<9>/*262:0*/ __Vcellout__u_id2ex__dn_data;
         VlWide<9>/*262:0*/ __Vcellinp__u_id2ex__up_data;
         IData/*31:0*/ __Vcellinp__u_execute__imm_in;

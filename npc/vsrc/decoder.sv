@@ -4,8 +4,8 @@ module decode #(
     parameter AW = 32,
     parameter DW = 32
 )(
-    input  logic [AW-1:0] instr_addr_in, // PC from IF/ID
-    input  logic [DW-1:0] instr_in,      // Instruction from IF/ID
+    input  logic [AW-1:0] instr_addr_in, // PC 
+    input  logic [DW-1:0] instr_in,      // Instruction 
     
     // To Register (Read Addr) 
     output logic [4:0]    rd_rs1_addr,
@@ -26,7 +26,7 @@ module decode #(
     output logic inst_ebreak,
 
     // CSR 
-    output logic [11:0]   csr_addr_out,  // 提取的 12 位 CSR 地址
+    output logic [11:0]   csr_addr_out,  // 12 位 CSR 地址
     output logic          inst_csrrw,    // 是否为 csrrw 指令
     output logic          inst_csrrs,    // 是否为 csrrs 指令
     output logic          inst_ecall,    // 是否为 ecall 指令
@@ -55,26 +55,26 @@ module decode #(
     assign funct7_out  = funct7;
     assign imm_out     = imm;
 
-    // --- [新增] CSR 地址提取 ---
-    // 对于 SYSTEM (I-Type) 指令，CSR 地址存放在 [31:20]
+    // CSR 地址提取 
     assign csr_addr_out = instr_in[31:20];
 
     // ebreak
     wire is_ebreak = (instr_in == 32'h00100073); // ebreak 的机器码
     assign inst_ebreak = is_ebreak;
 
-    // --- [新增] SYSTEM 指令译码逻辑 ---
+    // SYSTEM 
     wire is_system = (opcode == 7'b1110011);
     
-    // CSRRW: funct3 = 3'b001
+    // CSRRW
     assign inst_csrrw = is_system && (funct3 == 3'b001);
-    // CSRRS: funct3 = 3'b010
+
+    // CSRRS
     assign inst_csrrs = is_system && (funct3 == 3'b010);
     
-    // 特权/异常指令: funct3 = 3'b000 且依赖 funct12 (即 csr_addr_out) 来区分
-    // ECALL: funct12 = 12'h000 (且 rs1=0, rd=0)
+    // ECALL
     assign inst_ecall = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
-    // MRET:  funct12 = 12'h302 (且 rs1=0, rd=0)
+
+    // MRET
     assign inst_mret  = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
 
 
@@ -189,27 +189,24 @@ module decode #(
             end
             
             7'b1110011: begin 
-                if (is_ebreak) begin
-                    // 关键点：ebreak 本身不带 rs1 索引，但我们需要读取 a0 (x10) 寄存器的值传给 trap 函数
-                    rd_rs1_addr = 5'd10; // 强制读取 x10 (a0)
+                if (is_ebreak) begin // EBREAK
+                    rd_rs1_addr = 5'd10;
                     rd_rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1; // 让 op1_in 拿到 a0 的值
+                    op1_sel_out = OP1_RS1;
                     op2_sel_out = OP2_RS2;
                 end 
-                else if (inst_csrrw || inst_csrrs) begin
-                    // --- [新增] CSRRW / CSRRS 的通用寄存器读取 ---
-                    // 这两条指令都需要读取 rs1 寄存器的值 (用于写入 CSR 或设置 CSR 位)
+                else if (inst_csrrw || inst_csrrs) begin // CSRRW,CSRRS
                     rd_rs1_addr = rs1;
                     rd_rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1; // 把 rs1 的值通过 op1 传给 EX 阶段
-                    op2_sel_out = OP2_RS2; // 这里没用到 op2，随便设个默认值即可
+                    op1_sel_out = OP1_RS1; 
+                    op2_sel_out = OP2_RS2; 
                 end
-                else begin
-                    // 处理 ecall, mret 等不涉及通用寄存器读取的指令
+                else begin // ECALL, MRET 
                     rd_rs1_addr = 5'h0;
                     rd_rs2_addr = 5'h0;
+
                     op1_sel_out = OP1_ZERO;
                     op2_sel_out = OP2_RS2;
                 end

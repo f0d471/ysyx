@@ -16,9 +16,9 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/normal/ysyx-workbench/npc/vsrc/core_top.sv:4:29
+    // DPI import at /home/normal/ysyx-workbench/npc/vsrc/sim_top.sv:19:30
     extern int paddr_read(int addr);
-    // DPI import at /home/normal/ysyx-workbench/npc/vsrc/core_top.sv:5:30
+    // DPI import at /home/normal/ysyx-workbench/npc/vsrc/sim_top.sv:20:30
     extern void paddr_write(int addr, int len, int data);
     // DPI import at /home/normal/ysyx-workbench/npc/vsrc/core_top.sv:3:30
     extern void trap(int code, int pc);

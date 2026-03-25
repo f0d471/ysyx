@@ -85,12 +85,12 @@ VL_INLINE_OPT void Vtop_decode___nba_sequent__TOP__top__u_core__u_decode__0(Vtop
                                              : 0U)))));
     vlSelfRef.__PVT__is_system = (0x73U == (IData)(vlSelfRef.__PVT__opcode));
     vlSelfRef.__PVT__imm_out = vlSelfRef.__PVT__imm;
-    vlSelfRef.__PVT__inst_mret = (((IData)(vlSelfRef.__PVT__is_system) 
-                                   & (0U == (IData)(vlSelfRef.__PVT__funct3))) 
-                                  & (0x302U == (IData)(vlSelfRef.__PVT__csr_addr_out)));
     vlSelfRef.__PVT__inst_ecall = (((IData)(vlSelfRef.__PVT__is_system) 
                                     & (0U == (IData)(vlSelfRef.__PVT__funct3))) 
                                    & (0U == (IData)(vlSelfRef.__PVT__csr_addr_out)));
+    vlSelfRef.__PVT__inst_mret = (((IData)(vlSelfRef.__PVT__is_system) 
+                                   & (0U == (IData)(vlSelfRef.__PVT__funct3))) 
+                                  & (0x302U == (IData)(vlSelfRef.__PVT__csr_addr_out)));
     vlSelfRef.__PVT__inst_csrrw = ((IData)(vlSelfRef.__PVT__is_system) 
                                    & (1U == (IData)(vlSelfRef.__PVT__funct3)));
     vlSelfRef.__PVT__inst_csrrs = ((IData)(vlSelfRef.__PVT__is_system) 

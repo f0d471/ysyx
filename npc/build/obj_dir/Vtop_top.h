@@ -20,13 +20,26 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_top final : public VerilatedModule {
     VL_IN8(clk,0,0);
     VL_IN8(rst_n,0,0);
     VL_OUT8(debug_wb_have,0,0);
-    VL_OUT8(debug_wb_ena,0,0);
+    VL_OUT8(debug_wb_en,0,0);
     VL_OUT8(debug_wb_addr,4,0);
+    CData/*0:0*/ __PVT__lsu_wen;
+    CData/*3:0*/ __PVT__lsu_wmask;
+    CData/*3:0*/ __Vfunc_wmask2len__3__mask;
     VL_OUT(pc,31,0);
     VL_OUT(instr,31,0);
     VL_OUT(debug_wb_pc,31,0);
     VL_OUT(debug_wb_instr,31,0);
     VL_OUT(debug_wb_data,31,0);
+    IData/*31:0*/ __PVT__ifu_raddr;
+    IData/*31:0*/ __PVT__ifu_rdata;
+    IData/*31:0*/ __PVT__lsu_addr;
+    IData/*31:0*/ __PVT__lsu_wdata;
+    IData/*31:0*/ __PVT__lsu_rdata;
+    IData/*31:0*/ __Vfunc_paddr_read__0__Vfuncout;
+    IData/*31:0*/ __Vfunc_paddr_read__1__Vfuncout;
+    IData/*31:0*/ __Vfunc_wmask2len__3__Vfuncout;
+    IData/*31:0*/ __Vdly__ifu_rdata;
+    IData/*31:0*/ __Vdly__lsu_rdata;
     VL_OUT(regs[16],31,0);
 
     // INTERNAL VARIABLES

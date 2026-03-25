@@ -6,7 +6,7 @@ module pipe_reg #(
     input  logic          clk,
     input  logic          rst_n,
     input  logic          flush,
-    input  logic          stall,      // 默认连 1'b0，只有 IF/ID 需要
+    input  logic          stall,      
 
     input  logic          up_valid,
     output logic          up_ready,

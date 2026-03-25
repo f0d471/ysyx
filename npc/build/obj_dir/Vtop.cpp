@@ -13,7 +13,7 @@ Vtop::Vtop(VerilatedContext* _vcontextp__, const char* _vcname__)
     , clk{vlSymsp->TOP.clk}
     , rst_n{vlSymsp->TOP.rst_n}
     , debug_wb_have{vlSymsp->TOP.debug_wb_have}
-    , debug_wb_ena{vlSymsp->TOP.debug_wb_ena}
+    , debug_wb_en{vlSymsp->TOP.debug_wb_en}
     , debug_wb_addr{vlSymsp->TOP.debug_wb_addr}
     , pc{vlSymsp->TOP.pc}
     , instr{vlSymsp->TOP.instr}

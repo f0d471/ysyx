@@ -127,6 +127,32 @@ VL_ATTR_COLD void Vtop_forward_unit___stl_sequent__TOP__top__u_core__u_forward__
                                                : 0U)));
 }
 
+VL_ATTR_COLD void Vtop_forward_unit___stl_sequent__TOP__top__u_core__u_forward__1(Vtop_forward_unit* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_forward_unit___stl_sequent__TOP__top__u_core__u_forward__1\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__fwd_rs1_data = ((1U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                      ? vlSelfRef.__PVT__ex_alu_result
+                                      : ((2U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                          ? ((3U == (IData)(vlSelfRef.__PVT__mem_opcode))
+                                              ? vlSelfRef.__PVT__mem_rdata
+                                              : vlSelfRef.__PVT__ex_mem_alu_result)
+                                          : ((3U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                              ? vlSelfRef.__PVT__wb_wr_data
+                                              : vlSelfRef.__PVT__reg_rs1_data)));
+    vlSelfRef.__PVT__fwd_rs2_data = ((1U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                      ? vlSelfRef.__PVT__ex_alu_result
+                                      : ((2U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                          ? ((3U == (IData)(vlSelfRef.__PVT__mem_opcode))
+                                              ? vlSelfRef.__PVT__mem_rdata
+                                              : vlSelfRef.__PVT__ex_mem_alu_result)
+                                          : ((3U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                              ? vlSelfRef.__PVT__wb_wr_data
+                                              : vlSelfRef.__PVT__reg_rs2_data)));
+}
+
 VL_ATTR_COLD void Vtop_forward_unit___ctor_var_reset(Vtop_forward_unit* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
@@ -135,12 +161,20 @@ VL_ATTR_COLD void Vtop_forward_unit___ctor_var_reset(Vtop_forward_unit* vlSelf) 
     // Body
     vlSelf->__PVT__ex_rs1_addr = 0;
     vlSelf->__PVT__ex_rs2_addr = 0;
-    vlSelf->__PVT__ex_stage_rd_addr = 0;
     vlSelf->__PVT__ex_stage_opcode = 0;
-    vlSelf->__PVT__mem_rd_addr = 0;
+    vlSelf->__PVT__ex_stage_rd_addr = 0;
+    vlSelf->__PVT__ex_alu_result = 0;
     vlSelf->__PVT__mem_opcode = 0;
-    vlSelf->__PVT__wb_rd_addr = 0;
+    vlSelf->__PVT__mem_rd_addr = 0;
+    vlSelf->__PVT__ex_mem_alu_result = 0;
+    vlSelf->__PVT__mem_rdata = 0;
     vlSelf->__PVT__wb_opcode = 0;
+    vlSelf->__PVT__wb_rd_addr = 0;
+    vlSelf->__PVT__wb_wr_data = 0;
+    vlSelf->__PVT__reg_rs1_data = 0;
+    vlSelf->__PVT__reg_rs2_data = 0;
+    vlSelf->__PVT__fwd_rs1_data = 0;
+    vlSelf->__PVT__fwd_rs2_data = 0;
     vlSelf->__PVT__fwd_rs1_sel = 0;
     vlSelf->__PVT__fwd_rs2_sel = 0;
     vlSelf->__Vfunc_writes_rd__0__Vfuncout = 0;

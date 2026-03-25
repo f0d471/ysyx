@@ -18,10 +18,17 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     for (int __Vi0 = 0; __Vi0 < 16; ++__Vi0) {
         vlSelf->__PVT__regs[__Vi0] = 0;
     }
+    vlSelf->__PVT__ifu_raddr = 0;
+    vlSelf->__PVT__ifu_rdata = 0;
+    vlSelf->__PVT__lsu_addr = 0;
+    vlSelf->__PVT__lsu_wen = 0;
+    vlSelf->__PVT__lsu_wdata = 0;
+    vlSelf->__PVT__lsu_wmask = 0;
+    vlSelf->__PVT__lsu_rdata = 0;
     vlSelf->__PVT__debug_wb_have = 0;
     vlSelf->__PVT__debug_wb_pc = 0;
     vlSelf->__PVT__debug_wb_instr = 0;
-    vlSelf->__PVT__debug_wb_ena = 0;
+    vlSelf->__PVT__debug_wb_en = 0;
     vlSelf->__PVT__debug_wb_addr = 0;
     vlSelf->__PVT__debug_wb_data = 0;
     vlSelf->__PVT__if2id_up_ready = 0;
@@ -71,6 +78,8 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__PVT__load_stall = 0;
     vlSelf->__PVT__fwd_rs1_sel = 0;
     vlSelf->__PVT__fwd_rs2_sel = 0;
+    vlSelf->__PVT__ifu_valid = 0;
+    vlSelf->__PVT__lsu_busy = 0;
     vlSelf->__PVT__csr_raddr = 0;
     vlSelf->__PVT__csr_rdata = 0;
     vlSelf->__PVT__csr_wen = 0;
@@ -81,20 +90,22 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__PVT__trap_cause = 0;
     vlSelf->__PVT__trap_mtvec = 0;
     vlSelf->__PVT__trap_mepc = 0;
-    vlSelf->__Vcellinp__u_pc_counter__jump_addr = 0;
-    vlSelf->__Vcellinp__u_pc_counter__jump_en = 0;
+    vlSelf->__Vcellinp__u_pc_counter__pc_hold = 0;
     vlSelf->__Vcellout__u_if2id__dn_data = 0;
     vlSelf->__Vcellinp__u_if2id__up_data = 0;
+    vlSelf->__Vcellinp__u_if2id__stall = 0;
     vlSelf->__Vcellinp__u_decode__instr_in = 0;
     vlSelf->__Vcellinp__u_decode__instr_addr_in = 0;
+    vlSelf->__Vcellinp__u_csr_file__rst = 0;
     vlSelf->__Vcellinp__u_hazard__ex_rd_addr = 0;
     vlSelf->__Vcellinp__u_hazard__ex_opcode = 0;
-    vlSelf->__Vcellinp__u_forward__wb_opcode = 0;
     vlSelf->__Vcellinp__u_forward__wb_rd_addr = 0;
-    vlSelf->__Vcellinp__u_forward__mem_opcode = 0;
+    vlSelf->__Vcellinp__u_forward__wb_opcode = 0;
+    vlSelf->__Vcellinp__u_forward__ex_mem_alu_result = 0;
     vlSelf->__Vcellinp__u_forward__mem_rd_addr = 0;
-    vlSelf->__Vcellinp__u_forward__ex_stage_opcode = 0;
+    vlSelf->__Vcellinp__u_forward__mem_opcode = 0;
     vlSelf->__Vcellinp__u_forward__ex_stage_rd_addr = 0;
+    vlSelf->__Vcellinp__u_forward__ex_stage_opcode = 0;
     VL_ZERO_RESET_W(263, vlSelf->__Vcellout__u_id2ex__dn_data);
     VL_ZERO_RESET_W(263, vlSelf->__Vcellinp__u_id2ex__up_data);
     vlSelf->__Vcellinp__u_id2ex__flush = 0;
@@ -120,9 +131,9 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__Vcellinp__u_memory__alu_result_in = 0;
     VL_ZERO_RESET_W(140, vlSelf->__Vcellout__u_mem2wb__dn_data);
     VL_ZERO_RESET_W(140, vlSelf->__Vcellinp__u_mem2wb__up_data);
+    vlSelf->__Vcellinp__u_mem2wb__up_valid = 0;
     vlSelf->__Vcellinp__u_writeback__rd_addr_in = 0;
     vlSelf->__Vcellinp__u_writeback__opcode_in = 0;
     vlSelf->__Vcellinp__u_writeback__mem_rdata_in = 0;
     vlSelf->__Vcellinp__u_writeback__alu_result_in = 0;
-    vlSelf->__Vcellinp__u_csr_file__rst = 0;
 }

@@ -16,9 +16,15 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_fetch final : public VerilatedModule {
     // DESIGN SPECIFIC STATE
     VL_IN8(__PVT__clk,0,0);
     VL_IN8(__PVT__rst_n,0,0);
+    VL_IN8(__PVT__flush,0,0);
+    VL_OUT8(__PVT__ifu_valid,0,0);
+    CData/*0:0*/ __PVT__state;
+    CData/*0:0*/ __PVT__state_next;
+    CData/*0:0*/ __Vdly__state;
     VL_IN(__PVT__pc_pointer,31,0);
+    VL_OUT(__PVT__ifu_raddr,31,0);
+    VL_IN(__PVT__ifu_rdata,31,0);
     VL_OUT(__PVT__instr_out,31,0);
-    IData/*31:0*/ __Vfunc_paddr_read__0__Vfuncout;
 
     // INTERNAL VARIABLES
     Vtop__Syms* const vlSymsp;

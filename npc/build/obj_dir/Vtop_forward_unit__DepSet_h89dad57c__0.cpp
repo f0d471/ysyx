@@ -126,3 +126,29 @@ VL_INLINE_OPT void Vtop_forward_unit___nba_comb__TOP__top__u_core__u_forward__0(
                                                ? 3U
                                                : 0U)));
 }
+
+VL_INLINE_OPT void Vtop_forward_unit___nba_comb__TOP__top__u_core__u_forward__1(Vtop_forward_unit* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_forward_unit___nba_comb__TOP__top__u_core__u_forward__1\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__fwd_rs1_data = ((1U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                      ? vlSelfRef.__PVT__ex_alu_result
+                                      : ((2U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                          ? ((3U == (IData)(vlSelfRef.__PVT__mem_opcode))
+                                              ? vlSelfRef.__PVT__mem_rdata
+                                              : vlSelfRef.__PVT__ex_mem_alu_result)
+                                          : ((3U == (IData)(vlSelfRef.__PVT__fwd_rs1_sel))
+                                              ? vlSelfRef.__PVT__wb_wr_data
+                                              : vlSelfRef.__PVT__reg_rs1_data)));
+    vlSelfRef.__PVT__fwd_rs2_data = ((1U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                      ? vlSelfRef.__PVT__ex_alu_result
+                                      : ((2U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                          ? ((3U == (IData)(vlSelfRef.__PVT__mem_opcode))
+                                              ? vlSelfRef.__PVT__mem_rdata
+                                              : vlSelfRef.__PVT__ex_mem_alu_result)
+                                          : ((3U == (IData)(vlSelfRef.__PVT__fwd_rs2_sel))
+                                              ? vlSelfRef.__PVT__wb_wr_data
+                                              : vlSelfRef.__PVT__reg_rs2_data)));
+}
