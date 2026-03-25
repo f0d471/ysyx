@@ -42,6 +42,7 @@ VL_ATTR_COLD void Vtop_memory___stl_sequent__TOP__top__u_core__u_memory__0(Vtop_
     }
     vlSelfRef.__PVT__state_next = ((1U & (~ (IData)(vlSelfRef.__PVT__state))) 
                                    && (IData)(vlSelfRef.__PVT__is_load));
+    vlSelfRef.__PVT__lsu_ren = vlSelfRef.__PVT__is_load;
     vlSelfRef.__PVT__lsu_busy = ((IData)(vlSelfRef.__PVT__is_load) 
                                  & (~ (IData)(vlSelfRef.__PVT__state)));
     vlSelfRef.__PVT__mem_rdata_out = 0U;
@@ -97,6 +98,7 @@ VL_ATTR_COLD void Vtop_memory___ctor_var_reset(Vtop_memory* vlSelf) {
     vlSelf->__PVT__opcode_in = 0;
     vlSelf->__PVT__funct3_in = 0;
     vlSelf->__PVT__lsu_addr = 0;
+    vlSelf->__PVT__lsu_ren = 0;
     vlSelf->__PVT__lsu_wen = 0;
     vlSelf->__PVT__lsu_wdata = 0;
     vlSelf->__PVT__lsu_wmask = 0;

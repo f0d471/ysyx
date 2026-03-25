@@ -73,6 +73,7 @@ VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__2(Vtop_top* vlSelf) {
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core.__PVT__lsu_wen;
     vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core.__PVT__lsu_ren;
     vlSelfRef.debug_wb_addr = vlSymsp->TOP__top__u_core.__PVT__debug_wb_addr;
     vlSelfRef.debug_wb_en = vlSymsp->TOP__top__u_core.__PVT__debug_wb_en;
     vlSelfRef.debug_wb_data = vlSymsp->TOP__top__u_core.__PVT__debug_wb_data;

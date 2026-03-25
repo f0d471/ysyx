@@ -27,6 +27,7 @@ VL_ATTR_COLD void Vtop_top___ctor_var_reset(Vtop_top* vlSelf) {
     vlSelf->__PVT__ifu_raddr = 0;
     vlSelf->__PVT__ifu_rdata = 0;
     vlSelf->__PVT__lsu_addr = 0;
+    vlSelf->__PVT__lsu_ren = 0;
     vlSelf->__PVT__lsu_wen = 0;
     vlSelf->__PVT__lsu_wdata = 0;
     vlSelf->__PVT__lsu_wmask = 0;

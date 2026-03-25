@@ -22,6 +22,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_top final : public VerilatedModule {
     VL_OUT8(debug_wb_have,0,0);
     VL_OUT8(debug_wb_en,0,0);
     VL_OUT8(debug_wb_addr,4,0);
+    CData/*0:0*/ __PVT__lsu_ren;
     CData/*0:0*/ __PVT__lsu_wen;
     CData/*3:0*/ __PVT__lsu_wmask;
     CData/*3:0*/ __Vfunc_wmask2len__3__mask;

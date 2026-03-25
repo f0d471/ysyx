@@ -16,6 +16,7 @@ module memory #(
  
     // --- SimpleBus 接口（连接外部存储器）---
     output logic [AW-1:0] lsu_addr,        // → 存储器地址
+    output logic          lsu_ren,         // → 读使能（仅 Load）
     output logic          lsu_wen,         // → 写使能
     output logic [DW-1:0] lsu_wdata,       // → 写数据（原始 rs2 值）
     output logic [3:0]    lsu_wmask,       // → 写掩码
@@ -65,6 +66,9 @@ module memory #(
     // 地址：Load 或 Store 时输出计算好的地址
     assign lsu_addr = alu_result_in;
  
+    // 读使能：仅 Load 指令
+    assign lsu_ren = is_load;
+
     // 写使能：仅 Store 指令
     assign lsu_wen = is_store;
  

@@ -254,6 +254,7 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSel
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wen;
     vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_ren;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__9(Vtop_core* vlSelf) {

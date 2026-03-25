@@ -43,6 +43,7 @@ module top (
 
     // ========== LSU SimpleBus 信号 ==========
     logic [31:0] lsu_addr;
+    logic        lsu_ren;
     logic        lsu_wen;
     logic [31:0] lsu_wdata;
     logic [3:0]  lsu_wmask;
@@ -62,6 +63,7 @@ module top (
 
         // ★ [新增] LSU SimpleBus
         .lsu_addr       (lsu_addr),
+        .lsu_ren        (lsu_ren),
         .lsu_wen        (lsu_wen),
         .lsu_wdata      (lsu_wdata),
         .lsu_wmask      (lsu_wmask),
@@ -105,8 +107,11 @@ module top (
         if (!rst_n) begin
             lsu_rdata <= 32'h0;
         end else begin
-            // 读：无论是否 Store，都执行读（Store 时结果被忽略）
-            lsu_rdata <= paddr_read(lsu_addr);
+            // 读：仅当 lsu_ren=1 时执行，避免非访存指令触发越界读
+            if (lsu_ren)
+                lsu_rdata <= paddr_read(lsu_addr);
+            else
+                lsu_rdata <= 32'h0;
 
             // 写：仅当 wen=1 时执行
             if (lsu_wen) begin

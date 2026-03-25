@@ -19,6 +19,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_memory final : public VerilatedModule {
     VL_IN8(__PVT__valid_in,0,0);
     VL_IN8(__PVT__opcode_in,6,0);
     VL_IN8(__PVT__funct3_in,2,0);
+    VL_OUT8(__PVT__lsu_ren,0,0);
     VL_OUT8(__PVT__lsu_wen,0,0);
     VL_OUT8(__PVT__lsu_wmask,3,0);
     VL_OUT8(__PVT__lsu_busy,0,0);

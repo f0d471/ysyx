@@ -19,6 +19,7 @@ module core #(
 
     // ★ [新增] LSU SimpleBus 接口
     output logic [AW-1:0] lsu_addr,
+    output logic          lsu_ren,
     output logic          lsu_wen,
     output logic [DW-1:0] lsu_wdata,
     output logic [3:0]    lsu_wmask,
@@ -358,13 +359,14 @@ memory #(
     .clk          (clk),
     .rst_n        (rst_n),
 
-    .valid_in     (),
+    .valid_in     (ex2mem_dn_valid),
     .alu_result_in(ex_mem_dn.alu_result),
     .rs2_data_in  (ex_mem_dn.rs2_data),
     .opcode_in    (ex_mem_dn.opcode),
     .funct3_in    (ex_mem_dn.funct3),
 
     .lsu_addr     (lsu_addr),                          // ★ 新增 → sim_top
+    .lsu_ren      (lsu_ren),                           // ★ 新增
     .lsu_wen      (lsu_wen),                           // ★ 新增
     .lsu_wdata    (lsu_wdata),                         // ★ 新增
     .lsu_wmask    (lsu_wmask),                         // ★ 新增

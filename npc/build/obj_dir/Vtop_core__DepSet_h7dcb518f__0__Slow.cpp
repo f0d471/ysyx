@@ -316,6 +316,7 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__2(Vtop_core* vlSelf
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wen;
     vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_ren;
     vlSelfRef.__PVT__lsu_busy = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_busy;
     vlSelfRef.__PVT__mem_rdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__mem_rdata_out;
     vlSymsp->TOP__top__u_core__u_csr_file.__PVT__rst 

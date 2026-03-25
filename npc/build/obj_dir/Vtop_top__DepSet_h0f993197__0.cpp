@@ -83,8 +83,12 @@ VL_INLINE_OPT void Vtop_top___nba_sequent__TOP__top__2(Vtop_top* vlSelf) {
         vlSelfRef.__Vdly__ifu_rdata = 0x13U;
     }
     if (vlSelfRef.rst_n) {
-        Vtop___024unit____Vdpiimwrap_paddr_read_TOP____024unit(vlSelfRef.__PVT__lsu_addr, vlSelfRef.__Vfunc_paddr_read__1__Vfuncout);
-        vlSelfRef.__Vdly__lsu_rdata = vlSelfRef.__Vfunc_paddr_read__1__Vfuncout;
+        if (vlSelfRef.__PVT__lsu_ren) {
+            Vtop___024unit____Vdpiimwrap_paddr_read_TOP____024unit(vlSelfRef.__PVT__lsu_addr, vlSelfRef.__Vfunc_paddr_read__1__Vfuncout);
+            vlSelfRef.__Vdly__lsu_rdata = vlSelfRef.__Vfunc_paddr_read__1__Vfuncout;
+        } else {
+            vlSelfRef.__Vdly__lsu_rdata = 0U;
+        }
         if (vlSelfRef.__PVT__lsu_wen) {
             Vtop___024unit____Vdpiimwrap_paddr_write_TOP____024unit(vlSelfRef.__PVT__lsu_addr, 
                                                                     ([&]() {
@@ -150,6 +154,7 @@ VL_INLINE_OPT void Vtop_top___nba_sequent__TOP__top__5(Vtop_top* vlSelf) {
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core.__PVT__lsu_wen;
     vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core.__PVT__lsu_ren;
 }
 
 VL_INLINE_OPT void Vtop_top___nba_sequent__TOP__top__6(Vtop_top* vlSelf) {
