@@ -17,10 +17,12 @@ module memory #(
     // --- SimpleBus 接口（连接外部存储器）---
     output logic [AW-1:0] lsu_addr,        // → 存储器地址
     output logic          lsu_ren,         // → 读使能（仅 Load）
+    input  logic [DW-1:0] lsu_rdata,       // ← 存储器返回的数据
     output logic          lsu_wen,         // → 写使能
     output logic [DW-1:0] lsu_wdata,       // → 写数据（原始 rs2 值）
     output logic [3:0]    lsu_wmask,       // → 写掩码
-    input  logic [DW-1:0] lsu_rdata,       // ← 存储器返回的数据
+    output logic          lsu_reqValid,    // 
+    input  logic          lsu_respValid,   // 
  
     // --- 流水线控制 ---
     output logic          lsu_busy,        // → 全流水线 stall
@@ -32,12 +34,13 @@ module memory #(
     // =============================================================
     wire is_load  = valid_in && (opcode_in == `INST_TYPE_L);
     wire is_store = valid_in && (opcode_in == `INST_TYPE_S);
+    wire is_memop  = is_load || is_store;
  
     // =============================================================
     //  状态机：idle / wait（仅 Load 使用）
     // =============================================================
     localparam S_IDLE = 1'b0;
-    localparam S_WAIT = 1'b1;
+    localparam S_WAIT_RESP = 1'b1;
  
     logic state, state_next;
  
@@ -50,14 +53,23 @@ module memory #(
  
     always_comb begin
         case (state)
-            S_IDLE:  state_next = is_load ? S_WAIT : S_IDLE;
-            S_WAIT:  state_next = S_IDLE;
-            default: state_next = S_IDLE;
+            S_IDLE:      state_next = is_memop ? S_WAIT_RESP : S_IDLE;
+            S_WAIT_RESP: state_next = lsu_respValid ? S_IDLE : S_WAIT_RESP;
+            default:     state_next = S_IDLE;
         endcase
     end
  
-    // Load 在 IDLE 状态时需要等待 → stall 整条流水线
-    assign lsu_busy = is_load && (state == S_IDLE);
+    // =============================================================
+    //  控制信号
+    // =============================================================
+ 
+    // 请求有效：idle 时且有访存操作
+    assign lsu_reqValid = is_memop && (state == S_IDLE);
+ 
+    // busy：从发出请求到收到响应的整个过程
+    //   idle 且有访存 → busy（正在发请求）
+    //   wait_resp 且没收到 → busy（在等）
+    assign lsu_busy = (is_memop && state == S_IDLE) || (state == S_WAIT_RESP && !lsu_respValid);
  
     // =============================================================
     //  SimpleBus 输出信号
@@ -104,7 +116,7 @@ module memory #(
     always_comb begin
         mem_rdata_out = 32'h0;
  
-        if (is_load && state == S_WAIT) begin
+        if (is_load && state == S_WAIT_RESP && lsu_respValid) begin
             case (funct3_in)
                 `INST_LB:  mem_rdata_out = {{24{lsu_rdata[7]}},  lsu_rdata[7:0]};
                 `INST_LBU: mem_rdata_out = {24'b0,               lsu_rdata[7:0]};

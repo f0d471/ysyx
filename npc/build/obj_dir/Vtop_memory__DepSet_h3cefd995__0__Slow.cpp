@@ -40,13 +40,12 @@ VL_ATTR_COLD void Vtop_memory___stl_sequent__TOP__top__u_core__u_memory__0(Vtop_
     } else {
         vlSelfRef.__PVT__lsu_wmask = 0U;
     }
-    vlSelfRef.__PVT__state_next = ((1U & (~ (IData)(vlSelfRef.__PVT__state))) 
-                                   && (IData)(vlSelfRef.__PVT__is_load));
     vlSelfRef.__PVT__lsu_ren = vlSelfRef.__PVT__is_load;
-    vlSelfRef.__PVT__lsu_busy = ((IData)(vlSelfRef.__PVT__is_load) 
-                                 & (~ (IData)(vlSelfRef.__PVT__state)));
+    vlSelfRef.__PVT__is_memop = ((IData)(vlSelfRef.__PVT__is_load) 
+                                 | (IData)(vlSelfRef.__PVT__is_store));
     vlSelfRef.__PVT__mem_rdata_out = 0U;
-    if (((IData)(vlSelfRef.__PVT__is_load) & (IData)(vlSelfRef.__PVT__state))) {
+    if ((((IData)(vlSelfRef.__PVT__is_load) & (IData)(vlSelfRef.__PVT__state)) 
+         & (IData)(vlSelfRef.__PVT__lsu_respValid))) {
         vlSelfRef.__PVT__mem_rdata_out = ((0U == (IData)(vlSelfRef.__PVT__funct3_in))
                                            ? VL_CONCAT_III(32,24,8, 
                                                            (0xffffffU 
@@ -82,6 +81,16 @@ VL_ATTR_COLD void Vtop_memory___stl_sequent__TOP__top__u_core__u_memory__0(Vtop_
                                                      ? vlSelfRef.__PVT__lsu_rdata
                                                      : 0U)))));
     }
+    vlSelfRef.__PVT__state_next = ((IData)(vlSelfRef.__PVT__state)
+                                    ? ((IData)(vlSelfRef.__PVT__state) 
+                                       && (1U & (~ (IData)(vlSelfRef.__PVT__lsu_respValid))))
+                                    : (IData)(vlSelfRef.__PVT__is_memop));
+    vlSelfRef.__PVT__lsu_reqValid = ((IData)(vlSelfRef.__PVT__is_memop) 
+                                     & (~ (IData)(vlSelfRef.__PVT__state)));
+    vlSelfRef.__PVT__lsu_busy = (((IData)(vlSelfRef.__PVT__is_memop) 
+                                  & (~ (IData)(vlSelfRef.__PVT__state))) 
+                                 | ((IData)(vlSelfRef.__PVT__state) 
+                                    & (~ (IData)(vlSelfRef.__PVT__lsu_respValid))));
 }
 
 VL_ATTR_COLD void Vtop_memory___ctor_var_reset(Vtop_memory* vlSelf) {
@@ -99,14 +108,17 @@ VL_ATTR_COLD void Vtop_memory___ctor_var_reset(Vtop_memory* vlSelf) {
     vlSelf->__PVT__funct3_in = 0;
     vlSelf->__PVT__lsu_addr = 0;
     vlSelf->__PVT__lsu_ren = 0;
+    vlSelf->__PVT__lsu_rdata = 0;
     vlSelf->__PVT__lsu_wen = 0;
     vlSelf->__PVT__lsu_wdata = 0;
     vlSelf->__PVT__lsu_wmask = 0;
-    vlSelf->__PVT__lsu_rdata = 0;
+    vlSelf->__PVT__lsu_reqValid = 0;
+    vlSelf->__PVT__lsu_respValid = 0;
     vlSelf->__PVT__lsu_busy = 0;
     vlSelf->__PVT__mem_rdata_out = 0;
     vlSelf->__PVT__is_load = 0;
     vlSelf->__PVT__is_store = 0;
+    vlSelf->__PVT__is_memop = 0;
     vlSelf->__PVT__state = 0;
     vlSelf->__PVT__state_next = 0;
     vlSelf->__Vdly__state = 0;

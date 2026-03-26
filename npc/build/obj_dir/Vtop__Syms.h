@@ -18,6 +18,8 @@
 #include "Vtop_top.h"
 #include "Vtop___024unit.h"
 #include "Vtop_core.h"
+#include "Vtop_sim_sram__D1.h"
+#include "Vtop_sim_sram__LBz1_H1.h"
 #include "Vtop_memory.h"
 #include "Vtop_writeback.h"
 #include "Vtop_csr_file.h"
@@ -64,6 +66,8 @@ class alignas(VL_CACHE_LINE_BYTES)Vtop__Syms final : public VerilatedSyms {
     Vtop_pc_counter                TOP__top__u_core__u_pc_counter;
     Vtop_reg_file                  TOP__top__u_core__u_reg_file;
     Vtop_writeback                 TOP__top__u_core__u_writeback;
+    Vtop_sim_sram__D1              TOP__top__u_sram_ifu;
+    Vtop_sim_sram__LBz1_H1         TOP__top__u_sram_lsu;
 
     // CONSTRUCTORS
     Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* modelp);

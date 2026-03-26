@@ -7,6 +7,8 @@
 #include "Vtop_top.h"
 #include "Vtop___024unit.h"
 #include "Vtop_core.h"
+#include "Vtop_sim_sram__D1.h"
+#include "Vtop_sim_sram__LBz1_H1.h"
 #include "Vtop_memory.h"
 #include "Vtop_writeback.h"
 #include "Vtop_csr_file.h"
@@ -50,9 +52,11 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     , TOP__top__u_core__u_pc_counter{this, Verilated::catName(namep, "top.u_core.u_pc_counter")}
     , TOP__top__u_core__u_reg_file{this, Verilated::catName(namep, "top.u_core.u_reg_file")}
     , TOP__top__u_core__u_writeback{this, Verilated::catName(namep, "top.u_core.u_writeback")}
+    , TOP__top__u_sram_ifu{this, Verilated::catName(namep, "top.u_sram_ifu")}
+    , TOP__top__u_sram_lsu{this, Verilated::catName(namep, "top.u_sram_lsu")}
 {
         // Check resources
-        Verilated::stackCheck(416);
+        Verilated::stackCheck(392);
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-12);
     _vm_contextp__->timeprecision(-12);
@@ -74,6 +78,8 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     TOP__top__u_core.__PVT__u_pc_counter = &TOP__top__u_core__u_pc_counter;
     TOP__top__u_core.__PVT__u_reg_file = &TOP__top__u_core__u_reg_file;
     TOP__top__u_core.__PVT__u_writeback = &TOP__top__u_core__u_writeback;
+    TOP__top.__PVT__u_sram_ifu = &TOP__top__u_sram_ifu;
+    TOP__top.__PVT__u_sram_lsu = &TOP__top__u_sram_lsu;
     // Setup each module's pointer back to symbol table (for public functions)
     TOP.__Vconfigure(true);
     TOP____024unit.__Vconfigure(true);
@@ -93,6 +99,8 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     TOP__top__u_core__u_pc_counter.__Vconfigure(true);
     TOP__top__u_core__u_reg_file.__Vconfigure(true);
     TOP__top__u_core__u_writeback.__Vconfigure(true);
+    TOP__top__u_sram_ifu.__Vconfigure(true);
+    TOP__top__u_sram_lsu.__Vconfigure(true);
     // Setup export functions
     for (int __Vfinal = 0; __Vfinal < 2; ++__Vfinal) {
     }
