@@ -3,6 +3,7 @@
 #include "Vtop.h"
 #include <cstdio>
 #include <cstdint>
+#include <sys/stat.h>   // fstat / stat
 
 #include "common.h"
 #include "config.h"
@@ -14,6 +15,50 @@ uint64_t sim_time = 0;
 const char *img_file = NULL;
 NPCState npc_state = NPC_STOP;
 
+// =================== 波形文件大小限制 =================== //
+// 每隔 CONFIG_WAVE_CHECK_INTERVAL 个半周期检查一次文件大小。
+// 若超过 CONFIG_WAVE_MAX_BYTES，关闭旧文件并重新打开（截断），
+// 继续写入最新的波形数据，旧数据被丢弃。
+
+#ifndef CONFIG_WAVE_MAX_BYTES
+#define CONFIG_WAVE_MAX_BYTES   (32 * 1024 * 1024)   // 默认 32 MB
+#endif
+
+#ifndef CONFIG_WAVE_CHECK_INTERVAL
+#define CONFIG_WAVE_CHECK_INTERVAL  4096              // 每 4096 个半周期检查一次
+#endif
+
+static const char *wave_filename = "wave.vcd";
+
+// 查询文件当前大小（字节）
+static long get_file_size(const char *path) {
+    struct stat st;
+    if (stat(path, &st) == 0) return (long)st.st_size;
+    return -1;
+}
+
+// 检查波形文件大小，超限时截断重开
+static void wave_check_size() {
+#ifdef CONFIG_WAVE
+    if (!tfp) return;
+    long sz = get_file_size(wave_filename);
+    if (sz < 0 || sz < CONFIG_WAVE_MAX_BYTES) return;
+
+    // 超限：关闭旧文件，重新打开（"w" 截断），继续记录最新波形
+    tfp->flush();
+    tfp->close();
+    delete tfp;
+    tfp = nullptr;
+
+    printf("[wave] File size %.2f MB exceeded limit %d MB, truncating %s\n",
+           sz / 1048576.0, CONFIG_WAVE_MAX_BYTES / 1048576, wave_filename);
+
+    tfp = new VerilatedVcdC;
+    top->trace(tfp, 99);
+    tfp->open(wave_filename);   // 以写模式重新打开，自动截断旧内容
+#endif
+}
+
 // 时钟
 static void single_cycle() {
     top->clk = 0; 
@@ -23,6 +68,13 @@ static void single_cycle() {
     top->clk = 1; 
     top->eval();
     if (tfp) tfp->dump(sim_time++);
+
+    // 定期检查波形文件大小
+#ifdef CONFIG_WAVE
+    if ((sim_time % CONFIG_WAVE_CHECK_INTERVAL) == 0) {
+        wave_check_size();
+    }
+#endif
 }
 
 // 复位
@@ -76,8 +128,9 @@ void init_sim(int argc, char** argv) {
       Verilated::traceEverOn(true);
       tfp = new VerilatedVcdC;
       top->trace(tfp, 99);
-      tfp->open("wave.vcd");
-      printf("VCD Waveform enabled.\n");
+      tfp->open(wave_filename);
+      printf("[wave] VCD Waveform enabled. Max size: %d MB, check every %d half-cycles.\n",
+             CONFIG_WAVE_MAX_BYTES / 1048576, CONFIG_WAVE_CHECK_INTERVAL);
     #endif
 
     // 初始化 踪迹
@@ -139,6 +192,11 @@ void npc_quit() {
             delete tfp;
             tfp = nullptr;
         }
+    #endif
+
+    // Dump trace 环形缓冲区到文件
+    #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) || defined(CONFIG_DTRACE) || defined(CONFIG_FTRACE)
+        trace_close();
     #endif
 
     // 释放 Verilator 顶层对象
