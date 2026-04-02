@@ -131,6 +131,7 @@ fetch #(
 
     .pc_pointer    (pc),
     .flush         (ex_jump_flag),                     // ★ 新增：跳转时冲刷
+    .up_ready      (if2id_up_ready),                   // ★ 修复 Bug1：下游 ready 信号
     .instr_out     (instr),
     .ifu_valid     (ifu_valid)                         // ★ 新增：指令有效信号
 );
