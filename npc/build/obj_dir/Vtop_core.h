@@ -47,13 +47,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
     struct {
         VL_IN8(__PVT__clk,0,0);
         VL_IN8(__PVT__rst_n,0,0);
-        VL_OUT8(__PVT__ifu_reqValid,0,0);
-        VL_IN8(__PVT__ifu_respValid,0,0);
         VL_OUT8(__PVT__lsu_ren,0,0);
         VL_OUT8(__PVT__lsu_wen,0,0);
         VL_OUT8(__PVT__lsu_wmask,3,0);
-        VL_OUT8(__PVT__lsu_reqValid,0,0);
-        VL_IN8(__PVT__lsu_respValid,0,0);
         VL_OUT8(__PVT__debug_wb_have,0,0);
         VL_OUT8(__PVT__debug_wb_en,0,0);
         VL_OUT8(__PVT__debug_wb_addr,4,0);
@@ -109,12 +105,12 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_core final : public VerilatedModule {
         CData/*2:0*/ __Vcellinp__u_execute__funct3_in;
         CData/*6:0*/ __Vcellinp__u_execute__opcode_in;
         CData/*2:0*/ __Vcellinp__u_memory__funct3_in;
-    };
-    struct {
         CData/*6:0*/ __Vcellinp__u_memory__opcode_in;
         CData/*0:0*/ __Vcellinp__u_mem2wb__up_valid;
         CData/*4:0*/ __Vcellinp__u_writeback__rd_addr_in;
         CData/*6:0*/ __Vcellinp__u_writeback__opcode_in;
+    };
+    struct {
         SData/*11:0*/ __PVT__decode_csr_addr;
         SData/*11:0*/ __PVT__csr_raddr;
         SData/*11:0*/ __PVT__csr_waddr;

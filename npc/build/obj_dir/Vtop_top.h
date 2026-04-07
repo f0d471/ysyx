@@ -7,8 +7,6 @@
 
 #include "verilated.h"
 class Vtop_core;
-class Vtop_sim_sram__D1;
-class Vtop_sim_sram__LBz1_H1;
 
 
 class Vtop__Syms;
@@ -17,8 +15,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_top final : public VerilatedModule {
   public:
     // CELLS
     Vtop_core* __PVT__u_core;
-    Vtop_sim_sram__D1* __PVT__u_sram_ifu;
-    Vtop_sim_sram__LBz1_H1* __PVT__u_sram_lsu;
 
     // DESIGN SPECIFIC STATE
     VL_IN8(clk,0,0);
@@ -26,13 +22,10 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_top final : public VerilatedModule {
     VL_OUT8(debug_wb_have,0,0);
     VL_OUT8(debug_wb_en,0,0);
     VL_OUT8(debug_wb_addr,4,0);
-    CData/*0:0*/ __PVT__ifu_reqValid;
-    CData/*0:0*/ __PVT__ifu_respValid;
     CData/*0:0*/ __PVT__lsu_ren;
-    CData/*0:0*/ __PVT__lsu_reqValid;
     CData/*0:0*/ __PVT__lsu_wen;
     CData/*3:0*/ __PVT__lsu_wmask;
-    CData/*0:0*/ __PVT__lsu_respValid;
+    CData/*3:0*/ __Vfunc_wmask2len__3__mask;
     VL_OUT(pc,31,0);
     VL_OUT(instr,31,0);
     VL_OUT(debug_wb_pc,31,0);
@@ -43,6 +36,11 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_top final : public VerilatedModule {
     IData/*31:0*/ __PVT__lsu_addr;
     IData/*31:0*/ __PVT__lsu_wdata;
     IData/*31:0*/ __PVT__lsu_rdata;
+    IData/*31:0*/ __Vfunc_paddr_read__0__Vfuncout;
+    IData/*31:0*/ __Vfunc_paddr_read__1__Vfuncout;
+    IData/*31:0*/ __Vfunc_wmask2len__3__Vfuncout;
+    IData/*31:0*/ __Vdly__ifu_rdata;
+    IData/*31:0*/ __Vdly__lsu_rdata;
     VL_OUT(regs[16],31,0);
 
     // INTERNAL VARIABLES

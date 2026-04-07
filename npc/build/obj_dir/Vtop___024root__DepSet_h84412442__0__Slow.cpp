@@ -6,10 +6,8 @@
 #include "Vtop__Syms.h"
 #include "Vtop___024root.h"
 
-VL_ATTR_COLD void Vtop_top___eval_initial__TOP__top(Vtop_top* vlSelf);
-VL_ATTR_COLD void Vtop___024root____Vm_traceActivitySetAll(Vtop___024root* vlSelf);
 VL_ATTR_COLD void Vtop_core___eval_initial__TOP__top__u_core(Vtop_core* vlSelf);
-VL_ATTR_COLD void Vtop_sim_sram__LBz1_H1___eval_initial__TOP__top__u_sram_lsu(Vtop_sim_sram__LBz1_H1* vlSelf);
+VL_ATTR_COLD void Vtop___024root____Vm_traceActivitySetAll(Vtop___024root* vlSelf);
 VL_ATTR_COLD void Vtop_execute___eval_initial__TOP__top__u_core__u_execute(Vtop_execute* vlSelf);
 
 VL_ATTR_COLD void Vtop___024root___eval_initial(Vtop___024root* vlSelf) {
@@ -18,19 +16,10 @@ VL_ATTR_COLD void Vtop___024root___eval_initial(Vtop___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vtop___024root___eval_initial\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    Vtop_top___eval_initial__TOP__top((&vlSymsp->TOP__top));
-    Vtop___024root____Vm_traceActivitySetAll(vlSelf);
     Vtop_core___eval_initial__TOP__top__u_core((&vlSymsp->TOP__top__u_core));
-    Vtop_sim_sram__LBz1_H1___eval_initial__TOP__top__u_sram_lsu((&vlSymsp->TOP__top__u_sram_lsu));
+    Vtop___024root____Vm_traceActivitySetAll(vlSelf);
     Vtop_execute___eval_initial__TOP__top__u_core__u_execute((&vlSymsp->TOP__top__u_core__u_execute));
-    vlSelfRef.__Vtrigprevexpr___TOP__top__u_sram_ifu____PVT__clk__0 
-        = vlSymsp->TOP__top__u_sram_ifu.__PVT__clk;
-    vlSelfRef.__Vtrigprevexpr___TOP__top__u_sram_ifu____PVT__rst_n__0 
-        = vlSymsp->TOP__top__u_sram_ifu.__PVT__rst_n;
-    vlSelfRef.__Vtrigprevexpr___TOP__top__u_sram_lsu____PVT__clk__0 
-        = vlSymsp->TOP__top__u_sram_lsu.__PVT__clk;
-    vlSelfRef.__Vtrigprevexpr___TOP__top__u_sram_lsu____PVT__rst_n__0 
-        = vlSymsp->TOP__top__u_sram_lsu.__PVT__rst_n;
+    vlSelfRef.__Vtrigprevexpr___TOP__top__clk__0 = vlSymsp->TOP__top.clk;
     vlSelfRef.__Vtrigprevexpr___TOP__top__u_core__u_memory____PVT__clk__0 
         = vlSymsp->TOP__top__u_core__u_memory.__PVT__clk;
     vlSelfRef.__Vtrigprevexpr___TOP__top__u_core__u_memory____PVT__rst_n__0 
@@ -85,14 +74,13 @@ VL_ATTR_COLD void Vtop___024root___eval_triggers__stl(Vtop___024root* vlSelf) {
 #endif
 }
 
-VL_ATTR_COLD void Vtop_sim_sram__D1___stl_sequent__TOP__top__u_sram_ifu__0(Vtop_sim_sram__D1* vlSelf);
 VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__0(Vtop_core* vlSelf);
 VL_ATTR_COLD void Vtop_pipe_reg__D40___stl_sequent__TOP__top__u_core__u_if2id__0(Vtop_pipe_reg__D40* vlSelf);
 VL_ATTR_COLD void Vtop_pipe_reg__D107___stl_sequent__TOP__top__u_core__u_id2ex__0(Vtop_pipe_reg__D107* vlSelf);
 VL_ATTR_COLD void Vtop_pipe_reg__D8c___stl_sequent__TOP__top__u_core__u_mem2wb__0(Vtop_pipe_reg__D8c* vlSelf);
 VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__0(Vtop_top* vlSelf);
-VL_ATTR_COLD void Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0(Vtop_pc_counter* vlSelf);
 VL_ATTR_COLD void Vtop___024root___stl_sequent__TOP__0(Vtop___024root* vlSelf);
+VL_ATTR_COLD void Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0(Vtop_pc_counter* vlSelf);
 VL_ATTR_COLD void Vtop_csr_file___stl_sequent__TOP__top__u_core__u_csr_file__0(Vtop_csr_file* vlSelf);
 VL_ATTR_COLD void Vtop_pipe_reg__D8f___stl_sequent__TOP__top__u_core__u_ex2mem__0(Vtop_pipe_reg__D8f* vlSelf);
 VL_ATTR_COLD void Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__0(Vtop_reg_file* vlSelf);
@@ -131,15 +119,14 @@ VL_ATTR_COLD void Vtop___024root___eval_stl(Vtop___024root* vlSelf) {
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     if ((1ULL & vlSelfRef.__VstlTriggered.word(0U))) {
-        Vtop_sim_sram__D1___stl_sequent__TOP__top__u_sram_ifu__0((&vlSymsp->TOP__top__u_sram_ifu));
-        Vtop___024root____Vm_traceActivitySetAll(vlSelf);
         Vtop_core___stl_sequent__TOP__top__u_core__0((&vlSymsp->TOP__top__u_core));
+        Vtop___024root____Vm_traceActivitySetAll(vlSelf);
         Vtop_pipe_reg__D40___stl_sequent__TOP__top__u_core__u_if2id__0((&vlSymsp->TOP__top__u_core__u_if2id));
         Vtop_pipe_reg__D107___stl_sequent__TOP__top__u_core__u_id2ex__0((&vlSymsp->TOP__top__u_core__u_id2ex));
         Vtop_pipe_reg__D8c___stl_sequent__TOP__top__u_core__u_mem2wb__0((&vlSymsp->TOP__top__u_core__u_mem2wb));
         Vtop_top___stl_sequent__TOP__top__0((&vlSymsp->TOP__top));
-        Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0((&vlSymsp->TOP__top__u_core__u_pc_counter));
         Vtop___024root___stl_sequent__TOP__0(vlSelf);
+        Vtop_pc_counter___stl_sequent__TOP__top__u_core__u_pc_counter__0((&vlSymsp->TOP__top__u_core__u_pc_counter));
         Vtop_csr_file___stl_sequent__TOP__top__u_core__u_csr_file__0((&vlSymsp->TOP__top__u_core__u_csr_file));
         Vtop_pipe_reg__D8f___stl_sequent__TOP__top__u_core__u_ex2mem__0((&vlSymsp->TOP__top__u_core__u_ex2mem));
         Vtop_reg_file___stl_sequent__TOP__top__u_core__u_reg_file__0((&vlSymsp->TOP__top__u_core__u_reg_file));

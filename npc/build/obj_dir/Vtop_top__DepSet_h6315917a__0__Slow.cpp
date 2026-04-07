@@ -25,15 +25,17 @@ VL_ATTR_COLD void Vtop_top___ctor_var_reset(Vtop_top* vlSelf) {
     vlSelf->debug_wb_addr = 0;
     vlSelf->debug_wb_data = 0;
     vlSelf->__PVT__ifu_raddr = 0;
-    vlSelf->__PVT__ifu_reqValid = 0;
     vlSelf->__PVT__ifu_rdata = 0;
-    vlSelf->__PVT__ifu_respValid = 0;
     vlSelf->__PVT__lsu_addr = 0;
     vlSelf->__PVT__lsu_ren = 0;
-    vlSelf->__PVT__lsu_reqValid = 0;
     vlSelf->__PVT__lsu_wen = 0;
     vlSelf->__PVT__lsu_wdata = 0;
     vlSelf->__PVT__lsu_wmask = 0;
     vlSelf->__PVT__lsu_rdata = 0;
-    vlSelf->__PVT__lsu_respValid = 0;
+    vlSelf->__Vfunc_paddr_read__0__Vfuncout = 0;
+    vlSelf->__Vfunc_paddr_read__1__Vfuncout = 0;
+    vlSelf->__Vfunc_wmask2len__3__Vfuncout = 0;
+    vlSelf->__Vfunc_wmask2len__3__mask = 0;
+    vlSelf->__Vdly__ifu_rdata = 0;
+    vlSelf->__Vdly__lsu_rdata = 0;
 }

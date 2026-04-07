@@ -16,8 +16,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_fetch final : public VerilatedModule {
     // DESIGN SPECIFIC STATE
     VL_IN8(__PVT__clk,0,0);
     VL_IN8(__PVT__rst_n,0,0);
-    VL_OUT8(__PVT__ifu_reqValid,0,0);
-    VL_IN8(__PVT__ifu_respValid,0,0);
     VL_IN8(__PVT__flush,0,0);
     VL_OUT8(__PVT__ifu_valid,0,0);
     CData/*0:0*/ __PVT__state;

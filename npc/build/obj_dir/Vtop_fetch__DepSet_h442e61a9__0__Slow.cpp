@@ -20,17 +20,9 @@ VL_ATTR_COLD void Vtop_fetch___stl_sequent__TOP__top__u_core__u_fetch__1(Vtop_fe
     VL_DEBUG_IF(VL_DBG_MSGF("+          Vtop_fetch___stl_sequent__TOP__top__u_core__u_fetch__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__state_next = (1U & ((IData)(vlSelfRef.__PVT__state)
-                                          ? ((IData)(vlSelfRef.__PVT__state) 
-                                             && (1U 
-                                                 & (~ 
-                                                    ((IData)(vlSelfRef.__PVT__flush) 
-                                                     | (IData)(vlSelfRef.__PVT__ifu_respValid)))))
-                                          : (~ (IData)(vlSelfRef.__PVT__flush))));
-    vlSelfRef.__PVT__ifu_reqValid = (1U & ((~ (IData)(vlSelfRef.__PVT__state)) 
-                                           & (~ (IData)(vlSelfRef.__PVT__flush))));
-    vlSelfRef.__PVT__ifu_valid = (((IData)(vlSelfRef.__PVT__state) 
-                                   & (IData)(vlSelfRef.__PVT__ifu_respValid)) 
+    vlSelfRef.__PVT__state_next = ((1U & (~ (IData)(vlSelfRef.__PVT__state))) 
+                                   && (1U & (~ (IData)(vlSelfRef.__PVT__flush))));
+    vlSelfRef.__PVT__ifu_valid = ((IData)(vlSelfRef.__PVT__state) 
                                   & (~ (IData)(vlSelfRef.__PVT__flush)));
     vlSelfRef.__PVT__instr_out = ((IData)(vlSelfRef.__PVT__ifu_valid)
                                    ? vlSelfRef.__PVT__ifu_rdata
@@ -48,8 +40,6 @@ VL_ATTR_COLD void Vtop_fetch___ctor_var_reset(Vtop_fetch* vlSelf) {
     vlSelf->__PVT__pc_pointer = 0;
     vlSelf->__PVT__ifu_raddr = 0;
     vlSelf->__PVT__ifu_rdata = 0;
-    vlSelf->__PVT__ifu_reqValid = 0;
-    vlSelf->__PVT__ifu_respValid = 0;
     vlSelf->__PVT__flush = 0;
     vlSelf->__PVT__instr_out = 0;
     vlSelf->__PVT__ifu_valid = 0;

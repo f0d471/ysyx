@@ -10,82 +10,38 @@
 typedef uint32_t paddr_t;
 
 // ===================== log =============================
-// Trace 使用内存环形缓冲区，程序结束时一次性写入文件。
-// 这样可以严格控制 trace 文件大小，始终保留最近的 N 条记录。
+static FILE *trace_fp = NULL;
 
-#ifndef CONFIG_TRACE_BUF_LINES
-#define CONFIG_TRACE_BUF_LINES 4096   // 环形缓冲区容纳的最大行数
-#endif
-
-#ifndef CONFIG_TRACE_LINE_LEN
-#define CONFIG_TRACE_LINE_LEN  256    // 每行最大字节数（含 '\0'）
-#endif
-
-static char  trace_ring_buf[CONFIG_TRACE_BUF_LINES][CONFIG_TRACE_LINE_LEN];
-static int   trace_ring_head = 0;   // 下一次写入的位置（0-based，循环）
-static int   trace_ring_count = 0;  // 当前缓冲区中有效行数
-static char  trace_filename[256] = "npc-trace.txt";
-
-// 初始化：仅记录文件名，不打开文件
+// 初始化
 void init_trace(const char *filename) {
 #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) || defined(CONFIG_FTRACE) || defined(CONFIG_DTRACE)
-    if (filename) {
-        strncpy(trace_filename, filename, sizeof(trace_filename) - 1);
-        trace_filename[sizeof(trace_filename) - 1] = '\0';
+    if (trace_fp != NULL) return;  
+    trace_fp = fopen(filename, "w");
+    if (!trace_fp) {
+        perror("fopen trace file failed");
+        exit(1);
     }
-    trace_ring_head  = 0;
-    trace_ring_count = 0;
-    printf("[trace] Ring buffer initialized: max %d lines x %d bytes, output -> %s\n",
-           CONFIG_TRACE_BUF_LINES, CONFIG_TRACE_LINE_LEN, trace_filename);
 #endif
 }
 
-// 统一的写日志接口：写入环形缓冲区，超过上限时自动覆盖最旧的行
+// 统一的写日志接口 (大写 TRACE_LOG)
 void TRACE_LOG(const char *fmt, ...) {
+    if (!trace_fp) return;  
+
     va_list args;
     va_start(args, fmt);
-    vsnprintf(trace_ring_buf[trace_ring_head], CONFIG_TRACE_LINE_LEN, fmt, args);
+    vfprintf(trace_fp, fmt, args);
     va_end(args);
 
-    trace_ring_head = (trace_ring_head + 1) % CONFIG_TRACE_BUF_LINES;
-    if (trace_ring_count < CONFIG_TRACE_BUF_LINES) {
-        trace_ring_count++;
-    }
-    // 当 count == BUF_LINES 时，head 已经绕回，下次写入将覆盖最旧的行
+    fflush(trace_fp); 
 }
 
-// 将环形缓冲区内容按时间顺序 dump 到文件
-// 若缓冲区未满，从 0 开始顺序输出；若已满，从 head（最旧）开始循环输出
+// 关闭 trace 文件
 void trace_close() {
-    if (trace_ring_count == 0) return;
-
-    FILE *fp = fopen(trace_filename, "w");
-    if (!fp) {
-        perror("[trace] fopen trace file failed");
-        return;
+    if (trace_fp) {
+        fclose(trace_fp);
+        trace_fp = NULL;
     }
-
-    int start;
-    int total = trace_ring_count;
-
-    if (trace_ring_count < CONFIG_TRACE_BUF_LINES) {
-        // 缓冲区未满：从 0 到 count-1 顺序输出
-        start = 0;
-    } else {
-        // 缓冲区已满：head 指向最旧的行
-        start = trace_ring_head;
-        fprintf(fp, "[trace] NOTE: buffer full (%d lines), oldest entries discarded.\n",
-                CONFIG_TRACE_BUF_LINES);
-        total = CONFIG_TRACE_BUF_LINES;
-    }
-
-    for (int i = 0; i < total; i++) {
-        int idx = (start + i) % CONFIG_TRACE_BUF_LINES;
-        fputs(trace_ring_buf[idx], fp);
-    }
-
-    fclose(fp);
-    printf("[trace] Dumped %d lines to %s\n", total, trace_filename);
 }
 
 // ============================ itrace =============================
