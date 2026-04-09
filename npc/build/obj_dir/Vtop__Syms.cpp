@@ -52,7 +52,7 @@ Vtop__Syms::Vtop__Syms(VerilatedContext* contextp, const char* namep, Vtop* mode
     , TOP__top__u_core__u_writeback{this, Verilated::catName(namep, "top.u_core.u_writeback")}
 {
         // Check resources
-        Verilated::stackCheck(416);
+        Verilated::stackCheck(392);
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-12);
     _vm_contextp__->timeprecision(-12);

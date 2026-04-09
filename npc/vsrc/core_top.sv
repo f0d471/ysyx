@@ -13,25 +13,33 @@ module core #(
     output logic [DW-1:0] instr,
     output logic [DW-1:0] regs [15:0],
 
-    // ★ [新增] IFU SimpleBus 接口 — 连接 sim_top 中的仿真存储器
-    output logic [AW-1:0] ifu_raddr,      // → 取指地址
-    input  logic [DW-1:0] ifu_rdata,      // ← 返回的指令
+    // IFU SimpleBus 接口
+    output logic [AW-1:0] ifu_raddr,
+    output logic          ifu_reqValid,
+    input  logic          ifu_reqReady,
+    input  logic [DW-1:0] ifu_rdata,
+    input  logic          ifu_respValid,
+    output logic          ifu_respReady,
 
-    // ★ [新增] LSU SimpleBus 接口
+    // LSU 握手接口
     output logic [AW-1:0] lsu_addr,
     output logic          lsu_ren,
     output logic          lsu_wen,
     output logic [DW-1:0] lsu_wdata,
     output logic [3:0]    lsu_wmask,
+    output logic          lsu_reqValid,
+    input  logic          lsu_reqReady,
     input  logic [DW-1:0] lsu_rdata,
+    input  logic          lsu_respValid,
+    output logic          lsu_respReady,
  
-    // ★ Debug / Commit 信号（供 sim_top 传给 C++ 做 trace/difftest）
-    output logic          debug_wb_have,    // WB 级有有效指令提交
-    output logic [31:0]   debug_wb_pc,      // 提交指令的 PC
-    output logic [31:0]   debug_wb_instr,   // 提交指令本体
-    output logic          debug_wb_en,     // 寄存器写使能
-    output logic [4:0]    debug_wb_addr,    // 写回寄存器号
-    output logic [31:0]   debug_wb_data     // 写回数据
+    // Debug / Commit 信号
+    output logic          debug_wb_have,
+    output logic [31:0]   debug_wb_pc,
+    output logic [31:0]   debug_wb_instr,
+    output logic          debug_wb_en,
+    output logic [4:0]    debug_wb_addr,
+    output logic [31:0]   debug_wb_data
 );
 
 //  握手通道信号
@@ -84,7 +92,7 @@ logic [1:0]  fwd_rs2_sel;
 
 // IFU 控制信号
 logic        ifu_valid;        // fetch 输出：指令有效
-logic        lsu_busy;        // LSU 正在等待数据（Load 的 IDLE 状态）
+logic        lsu_busy;         // LSU 正在等待数据
 
 //  CSR 接口
 logic [11:0] csr_raddr;
@@ -95,6 +103,24 @@ logic [31:0] csr_wdata;
 logic        trap_valid;
 logic [31:0] trap_pc, trap_cause, trap_mtvec, trap_mepc;
 
+// ===================================================================
+//  ★ 修正：Stall 信号分层
+//
+//  后级阻塞 = load_stall | lsu_busy
+//    → 冻结 IF/ID、ID/EX、EX/MEM，以及 PC
+//
+//  IFU 未就绪 (ifu_valid=0)
+//    → 只冻结 PC（不取新地址）
+//    → 不冻结 IF/ID！IF/ID 看到 up_valid=0，自然产生气泡
+//    → 已在管线里的指令继续流动、排空
+// ===================================================================
+
+logic backend_stall;
+assign backend_stall = load_stall | lsu_busy;
+
+// PC 需要两种情况都暂停
+logic pc_hold_sig;
+assign pc_hold_sig = !ifu_valid | backend_stall;
 
 // ===================================================================
 //  Stage 1 : Fetch (IF)
@@ -106,9 +132,9 @@ pc_counter #(
 ) u_pc_counter (
     .clk      (clk),
     .rst_n    (rst_n),
-    .jump_en  (ex_jump_flag),                       // ★ 改：只有真正跳转
-    .jump_addr(ex_jump_target),                     // ★ 改：直接用跳转目标
-    .pc_hold  (!ifu_valid | load_stall | lsu_busy), // ★ 新增：IFU 忙或 stall 时保持
+    .jump_en  (ex_jump_flag),
+    .jump_addr(ex_jump_target),
+    .pc_hold  (pc_hold_sig),
     .pc       (pc)
 );
 
@@ -116,14 +142,19 @@ fetch #(
     .AW(AW),
     .DW(DW)
 ) u_fetch (
-    .clk       (clk),
-    .rst_n     (rst_n),
-    .pc_pointer(pc),
-    .ifu_raddr (ifu_raddr),                        // ★ 新增：→ 外部存储器
-    .ifu_rdata (ifu_rdata),                        // ★ 新增：← 外部存储器
-    .flush     (ex_jump_flag),                     // ★ 新增：跳转时冲刷
-    .instr_out (instr),
-    .ifu_valid (ifu_valid)                         // ★ 新增：指令有效信号
+    .clk          (clk),
+    .rst_n        (rst_n),
+    .pc_pointer   (pc),
+    .ifu_raddr    (ifu_raddr),
+    .ifu_rdata    (ifu_rdata),
+    .ifu_reqValid (ifu_reqValid),
+    .ifu_reqReady (ifu_reqReady),
+    .ifu_respValid(ifu_respValid),
+    .ifu_respReady(ifu_respReady),
+    .flush        (ex_jump_flag),
+    .stall        (backend_stall),       // ★ 修正：只传后级阻塞，不含 ifu_busy
+    .instr_out    (instr),
+    .ifu_valid    (ifu_valid)
 );
 
 assign if_id_up.pc    = pc;
@@ -132,20 +163,15 @@ assign if_id_up.instr = instr;
 pipe_reg #(.DW($bits(if_id_t))) u_if2id (
     .clk      (clk),
     .rst_n    (rst_n),
-
     .flush    (ex_jump_flag),
-    .stall    (load_stall | lsu_busy), 
-
-    .up_valid (ifu_valid),
+    .stall    (backend_stall),           // ★ 修正：不含 ifu_busy
+    .up_valid (ifu_valid),               // ifu_valid=0 时自然产生气泡
     .up_ready (if2id_up_ready),
     .up_data  (if_id_up),
-
     .dn_valid (if2id_dn_valid),
     .dn_ready (id2ex_up_ready),
     .dn_data  (if_id_dn)
 );
-
-
 
 // ===================================================================
 //  Stage 2 : Decode (ID)
@@ -157,7 +183,6 @@ decode #(
 ) u_decode (
     .instr_addr_in (if_id_dn.pc),
     .instr_in      (if_id_dn.instr),
-
     .rd_rs1_addr   (decode_rs1_addr),
     .rd_rs2_addr   (decode_rs2_addr),
     .rd_addr_out   (decode_rd_addr),
@@ -241,6 +266,25 @@ forward_unit u_forward (
     .fwd_rs2_data     (fwd_rs2_data)
 );
 
+// ===================================================================
+//  Stage 3 : Execute (EX)
+// ===================================================================
+
+always_comb begin
+    case (decode_op1_sel)
+        2'b00:   id_op1 = fwd_rs1_data;
+        2'b01:   id_op1 = if_id_dn.pc;
+        2'b10:   id_op1 = 32'h0;
+        default: id_op1 = 32'h0;
+    endcase
+    case (decode_op2_sel)
+        2'b00:   id_op2 = fwd_rs2_data;
+        2'b01:   id_op2 = decode_imm;
+        2'b10:   id_op2 = 32'd4;
+        default: id_op2 = 32'h0;
+    endcase
+end
+
 //  ID/EX 流水线寄存器
 assign id_ex_up.op1         = id_op1;
 assign id_ex_up.op2         = id_op2;
@@ -272,26 +316,6 @@ pipe_reg #(.DW($bits(id_ex_t))) u_id2ex (
     .dn_ready (ex2mem_up_ready),
     .dn_data  (id_ex_dn)
 );
-
-
-// ===================================================================
-//  Stage 3 : Execute (EX)
-// ===================================================================
-
-always_comb begin
-    case (decode_op1_sel)
-        2'b00:   id_op1 = fwd_rs1_data;   // OP1_RS1 
-        2'b01:   id_op1 = if_id_dn.pc;    // OP1_PC
-        2'b10:   id_op1 = 32'h0;          // OP1_ZERO
-        default: id_op1 = 32'h0;
-    endcase
-    case (decode_op2_sel)
-        2'b00:   id_op2 = fwd_rs2_data;   // OP2_RS2 
-        2'b01:   id_op2 = decode_imm;     // OP2_IMM
-        2'b10:   id_op2 = 32'd4;          // OP2_4
-        default: id_op2 = 32'h0;
-    endcase
-end
 
 execute #(
     .AW(AW),
@@ -356,23 +380,25 @@ memory #(
     .AW(AW),
     .DW(DW)
 ) u_memory (
-    .clk          (clk),
-    .rst_n        (rst_n),
-
-    .valid_in     (ex2mem_dn_valid),
-    .alu_result_in(ex_mem_dn.alu_result),
-    .rs2_data_in  (ex_mem_dn.rs2_data),
-    .opcode_in    (ex_mem_dn.opcode),
-    .funct3_in    (ex_mem_dn.funct3),
-
-    .lsu_addr     (lsu_addr),                          // ★ 新增 → sim_top
-    .lsu_ren      (lsu_ren),                           // ★ 新增
-    .lsu_wen      (lsu_wen),                           // ★ 新增
-    .lsu_wdata    (lsu_wdata),                         // ★ 新增
-    .lsu_wmask    (lsu_wmask),                         // ★ 新增
-    .lsu_rdata    (lsu_rdata),                         // ★ 新增 ← sim_top
-    .lsu_busy     (lsu_busy),                          // ★ 新增
-    .mem_rdata_out(mem_rdata)
+    .clk           (clk),
+    .rst_n         (rst_n),
+    .valid_in      (ex2mem_dn_valid),
+    .alu_result_in (ex_mem_dn.alu_result),
+    .rs2_data_in   (ex_mem_dn.rs2_data),
+    .opcode_in     (ex_mem_dn.opcode),
+    .funct3_in     (ex_mem_dn.funct3),
+    .lsu_addr      (lsu_addr),
+    .lsu_ren       (lsu_ren),
+    .lsu_wen       (lsu_wen),
+    .lsu_wdata     (lsu_wdata),
+    .lsu_wmask     (lsu_wmask),
+    .lsu_reqValid  (lsu_reqValid),
+    .lsu_reqReady  (lsu_reqReady),
+    .lsu_rdata     (lsu_rdata),
+    .lsu_respValid (lsu_respValid),
+    .lsu_respReady (lsu_respReady),
+    .lsu_busy      (lsu_busy),
+    .mem_rdata_out (mem_rdata)
 );
 
 // ===================================================================
@@ -391,14 +417,13 @@ pipe_reg #(.DW($bits(mem_wb_t))) u_mem2wb (
     .rst_n    (rst_n),
     .flush    (1'b0),
     .stall    (1'b0),
-    .up_valid (ex2mem_dn_valid && !lsu_busy), 
+    .up_valid (ex2mem_dn_valid && !lsu_busy),
     .up_ready (mem2wb_up_ready),
     .up_data  (mem_wb_up),
     .dn_valid (mem2wb_dn_valid),
     .dn_ready (1'b1),
     .dn_data  (mem_wb_dn)
 );
-
 
 // ===================================================================
 //  Stage 5 : Writeback (WB)
@@ -416,11 +441,11 @@ writeback #(
     .wb_data      (wb_wr_data)  
 );
 
-assign debug_wb_have  = mem2wb_dn_valid;      // WB 级有有效指令
+assign debug_wb_have  = mem2wb_dn_valid;
 assign debug_wb_pc    = mem_wb_dn.pc;
 assign debug_wb_instr = mem_wb_dn.instr;
-assign debug_wb_en    = wb_wr_en;             // writeback 模块输出的写使能
-assign debug_wb_addr  = wb_wr_addr;           // writeback 模块输出的写回寄存器号
-assign debug_wb_data  = wb_wr_data;           // writeback 模块输出的写回数据
+assign debug_wb_en    = wb_wr_en;
+assign debug_wb_addr  = wb_wr_addr;
+assign debug_wb_data  = wb_wr_data;
 
 endmodule
