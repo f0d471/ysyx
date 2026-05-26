@@ -60,6 +60,7 @@ npc/obj_dir/
 npc/target/
 npc/project/target/
 npc/project/project/
+npc/npc-trace.txt
 
 # NVBoard
 nvboard/build/
