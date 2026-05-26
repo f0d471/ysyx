@@ -5,7 +5,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-// 向输出缓冲区安全追加一个字符
+// 向输出缓冲区安全追加一个字符，超出容量则丢弃
 static void append_char(char *out, size_t n, size_t *pos, char c) {
   if (*pos < n - 1) {
     out[*pos] = c;
@@ -13,7 +13,7 @@ static void append_char(char *out, size_t n, size_t *pos, char c) {
   (*pos)++;
 }
 
-// 将整数按指定进制/宽度/填充符格式化到输出缓冲区
+// 将整数按指定进制、宽度和填充符格式化到输出缓冲区
 static void print_num(char *out, size_t n, size_t *pos, long long val, int base, int width, char pad) {
   char buf[32];
   int i = 0;
@@ -57,7 +57,7 @@ static void print_num(char *out, size_t n, size_t *pos, long long val, int base,
   }
 }
 
-// 将字符串按指定宽度格式化到输出缓冲区
+// 将字符串按指定宽度右对齐格式化到输出缓冲区
 static void print_string(char *out, size_t n, size_t *pos, const char *s, int width) {
   size_t len = strlen(s);
   int pad_len = width - len;
@@ -72,7 +72,7 @@ static void print_string(char *out, size_t n, size_t *pos, const char *s, int wi
   }
 }
 
-// 核心格式化引擎：解析 fmt 字符串，将结果写入 out
+// 核心格式化引擎：解析 fmt 字符串，将结果写入 out，返回写入字符数（不含 '\0'）
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   size_t pos = 0;
 
@@ -138,6 +138,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   return pos;
 }
 
+// 格式化字符串到 out（无长度限制）
 int sprintf(char *out, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -146,6 +147,7 @@ int sprintf(char *out, const char *fmt, ...) {
   return ret;
 }
 
+// 格式化字符串到 out，最多写入 n-1 个字符加 '\0'
 int snprintf(char *out, size_t n, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -154,11 +156,12 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
   return ret;
 }
 
+// 格式化字符串到 out，使用已有的 va_list
 int vsprintf(char *out, const char *fmt, va_list ap) {
   return vsnprintf(out, INT32_MAX, fmt, ap);
 }
 
-// 格式化输出到串口：先格式化到栈缓冲区，再逐字符 putch
+// 格式化输出到串口：先格式化到栈缓冲区，再逐字符通过 putch 输出
 int printf(const char *fmt, ...) {
   char buf[2048];
   va_list ap;

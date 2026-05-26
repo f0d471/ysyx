@@ -17,6 +17,7 @@ typedef struct BlockHeader {
 
 static BlockHeader *free_list = NULL;
 
+// 将空闲块按地址顺序插入 free_list，并合并前后相邻块
 static void insert_free(BlockHeader *blk) {
   blk->size = blk->size > 0 ? blk->size : -blk->size;
   blk->next = NULL;
@@ -46,19 +47,23 @@ static void insert_free(BlockHeader *blk) {
 
 static unsigned long int next = 1;
 
+// 返回一个伪随机整数
 int rand(void) {
   next = next * 1103515245 + 12345;
   return (unsigned int)(next / 65536) % 32768;
 }
 
+// 设置伪随机数种子
 void srand(unsigned int seed) {
   next = seed;
 }
 
+// 返回 x 的绝对值
 int abs(int x) {
   return (x < 0 ? -x : x);
 }
 
+// 将十进制字符串转换为 int
 int atoi(const char *nptr) {
   int x = 0;
   while (*nptr == ' ') { nptr++; }
@@ -69,6 +74,7 @@ int atoi(const char *nptr) {
   return x;
 }
 
+// 从 heap 分配至少 size 字节的内存，首次适应策略
 void *malloc(size_t size) {
   if (size == 0) return NULL;
 
@@ -109,6 +115,7 @@ void *malloc(size_t size) {
   return NULL;
 }
 
+// 释放 ptr 指向的内存块，自动合并相邻空闲块
 void free(void *ptr) {
   if (ptr == NULL) return;
 
