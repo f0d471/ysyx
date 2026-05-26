@@ -5,17 +5,17 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-// 向 buffer 安全写入字符
+// 向输出缓冲区安全追加一个字符
 static void append_char(char *out, size_t n, size_t *pos, char c) {
-  if (*pos < n - 1) { // 留一个位置给 '\0'
+  if (*pos < n - 1) {
     out[*pos] = c;
   }
   (*pos)++;
 }
 
-// 打印数字 
+// 将整数按指定进制/宽度/填充符格式化到输出缓冲区
 static void print_num(char *out, size_t n, size_t *pos, long long val, int base, int width, char pad) {
-  char buf[32]; 
+  char buf[32];
   int i = 0;
   unsigned long long uval = (unsigned long long)val;
   int sign = 0;
@@ -30,18 +30,17 @@ static void print_num(char *out, size_t n, size_t *pos, long long val, int base,
   } else {
     while (uval > 0) {
       int digit = uval % base;
-      buf[i++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'a'); 
+      buf[i++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'a');
       uval /= base;
     }
   }
 
   int real_len = i + sign;
-
   int pad_len = width - real_len;
 
   if (sign && pad == '0') {
     append_char(out, n, pos, '-');
-    sign = 0; 
+    sign = 0;
   }
 
   while (pad_len > 0) {
@@ -58,11 +57,11 @@ static void print_num(char *out, size_t n, size_t *pos, long long val, int base,
   }
 }
 
-// 打印字符串 
+// 将字符串按指定宽度格式化到输出缓冲区
 static void print_string(char *out, size_t n, size_t *pos, const char *s, int width) {
   size_t len = strlen(s);
   int pad_len = width - len;
-  
+
   while (pad_len > 0) {
     append_char(out, n, pos, ' ');
     pad_len--;
@@ -73,7 +72,7 @@ static void print_string(char *out, size_t n, size_t *pos, const char *s, int wi
   }
 }
 
-// 格式化函数 
+// 核心格式化引擎：解析 fmt 字符串，将结果写入 out
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   size_t pos = 0;
 
@@ -83,7 +82,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       continue;
     }
 
-    fmt++; 
+    fmt++;
 
     char pad = ' ';
     if (*fmt == '0') {
@@ -104,7 +103,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         break;
       }
       case 'x':
-      case 'p': { 
+      case 'p': {
         unsigned int val = va_arg(ap, unsigned int);
         print_num(out, n, &pos, val, 16, width, pad);
         break;
@@ -124,7 +123,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         append_char(out, n, &pos, '%');
         break;
       }
-      default: 
+      default:
         append_char(out, n, &pos, '%');
         append_char(out, n, &pos, *fmt);
     }
@@ -139,11 +138,10 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   return pos;
 }
 
-
 int sprintf(char *out, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  int ret = vsnprintf(out, INT32_MAX, fmt, ap); 
+  int ret = vsnprintf(out, INT32_MAX, fmt, ap);
   va_end(ap);
   return ret;
 }
@@ -160,8 +158,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
   return vsnprintf(out, INT32_MAX, fmt, ap);
 }
 
+// 格式化输出到串口：先格式化到栈缓冲区，再逐字符 putch
 int printf(const char *fmt, ...) {
-  char buf[2048]; 
+  char buf[2048];
   va_list ap;
   va_start(ap, fmt);
   int len = vsnprintf(buf, sizeof(buf), fmt, ap);
