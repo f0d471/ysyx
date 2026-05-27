@@ -10,7 +10,7 @@
  #define CONFIG_SDB
 
 /************ DIFFTEST ***********/ 
-#define CONFIG_DIFFTEST
+//#define CONFIG_DIFFTEST
 
 /************ ITRACE *************/ 
 // #define CONFIG_ITRACE   

@@ -42,7 +42,7 @@ module core #(
     output logic [31:0]   debug_wb_data
 );
 
-//  握手通道信号
+// 握手通道信号
 logic    if2id_up_ready;
 logic    if2id_dn_valid;
 logic    id2ex_up_ready;
@@ -52,13 +52,13 @@ logic    ex2mem_dn_valid;
 logic    mem2wb_up_ready;
 logic    mem2wb_dn_valid;
 
-//  通道数据（struct）
+// 通道数据（struct）
 if_id_t  if_id_up, if_id_dn;
 id_ex_t  id_ex_up, id_ex_dn;
 ex_mem_t ex_mem_up, ex_mem_dn;
 mem_wb_t mem_wb_up, mem_wb_dn;
 
-//  ID 阶段中间信号
+// ID 阶段中间信号
 logic [4:0]  decode_rs1_addr, decode_rs2_addr;
 logic [4:0]  decode_rd_addr;
 logic [31:0] decode_imm;
@@ -76,7 +76,7 @@ logic [31:0] reg_rs1_data, reg_rs2_data;
 logic [31:0] fwd_rs1_data, fwd_rs2_data;
 logic [31:0] id_op1, id_op2;
 
-//  EX / MEM / WB 阶段信号
+// EX / MEM / WB 阶段信号
 logic [31:0] ex_alu_result;
 logic        ex_jump_flag;
 logic [31:0] ex_jump_target;
@@ -85,16 +85,16 @@ logic        wb_wr_en;
 logic [4:0]  wb_wr_addr;
 logic [31:0] wb_wr_data;
 
-//  Hazard / Forward 控制信号
+// Hazard / Forward 控制信号
 logic        load_stall;
 logic [1:0]  fwd_rs1_sel;
 logic [1:0]  fwd_rs2_sel;
 
 // IFU 控制信号
-logic        ifu_valid;        // fetch 输出：指令有效
-logic        lsu_busy;         // LSU 正在等待数据
-
-//  CSR 接口
+logic        ifu_valid;        
+logic        lsu_busy;  
+       
+// CSR 接口
 logic [11:0] csr_raddr;
 logic [31:0] csr_rdata;
 logic        csr_wen;
@@ -103,29 +103,7 @@ logic [31:0] csr_wdata;
 logic        trap_valid;
 logic [31:0] trap_pc, trap_cause, trap_mtvec, trap_mepc;
 
-// ===================================================================
-//  ★ 修正：Stall 信号分层
-//
-//  后级阻塞 = load_stall | lsu_busy
-//    → 冻结 IF/ID、ID/EX、EX/MEM，以及 PC
-//
-//  IFU 未就绪 (ifu_valid=0)
-//    → 只冻结 PC（不取新地址）
-//    → 不冻结 IF/ID！IF/ID 看到 up_valid=0，自然产生气泡
-//    → 已在管线里的指令继续流动、排空
-// ===================================================================
-
-logic backend_stall;
-assign backend_stall = load_stall | lsu_busy;
-
-// PC 需要两种情况都暂停
-logic pc_hold_sig;
-assign pc_hold_sig = !ifu_valid | backend_stall;
-
-// ===================================================================
-//  Stage 1 : Fetch (IF)
-// ===================================================================
-
+// IF
 pc_counter #(
     .AW       (AW),
     .RESET_PC (32'h80000000)
@@ -134,7 +112,7 @@ pc_counter #(
     .rst_n    (rst_n),
     .jump_en  (ex_jump_flag),
     .jump_addr(ex_jump_target),
-    .pc_hold  (pc_hold_sig),
+    .pc_hold  (!ifu_valid | load_stall | lsu_busy),
     .pc       (pc)
 );
 
@@ -152,7 +130,7 @@ fetch #(
     .ifu_respValid(ifu_respValid),
     .ifu_respReady(ifu_respReady),
     .flush        (ex_jump_flag),
-    .stall        (backend_stall),       // ★ 修正：只传后级阻塞，不含 ifu_busy
+    .stall        (load_stall | lsu_busy),      
     .instr_out    (instr),
     .ifu_valid    (ifu_valid)
 );
@@ -164,8 +142,8 @@ pipe_reg #(.DW($bits(if_id_t))) u_if2id (
     .clk      (clk),
     .rst_n    (rst_n),
     .flush    (ex_jump_flag),
-    .stall    (backend_stall),           // ★ 修正：不含 ifu_busy
-    .up_valid (ifu_valid),               // ifu_valid=0 时自然产生气泡
+    .stall    (load_stall | lsu_busy),          
+    .up_valid (ifu_valid),              
     .up_ready (if2id_up_ready),
     .up_data  (if_id_up),
     .dn_valid (if2id_dn_valid),
