@@ -1,60 +1,83 @@
-# ========================
-# Editor & OS configuration
-# ========================
+# ============================================================
+# Editor & IDE
+# ============================================================
 .vscode/
 .idea/
 *.swp
+*.swo
 *~
+.*.swp
 .DS_Store
-compile_commands.json
+
+# ============================================================
+# Language servers / linters
+# ============================================================
 .ccls-cache/
 .cache/
+.clangd/
+compile_commands.json
 
-# ========================
-# C/C++ build artifacts
-# ========================
+# ============================================================
+# C/C++ build artifacts (global fallback)
+# ============================================================
 *.o
+*.d
 *.a
 *.so
+*.dylib
 *.elf
 *.bin
 *.hex
 *.img
+*.out
 
-# ========================
-# Logs and Simulator Outputs
-# ========================
+# ============================================================
+# Simulation & waveform
+# ============================================================
 *.log
 *.vcd
 *.fsdb
 *.fst
+*.wlf
+*.wdb
+*.jou
+*.str
+*.bak
+*.mem
+Makefile.html
 
-# ========================
-# Cscope and CTags
-# ========================
+# ============================================================
+# Cscope & CTags
+# ============================================================
 tags
 cscope.out
 cscope.in.out
 cscope.po.out
 
-# ========================
-# Subproject Directories
-# ========================
-# NEMU
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.pyc
+*.pyo
+
+# ============================================================
+# Build directories — by project
+# ============================================================
 nemu/build/
 
-# Abstract-Machine & Kernels
 abstract-machine/build/
 am-kernels/**/build/
 
-# OS and Navy Apps
 nanos-lite/build/
 navy-apps/build/
 navy-apps/fsimg/build/
 navy-apps/fsimg/bin/
 navy-apps/fsimg/share/
 
-# NPC (Chisel/Verilator)
+nvboard/build/
+
+# NPC
 npc/build/
 npc/obj_dir/
 npc/target/
@@ -62,15 +85,24 @@ npc/project/target/
 npc/project/project/
 npc/npc-trace.txt
 
-# NVBoard
-nvboard/build/
-
-# ysyxSoC
+# ysyxSoC (Chisel / Verilog / FPGA)
+ysyxSoC/build/
 ysyxSoC/target/
 ysyxSoC/project/target/
 ysyxSoC/rocket-chip/build/
 ysyxSoC/rocket-chip/target/
 
-# Python Cache
-__pycache__/
-*.pyc
+# ============================================================
+# FPGA toolchains (Vivado / Quartus / etc.)
+# ============================================================
+*.bit
+*.dcp
+*.edf
+*.jed
+*.mcs
+*.prm
+*.rbt
+*.runs/
+*.sim/
+*.xpr
+*.dSYM/
