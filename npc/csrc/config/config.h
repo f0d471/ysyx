@@ -27,7 +27,7 @@
 /************ FTRACE *************/ 
 #define CONFIG_FTRACE
 
-/************ DEVICE *************/ 
-// #define CONFIG_DEVICE    
+/************ DEVICE *************/
+#define CONFIG_DEVICE
 
 #endif
