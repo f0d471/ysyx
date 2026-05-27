@@ -135,8 +135,8 @@ extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data) {
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
-        int len = (wmask == 4'b0001 || wmask == 4'b0010 || wmask == 4'b0100 || wmask == 4'b1000) ? 1 :
-                  (wmask == 4'b0011 || wmask == 4'b1100) ? 2 : 4;
+        int len = (wmask == 0x1 || wmask == 0x2 || wmask == 0x4 || wmask == 0x8) ? 1 :
+                  (wmask == 0x3 || wmask == 0xC) ? 2 : 4;
         mmio_write(addr, len, data);
         #ifdef CONFIG_DTRACE
           log_dtrace('W', addr, len, data);
