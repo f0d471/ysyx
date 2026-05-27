@@ -131,10 +131,24 @@ module memory #(
         mem_rdata_out = 32'h0;
         if (is_load && state == S_DONE) begin
             case (funct3_in)
-                `INST_LB:  mem_rdata_out = {{24{rdata_latch[7]}},  rdata_latch[7:0]};
-                `INST_LBU: mem_rdata_out = {24'b0,                 rdata_latch[7:0]};
-                `INST_LH:  mem_rdata_out = {{16{rdata_latch[15]}}, rdata_latch[15:0]};
-                `INST_LHU: mem_rdata_out = {16'b0,                 rdata_latch[15:0]};
+                `INST_LB:  case (alu_result_in[1:0])
+                    2'b00: mem_rdata_out = {{24{rdata_latch[7]}},  rdata_latch[7:0]};
+                    2'b01: mem_rdata_out = {{24{rdata_latch[15]}}, rdata_latch[15:8]};
+                    2'b10: mem_rdata_out = {{24{rdata_latch[23]}}, rdata_latch[23:16]};
+                    2'b11: mem_rdata_out = {{24{rdata_latch[31]}}, rdata_latch[31:24]};
+                endcase
+                `INST_LBU: case (alu_result_in[1:0])
+                    2'b00: mem_rdata_out = {24'b0, rdata_latch[7:0]};
+                    2'b01: mem_rdata_out = {24'b0, rdata_latch[15:8]};
+                    2'b10: mem_rdata_out = {24'b0, rdata_latch[23:16]};
+                    2'b11: mem_rdata_out = {24'b0, rdata_latch[31:24]};
+                endcase
+                `INST_LH:  mem_rdata_out = alu_result_in[1]
+                    ? {{16{rdata_latch[31]}}, rdata_latch[31:16]}
+                    : {{16{rdata_latch[15]}}, rdata_latch[15:0]};
+                `INST_LHU: mem_rdata_out = alu_result_in[1]
+                    ? {16'b0, rdata_latch[31:16]}
+                    : {16'b0, rdata_latch[15:0]};
                 `INST_LW:  mem_rdata_out = rdata_latch;
                 default:   mem_rdata_out = 32'h0;
             endcase
