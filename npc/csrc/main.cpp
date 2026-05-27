@@ -114,8 +114,8 @@ void init_sim(int argc, char** argv) {
     #endif
 
     // 初始化 踪迹
-    #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) || defined(CONFIG_DTRACE) || defined(CONFIG_FTRACE)
-      init_trace("npc-trace.txt"); 
+    #if defined(CONFIG_ITRACE) || defined(CONFIG_MTRACE) || defined(CONFIG_DTRACE)
+      init_trace("npc-trace.txt");
     #endif
 
     // 初始化 反汇编库
