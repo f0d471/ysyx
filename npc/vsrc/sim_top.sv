@@ -147,7 +147,7 @@ module top (
                 lsu_respValid <= 1'b0;
                 if (lsu_reqValid && lsu_reqReady) begin
                     if (lsu_wen) begin
-                        paddr_write(lsu_addr & ~32'h3, lsu_wmask, lsu_wdata);
+                        paddr_write(lsu_addr & ~32'h3, {28'b0, lsu_wmask}, lsu_wdata);
                         lsu_rdata_buf <= 32'h0;
                     end else begin
                         lsu_rdata_buf <= paddr_read(lsu_addr & ~32'h3);
