@@ -1,68 +1,68 @@
-# AbstractMachine ÄÚºËÓë¿âµÄ¶¥²ã Makefile
+# AbstractMachine å†…æ ¸ä¸åº“çš„é¡¶å±‚ Makefile
 
-### Í¨¹ı `make html` »ñµÃ¸üÒ×¶ÁµÄ°æ±¾£¨ĞèÒª python-markdown£©
+### é€šè¿‡ `make html` è·å¾—æ›´æ˜“è¯»çš„ç‰ˆæœ¬ï¼ˆéœ€è¦ python-markdownï¼‰
 html:
 	cat Makefile | sed 's/^\([^#]\)/    \1/g' | markdown_py > Makefile.html
 .PHONY: html
 
-## 1. »ù±¾ÉèÖÃÓëĞ£Ñé
+## 1. åŸºæœ¬è®¾ç½®ä¸æ ¡éªŒ
 
-### Ä¬ÈÏÄ¿±ê£º´´½¨Âã»úÄÚºË¾µÏñ
+### é»˜è®¤ç›®æ ‡ï¼šåˆ›å»ºè£¸æœºå†…æ ¸é•œåƒ
 ifeq ($(MAKECMDGOALS),)
   MAKECMDGOALS  = image
   .DEFAULT_GOAL = image
 endif
 
-### `make clean/clean-all/html` Ê±Ìø¹ıºóĞøĞ£Ñé
+### `make clean/clean-all/html` æ—¶è·³è¿‡åç»­æ ¡éªŒ
 ifeq ($(findstring $(MAKECMDGOALS),clean|clean-all|html),)
 
-### ´òÓ¡¹¹½¨ĞÅÏ¢
+### æ‰“å°æ„å»ºä¿¡æ¯
 $(info # Building $(NAME)-$(MAKECMDGOALS) [$(ARCH)])
 
-### Ğ£Ñé£º»·¾³±äÁ¿ `$AM_HOME` ±ØĞëÖ¸ÏòºÏ·¨µÄ AM ²Ö¿â
+### æ ¡éªŒï¼šç¯å¢ƒå˜é‡ `$AM_HOME` å¿…é¡»æŒ‡å‘åˆæ³•çš„ AM ä»“åº“
 ifeq ($(wildcard $(AM_HOME)/am/include/am.h),)
   $(error $$AM_HOME must be an AbstractMachine repo)
 endif
 
-### Ğ£Ñé£º»·¾³±äÁ¿ `$ARCH` ±ØĞëÔÚÖ§³ÖÁĞ±íÖĞ
+### æ ¡éªŒï¼šç¯å¢ƒå˜é‡ `$ARCH` å¿…é¡»åœ¨æ”¯æŒåˆ—è¡¨ä¸­
 ARCHS = $(basename $(notdir $(shell ls $(AM_HOME)/scripts/*.mk)))
 ifeq ($(filter $(ARCHS), $(ARCH)), )
   $(error Expected $$ARCH in {$(ARCHS)}, Got "$(ARCH)")
 endif
 
-### ´Ó `$ARCH` ÖĞÌáÈ¡Ö¸Áî¼¯¼Ü¹¹(`ISA`)ºÍÆ½Ì¨(`PLATFORM`)¡£Ê¾Àı: `ARCH=x86_64-qemu -> ISA=x86_64; PLATFORM=qemu`
+### ä» `$ARCH` ä¸­æå–æŒ‡ä»¤é›†æ¶æ„(`ISA`)å’Œå¹³å°(`PLATFORM`)ã€‚ç¤ºä¾‹: `ARCH=x86_64-qemu -> ISA=x86_64; PLATFORM=qemu`
 ARCH_SPLIT = $(subst -, ,$(ARCH))
 ISA        = $(word 1,$(ARCH_SPLIT))
 PLATFORM   = $(word 2,$(ARCH_SPLIT))
 
-### Ğ£Ñé£ºÊÇ·ñÓĞ´ı±àÒëµÄÔ´ÎÄ¼ş
+### æ ¡éªŒï¼šæ˜¯å¦æœ‰å¾…ç¼–è¯‘çš„æºæ–‡ä»¶
 ifeq ($(flavor SRCS), undefined)
   $(error Nothing to build)
 endif
 
-### Ğ£Ñéµ½´Ë½áÊø
+### æ ¡éªŒåˆ°æ­¤ç»“æŸ
 endif
 
-## 2. Í¨ÓÃ±àÒëÄ¿±ê
+## 2. é€šç”¨ç¼–è¯‘ç›®æ ‡
 
-### ´´½¨Ä¿±êÊä³öÄ¿Â¼£¨`build/$ARCH`£©
+### åˆ›å»ºç›®æ ‡è¾“å‡ºç›®å½•ï¼ˆ`build/$ARCH`ï¼‰
 WORK_DIR  = $(shell pwd)
 DST_DIR   = $(WORK_DIR)/build/$(ARCH)
 $(shell mkdir -p $(DST_DIR))
 
-### ±àÒë²úÎï£¨¶ş½øÖÆ¾µÏñ»ò¾²Ì¬¿â£©
+### ç¼–è¯‘äº§ç‰©ï¼ˆäºŒè¿›åˆ¶é•œåƒæˆ–é™æ€åº“ï¼‰
 IMAGE_REL = build/$(NAME)-$(ARCH)
 IMAGE     = $(abspath $(IMAGE_REL))
 ARCHIVE   = $(WORK_DIR)/build/$(NAME)-$(ARCH).a
 
-### ÊÕ¼¯´ıÁ´½ÓµÄÎÄ¼ş£ºÄ¿±êÎÄ¼ş(`.o`)ºÍ¿âÎÄ¼ş(`.a`)
+### æ”¶é›†å¾…é“¾æ¥çš„æ–‡ä»¶ï¼šç›®æ ‡æ–‡ä»¶(`.o`)å’Œåº“æ–‡ä»¶(`.a`)
 OBJS      = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
 LIBS     := $(sort $(LIBS) am klib) # lazy evaluation ("=") causes infinite recursions
 LINKAGE   = $(OBJS)  # library archives are added by LIB_TEMPLATE below
 
-## 3. Í¨ÓÃ±àÒë²ÎÊı
+## 3. é€šç”¨ç¼–è¯‘å‚æ•°
 
-### (½»²æ)±àÒëÆ÷£¬ÀıÈç mips-linux-gnu-g++
+### (äº¤å‰)ç¼–è¯‘å™¨ï¼Œä¾‹å¦‚ mips-linux-gnu-g++
 AS        = $(CROSS_COMPILE)gcc
 CC        = $(CROSS_COMPILE)gcc
 CXX       = $(CROSS_COMPILE)g++
@@ -72,7 +72,7 @@ OBJDUMP   = $(CROSS_COMPILE)objdump
 OBJCOPY   = $(CROSS_COMPILE)objcopy
 READELF   = $(CROSS_COMPILE)readelf
 
-### ±àÒë²ÎÊı
+### ç¼–è¯‘å‚æ•°
 INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, $(LIBS)))
 INCFLAGS += $(addprefix -I, $(INC_PATH))
 
@@ -88,47 +88,47 @@ CXXFLAGS +=  $(CFLAGS) -ffreestanding -fno-rtti -fno-exceptions
 ASFLAGS  += -MMD $(INCFLAGS)
 LDFLAGS  += -z noexecstack $(addprefix -T, $(LDSCRIPTS))
 
-## 4. ¼Ü¹¹Ïà¹ØÅäÖÃ
+## 4. æ¶æ„ç›¸å…³é…ç½®
 
-### ¼ÓÔØ¼Ü¹¹Ïà¹ØÅäÖÃ£¨ÀıÈç `scripts/x86_64-qemu.mk`£©£¬-Ç°×º±íÊ¾ÎÄ¼ş²»´æÔÚÒ²²»±¨´í
+### åŠ è½½æ¶æ„ç›¸å…³é…ç½®ï¼ˆä¾‹å¦‚ `scripts/x86_64-qemu.mk`ï¼‰ï¼Œ-å‰ç¼€è¡¨ç¤ºæ–‡ä»¶ä¸å­˜åœ¨ä¹Ÿä¸æŠ¥é”™
 -include $(AM_HOME)/scripts/$(ARCH).mk
 
-## 5. ±àÒë¹æÔò
+## 5. ç¼–è¯‘è§„åˆ™
 
-### ¹æÔò(±àÒë)£ºµ¥¸ö `.c` ¡ú `.o`£¨gcc£©
+### è§„åˆ™(ç¼–è¯‘)ï¼šå•ä¸ª `.c` â†’ `.o`ï¼ˆgccï¼‰
 $(DST_DIR)/%.o: %.c
 	@mkdir -p $(dir $@) && echo + CC $<
 	@$(CC) -std=gnu11 $(CFLAGS) -c -o $@ $(realpath $<)
 
-### ¹æÔò(±àÒë)£ºµ¥¸ö `.cc` ¡ú `.o`£¨g++£©
+### è§„åˆ™(ç¼–è¯‘)ï¼šå•ä¸ª `.cc` â†’ `.o`ï¼ˆg++ï¼‰
 $(DST_DIR)/%.o: %.cc
 	@mkdir -p $(dir $@) && echo + CXX $<
 	@$(CXX) -std=c++17 $(CXXFLAGS) -c -o $@ $(realpath $<)
 
-### ¹æÔò(±àÒë)£ºµ¥¸ö `.cpp` ¡ú `.o`£¨g++£©
+### è§„åˆ™(ç¼–è¯‘)ï¼šå•ä¸ª `.cpp` â†’ `.o`ï¼ˆg++ï¼‰
 $(DST_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@) && echo + CXX $<
 	@$(CXX) -std=c++17 $(CXXFLAGS) -c -o $@ $(realpath $<)
 
-### ¹æÔò(±àÒë)£ºµ¥¸ö `.S` ¡ú `.o`£¨gcc£¬ÏÈÔ¤´¦ÀíÔÙµ÷»ã±àÆ÷£©
+### è§„åˆ™(ç¼–è¯‘)ï¼šå•ä¸ª `.S` â†’ `.o`ï¼ˆgccï¼Œå…ˆé¢„å¤„ç†å†è°ƒæ±‡ç¼–å™¨ï¼‰
 $(DST_DIR)/%.o: %.S
 	@mkdir -p $(dir $@) && echo + AS $<
 	@$(AS) $(ASFLAGS) -c -o $@ $(realpath $<)
 
 ifeq ($(MAKECMDGOALS),archive)
-### ¹æÔò(´ò°ü)£ºÄ¿±êÎÄ¼ş(`*.o`) ¡ú `ARCHIVE.a`£¨ar£©
+### è§„åˆ™(æ‰“åŒ…)ï¼šç›®æ ‡æ–‡ä»¶(`*.o`) â†’ `ARCHIVE.a`ï¼ˆarï¼‰
 $(ARCHIVE): $(OBJS)
 	@echo + AR "->" $(shell realpath $@ --relative-to .)
 	@$(AR) rcs $@ $^
 else
-# $(1)£º¿âÃû³Æ
+# $(1)ï¼šåº“åç§°
 define LIB_TEMPLATE =
 $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a: force
 	@$$(MAKE) -s -C $$(AM_HOME)/$(1) archive
 LINKAGE += $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a
 endef
 
-### ¹æÔò(µİ¹é make)£º¹¹½¨ÒÀÀµ¿â£¨am, klib, ...£©
+### è§„åˆ™(é€’å½’ make)ï¼šæ„å»ºä¾èµ–åº“ï¼ˆam, klib, ...ï¼‰
 $(foreach lib, $(LIBS), $(eval $(call LIB_TEMPLATE,$(lib))))
 endif
 
@@ -142,27 +142,27 @@ else
 	@$(LD) $(LDFLAGS) -o $@ --start-group $(LINKAGE) --end-group
 endif
 
-### ¹æÔò(`#include`ÒÀÀµ)£º»ãÈë gcc Í¨¹ı `-MMD` Éú³ÉµÄ `.d` ÎÄ¼ş£¬×Ô¶¯×·×ÙÍ·ÎÄ¼ş±ä¸ü
+### è§„åˆ™(`#include`ä¾èµ–)ï¼šæ±‡å…¥ gcc é€šè¿‡ `-MMD` ç”Ÿæˆçš„ `.d` æ–‡ä»¶ï¼Œè‡ªåŠ¨è¿½è¸ªå¤´æ–‡ä»¶å˜æ›´
 -include $(addprefix $(DST_DIR)/, $(addsuffix .d, $(basename $(SRCS))))
 
-## 6. ÔÓÏî
+## 6. æ‚é¡¹
 
-### ¹¹½¨Ë³Ğò¿ØÖÆ
+### æ„å»ºé¡ºåºæ§åˆ¶
 image: image-dep
 archive: $(ARCHIVE)
 image-dep: $(IMAGE).elf
 .PHONY: image image-dep archive run
 
-### Ç¿ÖÆÖØ±àµÄ¼ÙÄ¿±ê¡ª¡ª×÷Îª×Ó¿â .a µÄÒÀÀµ£¬ÈÃ×Ó¿âÃ¿´Î¶¼µİ¹é¼ì²é
+### å¼ºåˆ¶é‡ç¼–çš„å‡ç›®æ ‡â€”â€”ä½œä¸ºå­åº“ .a çš„ä¾èµ–ï¼Œè®©å­åº“æ¯æ¬¡éƒ½é€’å½’æ£€æŸ¥
 force:
 .PHONY: force
 
-### ÇåÀíµ¥¸öÏîÄ¿£¨É¾³ı `build/` Ä¿Â¼£©
+### æ¸…ç†å•ä¸ªé¡¹ç›®ï¼ˆåˆ é™¤ `build/` ç›®å½•ï¼‰
 clean:
 	rm -rf Makefile.html $(WORK_DIR)/build/
 .PHONY: clean
 
-### ÇåÀíÉî¶ÈÎª 2 ÒÔÄÚµÄËùÓĞ×ÓÏîÄ¿£¨ºöÂÔ´íÎó£©
+### æ¸…ç†æ·±åº¦ä¸º 2 ä»¥å†…çš„æ‰€æœ‰å­é¡¹ç›®ï¼ˆå¿½ç•¥é”™è¯¯ï¼‰
 CLEAN_ALL = $(dir $(shell find . -mindepth 2 -name Makefile))
 clean-all: $(CLEAN_ALL) clean
 $(CLEAN_ALL):
