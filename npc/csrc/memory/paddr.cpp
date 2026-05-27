@@ -73,7 +73,7 @@ uint32_t pmem_read(uint32_t addr, int len) {
 
         #ifdef CONFIG_MTRACE
         // 只有当访问的地址不是当前取指地址时，才认为是 Load 访存
-        if (addr != top->pc) { 
+        if (addr != top->debug_pc) { 
             log_mtrace(addr, data, 0); 
         }
         #endif

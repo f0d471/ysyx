@@ -9,9 +9,7 @@ module core #(
     input  logic          clk,
     input  logic          rst_n,
     
-    output logic [AW-1:0] pc,
-    output logic [DW-1:0] instr,
-    output logic [DW-1:0] regs [15:0],
+    output logic [DW-1:0] debug_regs [15:0],
 
     // IFU SimpleBus 接口
     output logic [AW-1:0] ifu_raddr,
@@ -34,13 +32,17 @@ module core #(
     output logic          lsu_respReady,
  
     // Debug / Commit 信号
-    output logic          debug_wb_have,
-    output logic [31:0]   debug_wb_pc,
-    output logic [31:0]   debug_wb_instr,
-    output logic          debug_wb_en,
-    output logic [4:0]    debug_wb_addr,
-    output logic [31:0]   debug_wb_data
+    output logic          debug_have,
+    output logic [31:0]   debug_pc,
+    output logic [31:0]   debug_instr,
+    output logic          debug_en,
+    output logic [4:0]    debug_addr,
+    output logic [31:0]   debug_data
 );
+
+// IF 阶段内部信号（原为顶层端口，现改为 WB 阶段 debug 信号对外暴露）
+logic [AW-1:0] pc;
+logic [DW-1:0] instr;
 
 // 握手通道信号
 logic    if2id_up_ready;
@@ -190,7 +192,7 @@ reg_file #(
     .wr_en    (wb_wr_en),
     .wr_addr  (wb_wr_addr),
     .wr_data  (wb_wr_data),
-    .regs     (regs)
+    .regs     (debug_regs)
 );
 
 csr_file #(
@@ -419,11 +421,11 @@ writeback #(
     .wb_data      (wb_wr_data)  
 );
 
-assign debug_wb_have  = mem2wb_dn_valid;
-assign debug_wb_pc    = mem_wb_dn.pc;
-assign debug_wb_instr = mem_wb_dn.instr;
-assign debug_wb_en    = wb_wr_en;
-assign debug_wb_addr  = wb_wr_addr;
-assign debug_wb_data  = wb_wr_data;
+assign debug_have  = mem2wb_dn_valid;
+assign debug_pc    = mem_wb_dn.pc;
+assign debug_instr = mem_wb_dn.instr;
+assign debug_en    = wb_wr_en;
+assign debug_addr  = wb_wr_addr;
+assign debug_data  = wb_wr_data;
 
 endmodule

@@ -7,16 +7,14 @@ module top (
     input  logic        clk,
     input  logic        rst_n,
 
-    output logic [31:0] pc,
-    output logic [31:0] instr,
-    output logic [31:0] regs [15:0],
+    output logic [31:0] debug_regs [15:0],
 
-    output logic        debug_wb_have,
-    output logic [31:0] debug_wb_pc,
-    output logic [31:0] debug_wb_instr,
-    output logic        debug_wb_en,
-    output logic [4:0]  debug_wb_addr,
-    output logic [31:0] debug_wb_data
+    output logic        debug_have,
+    output logic [31:0] debug_pc,
+    output logic [31:0] debug_instr,
+    output logic        debug_en,
+    output logic [4:0]  debug_addr,
+    output logic [31:0] debug_data
 );
 
     //  IFU SimpleBus 信号 
@@ -42,9 +40,8 @@ module top (
     core u_core (
         .clk            (clk),
         .rst_n          (rst_n),
-        .pc             (pc),
-        .instr          (instr),
-        .regs           (regs),
+
+        .debug_regs     (debug_regs),
 
         .ifu_raddr      (ifu_raddr),
         .ifu_rdata      (ifu_rdata),
@@ -64,12 +61,12 @@ module top (
         .lsu_respValid  (lsu_respValid),
         .lsu_respReady  (lsu_respReady),
 
-        .debug_wb_have  (debug_wb_have),
-        .debug_wb_pc    (debug_wb_pc),
-        .debug_wb_instr (debug_wb_instr),
-        .debug_wb_en    (debug_wb_en),
-        .debug_wb_addr  (debug_wb_addr),
-        .debug_wb_data  (debug_wb_data)
+        .debug_have     (debug_have),
+        .debug_pc       (debug_pc),
+        .debug_instr    (debug_instr),
+        .debug_en       (debug_en),
+        .debug_addr     (debug_addr),
+        .debug_data     (debug_data)
     );
 
     localparam IFU_MAX_DELAY = 3;

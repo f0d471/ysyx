@@ -34,7 +34,7 @@ static int cmd_si(char *args) {
     }
     
     cpu_exec(step);
-    printf(ANSI_FG_GREEN "pc: 0x%08x" ANSI_NONE " inst: 0x%08x\n", top->pc, top->instr);
+    printf(ANSI_FG_GREEN "pc: 0x%08x" ANSI_NONE " inst: 0x%08x\n", top->debug_pc, top->debug_instr);
     return 0;
 }
 

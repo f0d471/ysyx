@@ -48,9 +48,9 @@ void trace_close() {
 void log_itrace() {
 #ifdef CONFIG_ITRACE
     char asm_buf[128];
-    uint32_t inst = top->instr; 
-    disassemble(asm_buf, sizeof(asm_buf), top->pc, (uint8_t *)&inst, 4);
-    TRACE_LOG("[itrace] 0x%08x: 0x%08x  %s\n", top->pc, inst, asm_buf);
+    uint32_t inst = top->debug_instr;
+    disassemble(asm_buf, sizeof(asm_buf), top->debug_pc, (uint8_t *)&inst, 4);
+    TRACE_LOG("[itrace] 0x%08x: 0x%08x  %s\n", top->debug_pc, inst, asm_buf);
 #endif
 }
 
@@ -80,17 +80,17 @@ static const char* get_mop_name(uint32_t inst, int is_write) {
 
 void log_mtrace(uint32_t addr, uint32_t data, int is_write) {
 #ifdef CONFIG_MTRACE
-    const char *op_name = get_mop_name(top->instr, is_write);
+    const char *op_name = get_mop_name(top->debug_instr, is_write);
 
-    uint32_t rd  = (top->instr >> 7) & 0x1F;
-    uint32_t rs2 = (top->instr >> 20) & 0x1F;
+    uint32_t rd  = (top->debug_instr >> 7) & 0x1F;
+    uint32_t rs2 = (top->debug_instr >> 20) & 0x1F;
 
     if (!is_write) {
         TRACE_LOG("[mtrace] pc:0x%08x %-3s  x%-2d <- mem[0x%08x] = 0x%08x\n", 
-                  top->pc, op_name, rd, addr, data);
+                  top->debug_pc, op_name, rd, addr, data);
     } else {
         TRACE_LOG("[mtrace] pc:0x%08x %-3s  mem[0x%08x] <- x%-2d = 0x%08x\n", 
-                  top->pc, op_name, addr, rs2, data);
+                  top->debug_pc, op_name, addr, rs2, data);
     }
 #endif
 }

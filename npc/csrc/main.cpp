@@ -148,8 +148,8 @@ void init_sim(int argc, char** argv) {
     // 调用difftest
     #ifdef CONFIG_DIFFTEST
       DiffContext ctx;
-      for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
-      ctx.pc = top->pc;  // 此时 top->pc 应该是正确的复位地址 (例如 0x80000000)
+      for (int i = 0; i < 16; i++) ctx.gpr[i] = top->debug_regs[i];
+      ctx.pc = CONFIG_MBASE;
       difftest_regcpy(&ctx, 1); 
     #endif
 }
@@ -203,9 +203,9 @@ void cpu_exec(uint64_t n) {
 
         single_cycle(); 
 
-        if (top->debug_wb_have) {
-            uint32_t cpc   = top->debug_wb_pc;
-            uint32_t cinst = top->debug_wb_instr;
+        if (top->debug_have) {
+            uint32_t cpc   = top->debug_pc;
+            uint32_t cinst = top->debug_instr;
 
             #ifdef CONFIG_ITRACE
             {
@@ -233,8 +233,8 @@ void cpu_exec(uint64_t n) {
             #ifdef CONFIG_DIFFTEST
               if (difftest_skip) {
                   DiffContext ctx;
-                  for (int i = 0; i < 16; i++) ctx.gpr[i] = top->regs[i]; 
-                  ctx.pc = top->pc;
+                  for (int i = 0; i < 16; i++) ctx.gpr[i] = top->debug_regs[i];
+                  ctx.pc = top->debug_pc;
                   difftest_regcpy(&ctx, 1);
                   difftest_skip = false;
               } else {

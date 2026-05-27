@@ -67,16 +67,15 @@ void difftest_step(uint32_t commit_pc) {
   DiffContext ref;
   difftest_regcpy(&ref, false); 
   for (int i = 0; i < 16; i++) {
-    if (top->regs[i] != ref.gpr[i]) {
+    if (top->debug_regs[i] != ref.gpr[i]) {
       printf("[DiffTest] Reg x%d mismatch: DUT=0x%08x REF=0x%08x "
              "at commit_pc=0x%08x\n",
-             i, top->regs[i], ref.gpr[i], commit_pc);
+             i, top->debug_regs[i], ref.gpr[i], commit_pc);
       npc_state = NPC_ABORT; 
       npc_quit();
     }
   }
-  // ★ 不比较 top->pc（IF 级 PC ≠ 提交 PC）
-  // PC 同步性在下一次 commit 的 ref_before 检查中隐式保证
+  // PC 同步性在 difftest_step(commit_pc) 中保证
 }
 
 #endif
