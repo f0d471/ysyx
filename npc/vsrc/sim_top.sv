@@ -1,7 +1,7 @@
 `include "define.sv"
 
 import "DPI-C" function int  paddr_read (input int addr);
-import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
+import "DPI-C" function void paddr_write(input int addr, input int wmask, input int data);
 
 module top (
     input  logic        clk,
@@ -96,7 +96,7 @@ module top (
             ifu_rdata        <= 32'h00000013;
         end else begin
             if (ifu_reqValid && ifu_reqReady) begin
-                ifu_rdata_buf    <= paddr_read(ifu_raddr);
+                ifu_rdata_buf    <= paddr_read(ifu_raddr & ~32'h3);
                 ifu_delay_target <= 4'(ifu_lfsr[1:0] % IFU_MAX_DELAY) + 4'd1;
                 ifu_delay_cnt    <= 4'd1;
                 ifu_mem_busy     <= 1'b1;
@@ -132,14 +132,6 @@ module top (
             lsu_lfsr <= {lsu_lfsr[6:0], lsu_lfsr[7] ^ lsu_lfsr[5] ^ lsu_lfsr[4] ^ lsu_lfsr[3]};
     end
 
-    function automatic int wmask2len(input logic [3:0] mask);
-        case (mask)
-            4'b0001, 4'b0010, 4'b0100, 4'b1000: return 1;
-            4'b0011, 4'b1100:                    return 2;
-            default:                             return 4;
-        endcase
-    endfunction
-
     assign lsu_reqReady = !lsu_mem_busy;
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -155,10 +147,10 @@ module top (
                 lsu_respValid <= 1'b0;
                 if (lsu_reqValid && lsu_reqReady) begin
                     if (lsu_wen) begin
-                        paddr_write(lsu_addr, wmask2len(lsu_wmask), lsu_wdata);
+                        paddr_write(lsu_addr & ~32'h3, lsu_wmask, lsu_wdata);
                         lsu_rdata_buf <= 32'h0;
                     end else begin
-                        lsu_rdata_buf <= paddr_read(lsu_addr);
+                        lsu_rdata_buf <= paddr_read(lsu_addr & ~32'h3);
                     end
                     lsu_delay_target <= 4'(lsu_lfsr[1:0] % LSU_MAX_DELAY) + 4'd1;
                     lsu_delay_cnt    <= 4'd1;

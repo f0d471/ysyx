@@ -48,12 +48,12 @@ uint8_t* guest_to_host(uint32_t paddr);
 
 // 供 SDB 使用的 C 环境接口
 uint32_t pmem_read(uint32_t addr, int len);
-void pmem_write(uint32_t addr, int len, uint32_t data);
+void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data);
 
 // 供 DPI-C 调用的硬件接口
 extern "C" void trap(int code, int pc);
 extern "C" uint32_t paddr_read(uint32_t addr);
-extern "C" void paddr_write(uint32_t addr, int len, uint32_t data);
+extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data);
 
 // sdb 
 #ifdef CONFIG_SDB

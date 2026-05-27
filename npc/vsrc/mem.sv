@@ -114,7 +114,8 @@ module memory #(
     assign lsu_addr      = alu_result_in;
     assign lsu_ren       = is_load;
     assign lsu_wen       = is_store;
-    assign lsu_wdata     = rs2_data_in;
+    // 写数据按 addr[1:0] 移位到正确的字节 lane（真实硬件约定）
+    assign lsu_wdata     = rs2_data_in << (8 * alu_result_in[1:0]);
     assign lsu_wmask     = wmask_gen;
     assign lsu_reqValid  = is_mem && (state == S_IDLE);
     assign lsu_respReady = (state == S_WAIT_RESP);
