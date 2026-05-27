@@ -106,8 +106,9 @@ void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data) {
 // ================= 硬件DPI-C调用接口 ================================
 extern "C" uint32_t paddr_read(uint32_t addr) {
   if (addr == 0) return 0; // 保护一下，防止取指地址为 0 报错
-  
-  if (__builtin_expect(in_pmem(addr), 1)) return pmem_read(addr, 4);
+
+  uint32_t aligned = addr & ~3u;
+  if (__builtin_expect(in_pmem(aligned), 1)) return pmem_read(aligned, 4);
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
@@ -128,18 +129,21 @@ extern "C" uint32_t paddr_read(uint32_t addr) {
 }
 
 extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data) {
-  if (__builtin_expect(in_pmem(addr), 1)) {
-      pmem_write(addr, wmask, data);
+  uint32_t aligned = addr & ~3u;
+  if (__builtin_expect(in_pmem(aligned), 1)) {
+      pmem_write(aligned, wmask, data);
       return;
   }
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
+        // RTL 按真实硬件将数据移位到了对应 byte lane，MMIO 需要移回 byte 0
+        uint32_t unshifted = data >> (8 * (addr & 3));
         int len = (wmask == 0x1 || wmask == 0x2 || wmask == 0x4 || wmask == 0x8) ? 1 :
                   (wmask == 0x3 || wmask == 0xC) ? 2 : 4;
-        mmio_write(addr, len, data);
+        mmio_write(addr, len, unshifted);
         #ifdef CONFIG_DTRACE
-          log_dtrace('W', addr, len, data);
+          log_dtrace('W', addr, len, unshifted);
         #endif
         #ifdef CONFIG_DIFFTEST
           difftest_skip_ref();

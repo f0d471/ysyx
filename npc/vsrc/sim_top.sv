@@ -96,7 +96,7 @@ module top (
             ifu_rdata        <= 32'h00000013;
         end else begin
             if (ifu_reqValid && ifu_reqReady) begin
-                ifu_rdata_buf    <= paddr_read(ifu_raddr & ~32'h3);
+                ifu_rdata_buf    <= paddr_read(ifu_raddr);
                 ifu_delay_target <= 4'(ifu_lfsr[1:0] % IFU_MAX_DELAY) + 4'd1;
                 ifu_delay_cnt    <= 4'd1;
                 ifu_mem_busy     <= 1'b1;
@@ -147,10 +147,10 @@ module top (
                 lsu_respValid <= 1'b0;
                 if (lsu_reqValid && lsu_reqReady) begin
                     if (lsu_wen) begin
-                        paddr_write(lsu_addr & ~32'h3, {28'b0, lsu_wmask}, lsu_wdata);
+                        paddr_write(lsu_addr, {28'b0, lsu_wmask}, lsu_wdata);
                         lsu_rdata_buf <= 32'h0;
                     end else begin
-                        lsu_rdata_buf <= paddr_read(lsu_addr & ~32'h3);
+                        lsu_rdata_buf <= paddr_read(lsu_addr);
                     end
                     lsu_delay_target <= 4'(lsu_lfsr[1:0] % LSU_MAX_DELAY) + 4'd1;
                     lsu_delay_cnt    <= 4'd1;
