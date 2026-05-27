@@ -3,9 +3,40 @@
 #include "Vtop.h"
 #include <cstdio>
 #include <cstdint>
+#include <SDL2/SDL.h>
 
 #include "common.h"
 #include "config.h"
+
+void send_key(uint8_t scancode, bool is_keydown);
+void vga_update_screen();
+
+static void device_update() {
+  static uint64_t last = 0;
+  uint64_t now = sim_time;
+  if (now - last < 1000) return;
+  last = now;
+
+  vga_update_screen();
+
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+      case SDL_QUIT:
+        npc_state = NPC_END;
+        Verilated::gotFinish(true);
+        break;
+      case SDL_KEYDOWN:
+      case SDL_KEYUP: {
+        uint8_t k = event.key.keysym.scancode;
+        bool is_keydown = (event.key.type == SDL_KEYDOWN);
+        send_key(k, is_keydown);
+        break;
+      }
+      default: break;
+    }
+  }
+}
 
 // 全局变量
 Vtop* top = nullptr;
@@ -147,11 +178,13 @@ void npc_quit() {
         top = nullptr;
     }
 
+    SDL_Quit();
+
     // 根据状态返回给操作系统不同的退出码
     if (npc_state == NPC_END) {
-        exit(0); 
+        exit(0);
     } else {
-        exit(1); 
+        exit(1);
     }
 }
 
@@ -211,6 +244,8 @@ void cpu_exec(uint64_t n) {
         }
 
         if (npc_state != NPC_RUNNING) break;
+
+        device_update();
     }
 
     if (Verilated::gotFinish()) {
