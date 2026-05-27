@@ -25,10 +25,6 @@ compile_commands.json
 *.a
 *.so
 *.dylib
-*.elf
-*.bin
-*.hex
-*.img
 *.out
 
 # ============================================================
@@ -85,15 +81,16 @@ npc/project/target/
 npc/project/project/
 npc/npc-trace.txt
 
-# ysyxSoC (Chisel / Verilog / FPGA)
+# ysyxSoC
 ysyxSoC/build/
+!ysyxSoC/build/ysyxSoCFull.v
 ysyxSoC/target/
 ysyxSoC/project/target/
 ysyxSoC/rocket-chip/build/
 ysyxSoC/rocket-chip/target/
 
 # ============================================================
-# FPGA toolchains (Vivado / Quartus / etc.)
+# FPGA toolchains
 # ============================================================
 *.bit
 *.dcp
