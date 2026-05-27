@@ -47,13 +47,15 @@ NPCState npc_state = NPC_STOP;
 
 // 时钟
 static void single_cycle() {
-    top->clk = 0; 
+    top->clk = 0;
     top->eval();
-    if (tfp) tfp->dump(sim_time++);
+    if (tfp) tfp->dump(sim_time);
+    sim_time++;
 
-    top->clk = 1; 
+    top->clk = 1;
     top->eval();
-    if (tfp) tfp->dump(sim_time++);
+    if (tfp) tfp->dump(sim_time);
+    sim_time++;
 }
 
 // 复位
