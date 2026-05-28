@@ -1,31 +1,25 @@
 `include "define.sv"
 
 module forward_unit (
-    // 输入：当前 EX 阶段指令的源寄存器
     input  logic [4:0] ex_rs1_addr,
     input  logic [4:0] ex_rs2_addr,
 
-    // 输入：EX 阶段指令（正在执行）
     input  logic [6:0] ex_stage_opcode,
     input  logic [4:0] ex_stage_rd_addr,
-    input  logic [31:0]ex_alu_result,        // EX 阶段 ALU 结果
+    input  logic [31:0]ex_alu_result,     
 
-    // 输入：MEM 阶段指令
     input  logic [6:0] mem_opcode,
     input  logic [4:0] mem_rd_addr,
-    input  logic [31:0]ex_mem_alu_result,    // MEM 阶段 ALU 结果
-    input  logic [31:0]mem_rdata,            // MEM 阶段 读数据（load）
+    input  logic [31:0]ex_mem_alu_result,    
+    input  logic [31:0]mem_rdata,           
 
-    // 输入：WB 阶段指令
     input  logic [6:0] wb_opcode,
     input  logic [4:0] wb_rd_addr,
-    input  logic [31:0]wb_wr_data,           // WB 阶段要写回的数据
+    input  logic [31:0]wb_wr_data,           
 
-    // 输入：寄存器堆读出的原始数据
     input  logic [31:0]reg_rs1_data,
     input  logic [31:0]reg_rs2_data,
 
-    // 输出：前递完成后的最终数据（直接给 ALU 用！）
     output logic [31:0]fwd_rs1_data,
     output logic [31:0]fwd_rs2_data
 );

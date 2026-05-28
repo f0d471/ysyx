@@ -9,8 +9,6 @@ module core #(
     input  logic          clk,
     input  logic          rst_n,
     
-    output logic [DW-1:0] debug_regs [15:0],
-
     // IFU SimpleBus 接口
     output logic [AW-1:0] ifu_raddr,
     output logic          ifu_reqValid,
@@ -31,7 +29,8 @@ module core #(
     input  logic          lsu_respValid,
     output logic          lsu_respReady,
  
-    // Debug / Commit 信号
+    // Debug / Commit 信号  
+    output logic [DW-1:0] debug_regs [15:0],
     output logic          debug_have,
     output logic [31:0]   debug_pc,
     output logic [31:0]   debug_instr,

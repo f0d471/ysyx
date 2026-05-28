@@ -12,14 +12,14 @@ module execute #(
     input  logic [6:0]    opcode_in,
     input  logic [2:0]    funct3_in,
     input  logic [6:0]    funct7_in,
-    
+    input  logic [11:0]   csr_addr_in,
+    input  logic [4:0]    rs1_addr_in,   
+
     output logic [DW-1:0] alu_result_out, 
     output logic          jump_flag_out,  
     output logic [AW-1:0] jump_target_out, 
 
     input  logic          inst_ebreak,
-    input  logic [11:0]   csr_addr_in,
-    input  logic [4:0]    rs1_addr_in,
     input  logic          inst_csrrw,
     input  logic          inst_csrrs,
     input  logic          inst_ecall,
@@ -41,7 +41,7 @@ module execute #(
     logic [DW-1:0] alu_res;
     logic          branch_taken;
 
-    //  ALU 
+    // ALU 
     always_comb begin
         case(opcode_in)
             `INST_TYPE_I: begin
@@ -95,7 +95,7 @@ module execute #(
         endcase
     end
 
-    //  分支判断 
+    // 分支判断 
     always_comb begin
         if(opcode_in == `INST_TYPE_B) begin
             case(funct3_in)
@@ -112,7 +112,7 @@ module execute #(
         end
     end
 
-    //  跳转目标计算 
+    // 跳转目标计算 
     always_comb begin
         jump_flag_out   = 1'b0;
         jump_target_out = 32'h0;
@@ -139,7 +139,7 @@ module execute #(
         end
     end
 
-    //  CSR 操作与异常响应
+    // CSR 操作与异常响应
     assign csr_raddr = csr_addr_in;
     assign csr_wen   = inst_csrrw | (inst_csrrs & (rs1_addr_in != 5'b0));
     assign csr_waddr = csr_addr_in;
@@ -149,7 +149,7 @@ module execute #(
     assign trap_pc    = pc_in;
     assign trap_cause = `TRAP_CAUSE_ECALL_M;
 
-    //  结果选择 
+    // 结果选择 
     always_comb begin
         if (inst_csrrw || inst_csrrs) begin
             alu_result_out = csr_rdata;
@@ -158,7 +158,7 @@ module execute #(
         end
     end
 
-    //  ebreak 
+    // ebreak 
     always_comb begin
         if (inst_ebreak) begin
             trap(op1_in, pc_in);
