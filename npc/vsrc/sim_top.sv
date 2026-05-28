@@ -17,7 +17,7 @@ module top (
     output logic [31:0] debug_data
 );
 
-    //  IFU SimpleBus 信号 
+    // IFU SimpleBus 信号 
     logic [31:0] ifu_raddr;
     logic [31:0] ifu_rdata;
     logic        ifu_reqValid;
@@ -25,7 +25,7 @@ module top (
     logic        ifu_respValid;
     logic        ifu_respReady;
 
-    //  LSU SimpleBus 信号 
+    // LSU SimpleBus 信号 
     logic [31:0] lsu_addr;
     logic        lsu_ren;
     logic        lsu_wen;
@@ -69,12 +69,13 @@ module top (
         .debug_data     (debug_data)
     );
 
+    // IFU
     localparam IFU_MAX_DELAY = 3;
     
-    logic        ifu_mem_busy;
-    logic [3:0]  ifu_delay_cnt;
-    logic [3:0]  ifu_delay_target;
-    logic [31:0] ifu_rdata_buf;
+    logic        ifu_mem_busy;      // 1=有在途请求，正在等延迟
+    logic [3:0]  ifu_delay_cnt;     // 已经等了几个周期
+    logic [3:0]  ifu_delay_target;  // 要等几个周期 (1~3, 随机)
+    logic [31:0] ifu_rdata_buf;     // 从 paddr_read 读回的指令暂存
 
     logic [7:0] ifu_lfsr;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -84,7 +85,7 @@ module top (
             ifu_lfsr <= {ifu_lfsr[6:0], ifu_lfsr[7] ^ ifu_lfsr[5] ^ ifu_lfsr[4] ^ ifu_lfsr[3]};
     end
 
-    assign ifu_reqReady = 1'b1;
+    assign ifu_reqReady = 1'b1; //IFU永远接受
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -117,6 +118,7 @@ module top (
         end
     end
 
+    // LSU
     localparam LSU_MAX_DELAY = 3;
 
     logic [3:0]  lsu_delay_cnt;

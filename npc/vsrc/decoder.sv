@@ -4,33 +4,28 @@ module decode #(
     parameter AW = 32,
     parameter DW = 32
 )(
-    input  logic [AW-1:0] instr_addr_in, // PC 
-    input  logic [DW-1:0] instr_in,      // Instruction 
+    input  logic [AW-1:0] instr_addr_in, 
+    input  logic [DW-1:0] instr_in,    
     
-    // To Register (Read Addr) 
     output logic [4:0]    rd_rs1_addr,
     output logic [4:0]    rd_rs2_addr,
     
-    // To Execute 
-    output logic [4:0]    rd_addr_out,   // 目标寄存器 (rd)
-    output logic [DW-1:0] imm_out,       // 立即数
-    output logic [1:0]    op1_sel_out,   // op1选择控制：0=0，1=rs1，2=PC，3=PC+4（扩展用）
-    output logic [1:0]    op2_sel_out,   // op2选择控制：0=0，1=rs2，2=imm，3=4（返回地址用）
-    
-    // To Execute for decode
+    output logic [4:0]    rd_addr_out,   
+    output logic [DW-1:0] imm_out,       
+    output logic [1:0]    op1_sel_out,   
+    output logic [1:0]    op2_sel_out,   
     output logic [6:0]    opcode_out,
     output logic [2:0]    funct3_out,
     output logic [6:0]    funct7_out,
 
-    // ebreak
     output logic inst_ebreak,
 
     // CSR 
-    output logic [11:0]   csr_addr_out,  // 12 位 CSR 地址
-    output logic          inst_csrrw,    // 是否为 csrrw 指令
-    output logic          inst_csrrs,    // 是否为 csrrs 指令
-    output logic          inst_ecall,    // 是否为 ecall 指令
-    output logic          inst_mret      // 是否为 mret 指令
+    output logic [11:0]   csr_addr_out,  
+    output logic          inst_csrrw,   
+    output logic          inst_csrrs,   
+    output logic          inst_ecall,    
+    output logic          inst_mret     
 );
 
     logic [6:0] opcode;

@@ -40,10 +40,6 @@ module core #(
     output logic [31:0]   debug_data
 );
 
-// IF 阶段内部信号（原为顶层端口，现改为 WB 阶段 debug 信号对外暴露）
-logic [AW-1:0] pc;
-logic [DW-1:0] instr;
-
 // 握手通道信号
 logic    if2id_up_ready;
 logic    if2id_dn_valid;
@@ -59,6 +55,10 @@ if_id_t  if_id_up, if_id_dn;
 id_ex_t  id_ex_up, id_ex_dn;
 ex_mem_t ex_mem_up, ex_mem_dn;
 mem_wb_t mem_wb_up, mem_wb_dn;
+
+// IF 阶段内部信号
+logic [AW-1:0] pc;
+logic [DW-1:0] instr;
 
 // ID 阶段中间信号
 logic [4:0]  decode_rs1_addr, decode_rs2_addr;
@@ -153,10 +153,7 @@ pipe_reg #(.DW($bits(if_id_t))) u_if2id (
     .dn_data  (if_id_dn)
 );
 
-// ===================================================================
-//  Stage 2 : Decode (ID)
-// ===================================================================
-
+// ID
 decode #(
     .AW(AW),
     .DW(DW)
@@ -246,10 +243,7 @@ forward_unit u_forward (
     .fwd_rs2_data     (fwd_rs2_data)
 );
 
-// ===================================================================
-//  Stage 3 : Execute (EX)
-// ===================================================================
-
+// EX
 always_comb begin
     case (decode_op1_sel)
         2'b00:   id_op1 = fwd_rs1_data;
@@ -265,7 +259,6 @@ always_comb begin
     endcase
 end
 
-//  ID/EX 流水线寄存器
 assign id_ex_up.op1         = id_op1;
 assign id_ex_up.op2         = id_op2;
 assign id_ex_up.pc          = if_id_dn.pc;
@@ -330,7 +323,6 @@ execute #(
     .trap_mepc       (trap_mepc)
 );
 
-//  EX/MEM 流水线寄存器
 assign ex_mem_up.pc         = id_ex_dn.pc;
 assign ex_mem_up.instr      = id_ex_dn.instr;    
 assign ex_mem_up.alu_result = ex_alu_result;
@@ -352,10 +344,7 @@ pipe_reg #(.DW($bits(ex_mem_t))) u_ex2mem (
     .dn_data  (ex_mem_dn)
 );
 
-// ===================================================================
-//  Stage 4 : Memory (MEM)
-// ===================================================================
-
+// MEM
 memory #(
     .AW(AW),
     .DW(DW)
@@ -381,10 +370,6 @@ memory #(
     .mem_rdata_out (mem_rdata)
 );
 
-// ===================================================================
-//  MEM/WB 流水线寄存器
-// ===================================================================
-
 assign mem_wb_up.pc         = ex_mem_dn.pc;       
 assign mem_wb_up.instr      = ex_mem_dn.instr;    
 assign mem_wb_up.alu_result = ex_mem_dn.alu_result;
@@ -405,10 +390,7 @@ pipe_reg #(.DW($bits(mem_wb_t))) u_mem2wb (
     .dn_data  (mem_wb_dn)
 );
 
-// ===================================================================
-//  Stage 5 : Writeback (WB)
-// ===================================================================
-
+// WB
 writeback #(
     .DW(DW)
 ) u_writeback (
