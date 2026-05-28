@@ -5,7 +5,7 @@
 #include <cstdarg>
 #include <elf.h>
 
-#include "ftrace.h"
+#include "utils.h"
 
 #ifdef CONFIG_FTRACE
 
@@ -169,11 +169,7 @@ static void log_ftrace_ret(paddr_t pc) {
 
 // ==================== 指令分析 ====================
 
-#define FTRACE_COND 1
-
 static void do_ftrace(paddr_t pc, paddr_t dnpc, uint32_t inst) {
-    if (!FTRACE_COND) return;
-
     uint32_t opcode = inst & 0x7F;
     uint32_t rd  = (inst >> 7) & 0x1F;
     uint32_t rs1 = (inst >> 15) & 0x1F;

@@ -2,8 +2,7 @@
 #include <cstdint>
 
 #include "Vtop.h"
-#include "mtrace.h"
-#include "trace.h"
+#include "utils.h"
 
 #ifdef CONFIG_MTRACE
 
@@ -30,16 +29,15 @@ static const char* get_mop_name(uint32_t inst, int is_write) {
 
 void log_mtrace(uint32_t addr, uint32_t data, int is_write) {
     const char *op_name = get_mop_name(top->debug_instr, is_write);
-
     uint32_t rd  = (top->debug_instr >> 7) & 0x1F;
     uint32_t rs2 = (top->debug_instr >> 20) & 0x1F;
 
     if (!is_write) {
-        TRACE_LOG("[mtrace] pc:0x%08x %-3s  x%-2d <- mem[0x%08x] = 0x%08x\n",
-                  top->debug_pc, op_name, rd, addr, data);
+        iringbuf_push("[mtrace] pc:0x%08x %-3s  x%-2d <- mem[0x%08x] = 0x%08x\n",
+                      top->debug_pc, op_name, rd, addr, data);
     } else {
-        TRACE_LOG("[mtrace] pc:0x%08x %-3s  mem[0x%08x] <- x%-2d = 0x%08x\n",
-                  top->debug_pc, op_name, addr, rs2, data);
+        iringbuf_push("[mtrace] pc:0x%08x %-3s  mem[0x%08x] <- x%-2d = 0x%08x\n",
+                      top->debug_pc, op_name, addr, rs2, data);
     }
 }
 

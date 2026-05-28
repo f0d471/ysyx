@@ -3,83 +3,59 @@
 #include <cstring>
 #include <cstdarg>
 
-#include "trace.h"
-#include "ftrace.h"
+#include "utils.h"
 
+// ==================== iringbuf — I/M/D 共用环形缓冲区 ====================
+#define IRINGBUF_SIZE 2056
+
+static char iringbuf[IRINGBUF_SIZE][256];
+static int iringbuf_w = 0;
+static int iringbuf_cnt = 0;
+
+void iringbuf_push(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(iringbuf[iringbuf_w], 256, fmt, args);
+    va_end(args);
+
+    iringbuf_w = (iringbuf_w + 1) % IRINGBUF_SIZE;
+    if (iringbuf_cnt < IRINGBUF_SIZE) iringbuf_cnt++;
+}
+
+static void iringbuf_flush(FILE *fp) {
+    if (iringbuf_cnt == 0) return;
+
+    int count = iringbuf_cnt;
+    int start = (count < IRINGBUF_SIZE) ? 0 : iringbuf_w;
+
+    fprintf(fp, "\n========== I/M/D TRACE (%d/%d entries) ==========\n",
+            count, IRINGBUF_SIZE);
+    for (int i = 0; i < count; i++) {
+        int idx = (start + i) % IRINGBUF_SIZE;
+        fputs(iringbuf[idx], fp);
+    }
+    fprintf(fp, "========== I/M/D TRACE END ==========\n");
+}
+
+// ==================== 文件管理 ====================
 static FILE *trace_fp = NULL;
 static char trace_filename[512];
 
 void init_trace(const char *filename) {
-    if (trace_fp != NULL) return;
-
     strncpy(trace_filename, filename, sizeof(trace_filename) - 1);
     trace_filename[sizeof(trace_filename) - 1] = '\0';
-
-    char tmp_name[512];
-    snprintf(tmp_name, sizeof(tmp_name), "%s.tmp", filename);
-    trace_fp = fopen(tmp_name, "w");
-    if (!trace_fp) {
-        perror("fopen trace file failed");
-        exit(1);
-    }
-}
-
-void TRACE_LOG(const char *fmt, ...) {
-    if (!trace_fp) return;
-
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(trace_fp, fmt, args);
-    va_end(args);
-
-    fflush(trace_fp);
 }
 
 void trace_close() {
-    if (!trace_fp) return;
-
-    // 1. 关闭临时文件
-    fclose(trace_fp);
-    trace_fp = NULL;
-
-    // 2. 读取临时文件中的 I/M/D trace 内容
-    char tmp_name[512];
-    snprintf(tmp_name, sizeof(tmp_name), "%s.tmp", trace_filename);
-
-    FILE *tmp_fp = fopen(tmp_name, "r");
-    long tmp_size = 0;
-    char *tmp_content = NULL;
-
-    if (tmp_fp) {
-        fseek(tmp_fp, 0, SEEK_END);
-        tmp_size = ftell(tmp_fp);
-        if (tmp_size > 0) {
-            rewind(tmp_fp);
-            tmp_content = (char *)malloc(tmp_size + 1);
-            fread(tmp_content, 1, tmp_size, tmp_fp);
-            tmp_content[tmp_size] = '\0';
-        }
-        fclose(tmp_fp);
-    }
-
-    // 3. 打开最终文件，组装输出
-    FILE *final_fp = fopen(trace_filename, "w");
-    if (!final_fp) {
-        remove(tmp_name);
-        free(tmp_content);
-        return;
-    }
+    FILE *fp = fopen(trace_filename, "w");
+    if (!fp) return;
 
 #ifdef CONFIG_FTRACE
-    ftrace_buf_flush(final_fp);
-    fprintf(final_fp, "\n========== FTRACE END / I/M/D TRACE START ==========\n\n");
+    ftrace_buf_flush(fp);
+    fprintf(fp, "\n");
 #endif
 
-    if (tmp_content) {
-        fputs(tmp_content, final_fp);
-        free(tmp_content);
-    }
+    iringbuf_flush(fp);
 
-    fclose(final_fp);
-    remove(tmp_name);
+    fclose(fp);
 }

@@ -149,10 +149,6 @@ void npc_quit() {
       device_exit();
     #endif
 
-    #ifdef CONFIG_ITRACE
-      iringbuf_dump();
-    #endif
-
     trace_close();
 
     if (npc_state == NPC_END) {
