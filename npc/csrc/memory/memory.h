@@ -9,6 +9,8 @@
 void init_mem();
 void load_bin(const char *bin_file);
 
+extern size_t img_size;
+
 uint8_t* guest_to_host(uint32_t paddr);
 
 uint32_t pmem_read(uint32_t addr, int len);

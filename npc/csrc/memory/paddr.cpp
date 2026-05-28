@@ -7,6 +7,7 @@
 #include "common.h"
 
 static uint8_t pmem[CONFIG_MSIZE] = {};
+size_t img_size = 0;
 
 // 检查地址是否在合法范围内
 static inline bool in_pmem(uint32_t addr) {
@@ -45,6 +46,7 @@ void load_bin(const char *bin_file) {
 
     fseek(fp, 0, SEEK_END);
     size_t size = ftell(fp);
+    img_size = size;
     fseek(fp, 0, SEEK_SET);
 
     size_t ret = fread(guest_to_host(CONFIG_MBASE), size, 1, fp);
