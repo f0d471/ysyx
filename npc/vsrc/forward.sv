@@ -3,13 +3,13 @@ module forward_unit (
     input  logic [4:0]  ex_rs2_addr,
 
     input  logic        ex_wr_en,
-    input  logic [4:0]  ex_stage_rd_addr,
+    input  logic [4:0]  ex_rd_addr,
     input  logic [31:0] ex_alu_result,
 
     input  logic        mem_wr_en,
     input  logic        mem_is_load,
     input  logic [4:0]  mem_rd_addr,
-    input  logic [31:0] ex_mem_alu_result,
+    input  logic [31:0] mem_alu_result,
     input  logic [31:0] mem_rdata,
 
     input  logic        wb_wr_en,
@@ -32,7 +32,7 @@ module forward_unit (
     logic [1:0] fwd_rs2_sel;
 
     always_comb begin
-        if (ex_wr_en && ex_stage_rd_addr != 5'b0 && ex_stage_rd_addr == ex_rs1_addr)
+        if (ex_wr_en && ex_rd_addr != 5'b0 && ex_rd_addr == ex_rs1_addr)
             fwd_rs1_sel = FWD_EX;
         else if (mem_wr_en && mem_rd_addr != 5'b0 && mem_rd_addr == ex_rs1_addr)
             fwd_rs1_sel = FWD_MEM;
@@ -43,7 +43,7 @@ module forward_unit (
     end
 
     always_comb begin
-        if (ex_wr_en && ex_stage_rd_addr != 5'b0 && ex_stage_rd_addr == ex_rs2_addr)
+        if (ex_wr_en && ex_rd_addr != 5'b0 && ex_rd_addr == ex_rs2_addr)
             fwd_rs2_sel = FWD_EX;
         else if (mem_wr_en && mem_rd_addr != 5'b0 && mem_rd_addr == ex_rs2_addr)
             fwd_rs2_sel = FWD_MEM;
@@ -56,7 +56,7 @@ module forward_unit (
     always_comb begin
         case (fwd_rs1_sel)
             FWD_EX:  fwd_rs1_data = ex_alu_result;
-            FWD_MEM: fwd_rs1_data = mem_is_load ? mem_rdata : ex_mem_alu_result;
+            FWD_MEM: fwd_rs1_data = mem_is_load ? mem_rdata : mem_alu_result;
             FWD_WB:  fwd_rs1_data = wb_wr_data;
             default: fwd_rs1_data = reg_rs1_data;
         endcase
@@ -65,7 +65,7 @@ module forward_unit (
     always_comb begin
         case (fwd_rs2_sel)
             FWD_EX:  fwd_rs2_data = ex_alu_result;
-            FWD_MEM: fwd_rs2_data = mem_is_load ? mem_rdata : ex_mem_alu_result;
+            FWD_MEM: fwd_rs2_data = mem_is_load ? mem_rdata : mem_alu_result;
             FWD_WB:  fwd_rs2_data = wb_wr_data;
             default: fwd_rs2_data = reg_rs2_data;
         endcase

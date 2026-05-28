@@ -227,13 +227,13 @@ forward_unit u_forward (
     .ex_rs2_addr      (decode_rs2_addr),
 
     .ex_wr_en         (id_ex_dn.wr_en),
-    .ex_stage_rd_addr (id_ex_dn.rd_addr),
+    .ex_rd_addr       (id_ex_dn.rd_addr),
     .ex_alu_result    (ex_alu_result),
 
     .mem_wr_en        (ex_mem_dn.wr_en),
     .mem_is_load      (ex_mem_dn.is_load),
     .mem_rd_addr      (ex_mem_dn.rd_addr),
-    .ex_mem_alu_result(ex_mem_dn.alu_result),
+    .mem_alu_result   (ex_mem_dn.alu_result),
     .mem_rdata        (mem_rdata),
 
     .wb_wr_en         (mem_wb_dn.wr_en),
