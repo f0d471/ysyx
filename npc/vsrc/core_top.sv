@@ -158,10 +158,10 @@ decode #(
     .AW(AW),
     .DW(DW)
 ) u_decode (
-    .instr_addr_in (if_id_dn.pc),
-    .instr_in      (if_id_dn.instr),
-    .rd_rs1_addr   (decode_rs1_addr),
-    .rd_rs2_addr   (decode_rs2_addr),
+    .inst_addr_in (if_id_dn.pc),
+    .inst_in      (if_id_dn.instr),
+    .rs1_addr     (decode_rs1_addr),
+    .rs2_addr     (decode_rs2_addr),
     .rd_addr_out   (decode_rd_addr),
     .imm_out       (decode_imm),
     .op1_sel_out   (decode_op1_sel),
