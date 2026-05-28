@@ -271,6 +271,7 @@ assign id_ex_up.funct7      = decode_funct7;
 assign id_ex_up.rs1_data    = fwd_rs1_data;  
 assign id_ex_up.rs2_data    = fwd_rs2_data;  
 assign id_ex_up.csr_addr    = decode_csr_addr;
+assign id_ex_up.rs1_addr    = decode_rs1_addr;
 assign id_ex_up.inst_csrrw  = decode_inst_csrrw;
 assign id_ex_up.inst_csrrs  = decode_inst_csrrs;
 assign id_ex_up.inst_ecall  = decode_inst_ecall;
@@ -307,6 +308,7 @@ execute #(
     .jump_target_out (ex_jump_target),
     .inst_ebreak_in  (id_ex_dn.inst_ebreak),
     .csr_addr_in     (id_ex_dn.csr_addr),
+    .rs1_addr_in     (id_ex_dn.rs1_addr),
     .inst_csrrw      (id_ex_dn.inst_csrrw),
     .inst_csrrs      (id_ex_dn.inst_csrrs),
     .inst_ecall      (id_ex_dn.inst_ecall),

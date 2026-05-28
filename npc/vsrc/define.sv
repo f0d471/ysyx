@@ -114,6 +114,7 @@ typedef struct packed {
     logic [31:0] rs1_data;
     logic [31:0] rs2_data;
     logic [11:0] csr_addr;
+    logic [4:0]  rs1_addr;
     logic        inst_csrrw;
     logic        inst_csrrs;
     logic        inst_ecall;

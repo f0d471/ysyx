@@ -19,6 +19,7 @@ module execute #(
 
     input  logic          inst_ebreak_in,
     input  logic [11:0]   csr_addr_in,
+    input  logic [4:0]    rs1_addr_in,
     input  logic          inst_csrrw,
     input  logic          inst_csrrs,
     input  logic          inst_ecall,
@@ -138,10 +139,9 @@ module execute #(
         end
     end
 
-    //  CSR 操作与异常响应 
+    //  CSR 操作与异常响应
     assign csr_raddr = csr_addr_in;
-
-    assign csr_wen   = inst_csrrw | (inst_csrrs & (op1_in != 32'b0)); 
+    assign csr_wen   = inst_csrrw | (inst_csrrs & (rs1_addr_in != 5'b0));
     assign csr_waddr = csr_addr_in;
     assign csr_wdata = inst_csrrw ? op1_in : (csr_rdata | op1_in);
 
