@@ -21,7 +21,7 @@ module decode #(
     output logic inst_ebreak,
 
     // CSR 
-    output logic [11:0]   csr_addr_out,  
+    output logic [11:0]   csr_addr,
     output logic          inst_csrrw,   
     output logic          inst_csrrs,   
     output logic          inst_ecall,    
@@ -51,7 +51,7 @@ module decode #(
     assign imm_out     = imm;
 
     // CSR 地址提取 
-    assign csr_addr_out = inst_in[31:20];
+    assign csr_addr = inst_in[31:20];
 
     // ebreak
     assign inst_ebreak = (inst_in == 32'h00100073);
@@ -59,8 +59,8 @@ module decode #(
     // SYSTEM
     assign inst_csrrw = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b001);
     assign inst_csrrs = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b010);
-    assign inst_ecall = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
-    assign inst_mret  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
+    assign inst_ecall = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h000);
+    assign inst_mret  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h302);
 
 
     // 立即数生成 

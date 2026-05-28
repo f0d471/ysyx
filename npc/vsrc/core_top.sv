@@ -170,7 +170,7 @@ decode #(
     .funct3_out    (decode_funct3),
     .funct7_out    (decode_funct7),
     .inst_ebreak   (decode_inst_ebreak),
-    .csr_addr_out  (decode_csr_addr),
+    .csr_addr  (decode_csr_addr),
     .inst_csrrw    (decode_inst_csrrw),
     .inst_csrrs    (decode_inst_csrrs),
     .inst_ecall    (decode_inst_ecall),
