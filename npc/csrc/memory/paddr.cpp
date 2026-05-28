@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <time.h>
 
 #include "Vtop.h"
 #include "common.h"
@@ -33,13 +32,8 @@ static void out_of_bound(uint32_t addr, bool is_write) {
 }
 
 void init_mem() {
-    srand((unsigned int)time(NULL));
-
-    uint32_t *p = (uint32_t *)pmem;
-    for (int i = 0; i < CONFIG_MSIZE / sizeof(uint32_t); i++) {
-        p[i] = rand();
-    }
-    printf("Physical memory initialized at [" ANSI_FG_GREEN "0x%08x" ANSI_NONE ", " ANSI_FG_GREEN "0x%08x" ANSI_NONE "]\n", 
+    memset(pmem, 0, sizeof(pmem));
+    printf("Physical memory initialized at [" ANSI_FG_GREEN "0x%08x" ANSI_NONE ", " ANSI_FG_GREEN "0x%08x" ANSI_NONE "]\n",
            CONFIG_MBASE, CONFIG_MBASE + CONFIG_MSIZE - 1);
 }
 
@@ -114,10 +108,10 @@ extern "C" uint32_t paddr_read(uint32_t addr) {
     if (is_mmio(addr)) {
       uint32_t ret = mmio_read(addr, 4);
       #ifdef CONFIG_DTRACE
-        log_dtrace('W', addr, len, data);
+        log_dtrace('R', addr, 4, ret);
       #endif
       #ifdef CONFIG_DIFFTEST
-        difftest_skip_ref(); 
+        difftest_skip_ref();
       #endif
 
       return ret;

@@ -149,6 +149,8 @@ void npc_quit() {
       device_exit();
     #endif
 
+    trace_close();
+
     if (npc_state == NPC_END) {
         exit(0);
     } else {
