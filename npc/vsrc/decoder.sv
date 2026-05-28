@@ -56,20 +56,11 @@ module decode #(
     // ebreak
     assign inst_ebreak = (inst_in == 32'h00100073);
 
-    // SYSTEM 
-    wire is_system = (opcode == `INST_TYPE_SYSTEM);
-    
-    // CSRRW
-    assign inst_csrrw = is_system && (funct3 == 3'b001);
-
-    // CSRRS
-    assign inst_csrrs = is_system && (funct3 == 3'b010);
-    
-    // ECALL
-    assign inst_ecall = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
-
-    // MRET
-    assign inst_mret  = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
+    // SYSTEM
+    assign inst_csrrw = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b001);
+    assign inst_csrrs = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b010);
+    assign inst_ecall = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
+    assign inst_mret  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
 
 
     // 立即数生成 
