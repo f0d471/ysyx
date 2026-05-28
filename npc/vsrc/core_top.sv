@@ -39,6 +39,17 @@ module core #(
     output logic [31:0]   debug_data
 );
 
+// =============================================================
+// 命名约定：
+//   级间握手信号：  {from}2{to}_{up/dn}_{ready/valid}   (2 = "to")
+//   流水线寄存器数据：{from}_{to}_{up/dn}                (_ = 寄存器分隔)
+//   实例名：        u_{from}2{to}                        (2 = "to")
+//   up    = 流水线寄存器的上游侧（输入侧）
+//   dn    = 流水线寄存器的下游侧（输出侧）
+//   _up_ready → 寄存器→上游： "我可以接收"
+//   _dn_valid → 寄存器→下游： "数据有效"
+// =============================================================
+
 // 握手通道信号
 logic    if2id_up_ready;
 logic    if2id_dn_valid;
@@ -60,18 +71,18 @@ logic [AW-1:0] pc;
 logic [DW-1:0] instr;
 
 // ID 阶段中间信号
-logic [4:0]  decode_rs1_addr, decode_rs2_addr;
-logic [4:0]  decode_rd_addr;
-logic [31:0] decode_imm;
-logic [1:0]  decode_op1_sel, decode_op2_sel;
-logic [6:0]  decode_opcode;
-logic [2:0]  decode_funct3;
-logic [6:0]  decode_funct7;
-logic [11:0] decode_csr_addr;
-logic        decode_inst_csrrw, decode_inst_csrrs;
-logic        decode_inst_ecall, decode_inst_mret;
-logic        decode_inst_ebreak;
-logic        decode_wr_en, decode_is_load, decode_is_store;
+logic [4:0]  id_rs1_addr, id_rs2_addr;
+logic [4:0]  id_rd_addr;
+logic [31:0] id_imm;
+logic [1:0]  id_op1_sel, id_op2_sel;
+logic [6:0]  id_opcode;
+logic [2:0]  id_funct3;
+logic [6:0]  id_funct7;
+logic [11:0] id_csr_addr;
+logic        id_inst_csrrw, id_inst_csrrs;
+logic        id_inst_ecall, id_inst_mret;
+logic        id_inst_ebreak;
+logic        id_wr_en, id_is_load, id_is_store;
 logic [31:0] reg_rs1_data, reg_rs2_data;
 
 // 前递后的 rs1/rs2
@@ -89,8 +100,6 @@ logic [31:0] wb_wr_data;
 
 // Hazard / Forward 控制信号
 logic        load_stall;
-logic [1:0]  fwd_rs1_sel;
-logic [1:0]  fwd_rs2_sel;
 
 // IFU 控制信号
 logic        ifu_valid;        
@@ -160,24 +169,24 @@ decode #(
 ) u_decode (
     .inst_addr_in (if_id_dn.pc),
     .inst_in      (if_id_dn.instr),
-    .rs1_addr     (decode_rs1_addr),
-    .rs2_addr     (decode_rs2_addr),
-    .rd_addr_out   (decode_rd_addr),
-    .imm_out       (decode_imm),
-    .op1_sel_out   (decode_op1_sel),
-    .op2_sel_out   (decode_op2_sel),
-    .opcode_out    (decode_opcode),
-    .funct3_out    (decode_funct3),
-    .funct7_out    (decode_funct7),
-    .inst_ebreak   (decode_inst_ebreak),
-    .inst_wr_en    (decode_wr_en),
-    .inst_is_load  (decode_is_load),
-    .inst_is_store (decode_is_store),
-    .csr_addr  (decode_csr_addr),
-    .inst_csrrw    (decode_inst_csrrw),
-    .inst_csrrs    (decode_inst_csrrs),
-    .inst_ecall    (decode_inst_ecall),
-    .inst_mret     (decode_inst_mret)
+    .rs1_addr     (id_rs1_addr),
+    .rs2_addr     (id_rs2_addr),
+    .rd_addr_out   (id_rd_addr),
+    .imm_out       (id_imm),
+    .op1_sel_out   (id_op1_sel),
+    .op2_sel_out   (id_op2_sel),
+    .opcode_out    (id_opcode),
+    .funct3_out    (id_funct3),
+    .funct7_out    (id_funct7),
+    .inst_ebreak   (id_inst_ebreak),
+    .inst_wr_en    (id_wr_en),
+    .inst_is_load  (id_is_load),
+    .inst_is_store (id_is_store),
+    .csr_addr  (id_csr_addr),
+    .inst_csrrw    (id_inst_csrrw),
+    .inst_csrrs    (id_inst_csrrs),
+    .inst_ecall    (id_inst_ecall),
+    .inst_mret     (id_inst_mret)
 );
 
 reg_file #(
@@ -185,8 +194,8 @@ reg_file #(
 ) u_reg_file (
     .clk      (clk),
     .rst_n    (rst_n),
-    .rs1_addr (decode_rs1_addr),
-    .rs2_addr (decode_rs2_addr),
+    .rs1_addr (id_rs1_addr),
+    .rs2_addr (id_rs2_addr),
     .rs1_data (reg_rs1_data),
     .rs2_data (reg_rs2_data),
     .wr_en    (wb_wr_en),
@@ -216,15 +225,15 @@ csr_file #(
 hazard_unit u_hazard (
     .ex_is_load  (id_ex_dn.is_load),
     .ex_rd_addr  (id_ex_dn.rd_addr),
-    .id_rs1_addr (decode_rs1_addr),
-    .id_rs2_addr (decode_rs2_addr),
+    .id_rs1_addr (id_rs1_addr),
+    .id_rs2_addr (id_rs2_addr),
     .stall       (load_stall)
 );
 
 //  Forward 
 forward_unit u_forward (
-    .id_rs1_addr      (decode_rs1_addr),
-    .id_rs2_addr      (decode_rs2_addr),
+    .id_rs1_addr      (id_rs1_addr),
+    .id_rs2_addr      (id_rs2_addr),
 
     .ex_wr_en         (id_ex_dn.wr_en),
     .ex_rd_addr       (id_ex_dn.rd_addr),
@@ -249,15 +258,15 @@ forward_unit u_forward (
 
 // EX
 always_comb begin
-    case (decode_op1_sel)
+    case (id_op1_sel)
         `OP1_RS1:  id_op1 = fwd_rs1_data;
         `OP1_PC:   id_op1 = if_id_dn.pc;
         `OP1_ZERO: id_op1 = 32'h0;
         default:   id_op1 = 32'h0;
     endcase
-    case (decode_op2_sel)
+    case (id_op2_sel)
         `OP2_RS2: id_op2 = fwd_rs2_data;
-        `OP2_IMM: id_op2 = decode_imm;
+        `OP2_IMM: id_op2 = id_imm;
         `OP2_4:   id_op2 = 32'd4;
         default:  id_op2 = 32'h0;
     endcase
@@ -267,23 +276,23 @@ assign id_ex_up.op1         = id_op1;
 assign id_ex_up.op2         = id_op2;
 assign id_ex_up.pc          = if_id_dn.pc;
 assign id_ex_up.instr       = if_id_dn.instr;
-assign id_ex_up.rd_addr     = decode_rd_addr;
-assign id_ex_up.imm         = decode_imm;
-assign id_ex_up.opcode      = decode_opcode;
-assign id_ex_up.funct3      = decode_funct3;
-assign id_ex_up.funct7      = decode_funct7;
+assign id_ex_up.rd_addr     = id_rd_addr;
+assign id_ex_up.imm         = id_imm;
+assign id_ex_up.opcode      = id_opcode;
+assign id_ex_up.funct3      = id_funct3;
+assign id_ex_up.funct7      = id_funct7;
 assign id_ex_up.rs1_data    = fwd_rs1_data;  
 assign id_ex_up.rs2_data    = fwd_rs2_data;  
-assign id_ex_up.csr_addr    = decode_csr_addr;
-assign id_ex_up.rs1_addr    = decode_rs1_addr;
-assign id_ex_up.wr_en       = decode_wr_en;
-assign id_ex_up.is_load     = decode_is_load;
-assign id_ex_up.is_store    = decode_is_store;
-assign id_ex_up.inst_csrrw  = decode_inst_csrrw;
-assign id_ex_up.inst_csrrs  = decode_inst_csrrs;
-assign id_ex_up.inst_ecall  = decode_inst_ecall;
-assign id_ex_up.inst_mret   = decode_inst_mret;
-assign id_ex_up.inst_ebreak = decode_inst_ebreak;
+assign id_ex_up.csr_addr    = id_csr_addr;
+assign id_ex_up.rs1_addr    = id_rs1_addr;
+assign id_ex_up.wr_en       = id_wr_en;
+assign id_ex_up.is_load     = id_is_load;
+assign id_ex_up.is_store    = id_is_store;
+assign id_ex_up.inst_csrrw  = id_inst_csrrw;
+assign id_ex_up.inst_csrrs  = id_inst_csrrs;
+assign id_ex_up.inst_ecall  = id_inst_ecall;
+assign id_ex_up.inst_mret   = id_inst_mret;
+assign id_ex_up.inst_ebreak = id_inst_ebreak;
 
 pipe_reg #(.DW($bits(id_ex_t))) u_id2ex (
     .clk      (clk),

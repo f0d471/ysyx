@@ -49,33 +49,41 @@ void difftest_skip_ref() {
   difftest_skip = true;
 }
 
-void difftest_step(uint32_t commit_pc) {
-  // 执行前校验：NEMU 的 PC 应该和 DUT 提交的 PC 一致
+static void difftest_step(uint32_t commit_pc) {
   DiffContext ref_before;
   difftest_regcpy(&ref_before, false);
   if (ref_before.pc != commit_pc) {
     printf("[DiffTest] PC sync error! DUT commit_pc=0x%08x, "
            "NEMU pc=0x%08x\n", commit_pc, ref_before.pc);
-    npc_state = NPC_ABORT; 
+    npc_state = NPC_ABORT;
     npc_quit();
   }
- 
-  // 让 NEMU 执行一条指令
+
   difftest_exec(1);
- 
-  // 比较 GPR
+
   DiffContext ref;
-  difftest_regcpy(&ref, false); 
+  difftest_regcpy(&ref, false);
   for (int i = 0; i < 16; i++) {
     if (top->debug_regs[i] != ref.gpr[i]) {
       printf("[DiffTest] Reg x%d mismatch: DUT=0x%08x REF=0x%08x "
              "at commit_pc=0x%08x\n",
              i, top->debug_regs[i], ref.gpr[i], commit_pc);
-      npc_state = NPC_ABORT; 
+      npc_state = NPC_ABORT;
       npc_quit();
     }
   }
-  // PC 同步性在 difftest_step(commit_pc) 中保证
+}
+
+void difftest_commit(uint32_t commit_pc, uint32_t *regs) {
+  if (difftest_skip) {
+      DiffContext ctx;
+      for (int i = 0; i < 16; i++) ctx.gpr[i] = regs[i];
+      ctx.pc = commit_pc;
+      difftest_regcpy(&ctx, 1);
+      difftest_skip = false;
+  } else {
+      difftest_step(commit_pc);
+  }
 }
 
 #endif
