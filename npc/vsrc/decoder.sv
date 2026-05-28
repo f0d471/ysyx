@@ -25,7 +25,10 @@ module decode #(
     output logic          inst_csrrw,   
     output logic          inst_csrrs,   
     output logic          inst_ecall,    
-    output logic          inst_mret     
+    output logic          inst_mret,
+    output logic          inst_wr_en,
+    output logic          inst_is_load,
+    output logic          inst_is_store
 );
 
     logic [6:0] opcode;
@@ -57,7 +60,16 @@ module decode #(
     assign inst_ecall  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h000);
     assign inst_mret   = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h302);
 
-    // 立即数生成 
+    // 指令属性：写 rd / load / store
+    assign inst_wr_en   = (opcode == `INST_TYPE_R) || (opcode == `INST_TYPE_I)
+                       || (opcode == `INST_TYPE_L) || (opcode == `INST_TYPE_J)
+                       || (opcode == `INST_TYPE_JALR) || (opcode == `INST_TYPE_U_LUI)
+                       || (opcode == `INST_TYPE_U_AUIPC)
+                       || ((opcode == `INST_TYPE_SYSTEM) && (inst_csrrw || inst_csrrs));
+    assign inst_is_load  = (opcode == `INST_TYPE_L);
+    assign inst_is_store = (opcode == `INST_TYPE_S);
+
+    // 立即数生成
     always_comb begin
         case(opcode)
             `INST_TYPE_I, `INST_TYPE_L, `INST_TYPE_JALR:

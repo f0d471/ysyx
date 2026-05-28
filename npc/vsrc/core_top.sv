@@ -71,6 +71,7 @@ logic [11:0] decode_csr_addr;
 logic        decode_inst_csrrw, decode_inst_csrrs;
 logic        decode_inst_ecall, decode_inst_mret;
 logic        decode_inst_ebreak;
+logic        decode_wr_en, decode_is_load, decode_is_store;
 logic [31:0] reg_rs1_data, reg_rs2_data;
 
 // 前递后的 rs1/rs2
@@ -169,6 +170,9 @@ decode #(
     .funct3_out    (decode_funct3),
     .funct7_out    (decode_funct7),
     .inst_ebreak   (decode_inst_ebreak),
+    .inst_wr_en    (decode_wr_en),
+    .inst_is_load  (decode_is_load),
+    .inst_is_store (decode_is_store),
     .csr_addr  (decode_csr_addr),
     .inst_csrrw    (decode_inst_csrrw),
     .inst_csrrs    (decode_inst_csrrs),
@@ -210,7 +214,7 @@ csr_file #(
 
 //  Hazard 
 hazard_unit u_hazard (
-    .ex_opcode   (id_ex_dn.opcode),
+    .ex_is_load  (id_ex_dn.is_load),
     .ex_rd_addr  (id_ex_dn.rd_addr),
     .id_rs1_addr (decode_rs1_addr),
     .id_rs2_addr (decode_rs2_addr),
@@ -222,16 +226,17 @@ forward_unit u_forward (
     .ex_rs1_addr      (decode_rs1_addr),
     .ex_rs2_addr      (decode_rs2_addr),
 
-    .ex_stage_opcode  (id_ex_dn.opcode),
+    .ex_wr_en         (id_ex_dn.wr_en),
     .ex_stage_rd_addr (id_ex_dn.rd_addr),
     .ex_alu_result    (ex_alu_result),
 
-    .mem_opcode       (ex_mem_dn.opcode),
+    .mem_wr_en        (ex_mem_dn.wr_en),
+    .mem_is_load      (ex_mem_dn.is_load),
     .mem_rd_addr      (ex_mem_dn.rd_addr),
     .ex_mem_alu_result(ex_mem_dn.alu_result),
     .mem_rdata        (mem_rdata),
 
-    .wb_opcode        (mem_wb_dn.opcode),
+    .wb_wr_en         (mem_wb_dn.wr_en),
     .wb_rd_addr       (mem_wb_dn.rd_addr),
     .wb_wr_data       (wb_wr_data),
 
@@ -271,6 +276,9 @@ assign id_ex_up.rs1_data    = fwd_rs1_data;
 assign id_ex_up.rs2_data    = fwd_rs2_data;  
 assign id_ex_up.csr_addr    = decode_csr_addr;
 assign id_ex_up.rs1_addr    = decode_rs1_addr;
+assign id_ex_up.wr_en       = decode_wr_en;
+assign id_ex_up.is_load     = decode_is_load;
+assign id_ex_up.is_store    = decode_is_store;
 assign id_ex_up.inst_csrrw  = decode_inst_csrrw;
 assign id_ex_up.inst_csrrs  = decode_inst_csrrs;
 assign id_ex_up.inst_ecall  = decode_inst_ecall;
@@ -329,6 +337,9 @@ assign ex_mem_up.instr      = id_ex_dn.instr;
 assign ex_mem_up.alu_result = ex_alu_result;
 assign ex_mem_up.rs2_data   = id_ex_dn.rs2_data;
 assign ex_mem_up.rd_addr    = id_ex_dn.rd_addr;
+assign ex_mem_up.wr_en      = id_ex_dn.wr_en;
+assign ex_mem_up.is_load    = id_ex_dn.is_load;
+assign ex_mem_up.is_store   = id_ex_dn.is_store;
 assign ex_mem_up.opcode     = id_ex_dn.opcode;
 assign ex_mem_up.funct3     = id_ex_dn.funct3;
 
@@ -355,7 +366,8 @@ memory #(
     .valid_in      (ex2mem_dn_valid),
     .alu_result_in (ex_mem_dn.alu_result),
     .rs2_data_in   (ex_mem_dn.rs2_data),
-    .opcode_in     (ex_mem_dn.opcode),
+    .is_load_in    (ex_mem_dn.is_load),
+    .is_store_in   (ex_mem_dn.is_store),
     .funct3_in     (ex_mem_dn.funct3),
     .lsu_addr      (lsu_addr),
     .lsu_ren       (lsu_ren),
@@ -376,6 +388,8 @@ assign mem_wb_up.instr      = ex_mem_dn.instr;
 assign mem_wb_up.alu_result = ex_mem_dn.alu_result;
 assign mem_wb_up.mem_rdata  = mem_rdata;
 assign mem_wb_up.rd_addr    = ex_mem_dn.rd_addr;
+assign mem_wb_up.wr_en      = ex_mem_dn.wr_en;
+assign mem_wb_up.is_load    = ex_mem_dn.is_load;
 assign mem_wb_up.opcode     = ex_mem_dn.opcode;
 
 pipe_reg #(.DW($bits(mem_wb_t))) u_mem2wb (
@@ -397,7 +411,8 @@ writeback #(
 ) u_writeback (
     .alu_result_in(mem_wb_dn.alu_result),
     .mem_rdata_in (mem_wb_dn.mem_rdata),
-    .opcode_in    (mem_wb_dn.opcode),
+    .wr_en_in     (mem_wb_dn.wr_en),
+    .is_load_in   (mem_wb_dn.is_load),
     .rd_addr_in   (mem_wb_dn.rd_addr),
     .wb_en        (wb_wr_en),
     .wb_addr      (wb_wr_addr),

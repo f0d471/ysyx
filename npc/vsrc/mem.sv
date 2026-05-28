@@ -11,7 +11,8 @@ module memory #(
     input  logic          valid_in,
     input  logic [DW-1:0] alu_result_in,
     input  logic [DW-1:0] rs2_data_in,
-    input  logic [6:0]    opcode_in,
+    input  logic          is_load_in,
+    input  logic          is_store_in,
     input  logic [2:0]    funct3_in,
 
     // SimpleBus 数据通道（保持不变）
@@ -34,8 +35,8 @@ module memory #(
     // =============================================================
     //  指令类型
     // =============================================================
-    wire is_load  = valid_in && (opcode_in == `INST_TYPE_L);
-    wire is_store = valid_in && (opcode_in == `INST_TYPE_S);
+    wire is_load  = valid_in && is_load_in;
+    wire is_store = valid_in && is_store_in;
     wire is_mem   = is_load || is_store;
 
     // =============================================================

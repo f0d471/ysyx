@@ -116,6 +116,9 @@ typedef struct packed {
     logic [31:0] rs2_data;
     logic [11:0] csr_addr;
     logic [4:0]  rs1_addr;
+    logic        wr_en;
+    logic        is_load;
+    logic        is_store;
     logic        inst_csrrw;
     logic        inst_csrrs;
     logic        inst_ecall;
@@ -130,6 +133,9 @@ typedef struct packed {
     logic [31:0] alu_result;
     logic [31:0] rs2_data;
     logic [4:0]  rd_addr;
+    logic        wr_en;
+    logic        is_load;
+    logic        is_store;
     logic [6:0]  opcode;
     logic [2:0]  funct3;
 } ex_mem_t;
@@ -141,6 +147,8 @@ typedef struct packed {
     logic [31:0] alu_result;
     logic [31:0] mem_rdata;
     logic [4:0]  rd_addr;
+    logic        wr_en;
+    logic        is_load;
     logic [6:0]  opcode;
 } mem_wb_t;
 
