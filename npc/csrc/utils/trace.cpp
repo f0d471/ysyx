@@ -1,11 +1,10 @@
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <cstdarg>
 
 #include "utils.h"
 
-// ==================== iringbuf — I/M/D 共用环形缓冲区 ====================
+// ==================== iringbuf — F/I/M/D 共用环形缓冲区 ====================
 #define IRINGBUF_SIZE 2056
 
 static char iringbuf[IRINGBUF_SIZE][256];
@@ -28,17 +27,16 @@ static void iringbuf_flush(FILE *fp) {
     int count = iringbuf_cnt;
     int start = (count < IRINGBUF_SIZE) ? 0 : iringbuf_w;
 
-    fprintf(fp, "\n========== I/M/D TRACE (%d/%d entries) ==========\n",
+    fprintf(fp, "\n========== TRACE RINGBUF (%d/%d entries) ==========\n",
             count, IRINGBUF_SIZE);
     for (int i = 0; i < count; i++) {
         int idx = (start + i) % IRINGBUF_SIZE;
         fputs(iringbuf[idx], fp);
     }
-    fprintf(fp, "========== I/M/D TRACE END ==========\n");
+    fprintf(fp, "========== TRACE END ==========\n");
 }
 
 // ==================== 文件管理 ====================
-static FILE *trace_fp = NULL;
 static char trace_filename[512];
 
 void init_trace(const char *filename) {
@@ -49,11 +47,6 @@ void init_trace(const char *filename) {
 void trace_close() {
     FILE *fp = fopen(trace_filename, "w");
     if (!fp) return;
-
-#ifdef CONFIG_FTRACE
-    ftrace_buf_flush(fp);
-    fprintf(fp, "\n");
-#endif
 
     iringbuf_flush(fp);
 

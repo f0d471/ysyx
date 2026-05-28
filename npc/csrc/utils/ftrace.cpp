@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <cstdarg>
 #include <elf.h>
 
 #include "utils.h"
@@ -12,7 +11,6 @@
 typedef uint32_t paddr_t;
 
 #define MAX_FUNCS 1024
-#define FTRACE_BUF_SIZE 65536
 
 // ==================== ELF 符号解析 ====================
 
@@ -123,38 +121,14 @@ void init_ftrace(const char *elf_file) {
     fclose(fp);
 }
 
-// ==================== ftrace 环形缓冲区 ====================
-
-static char ftrace_buf[FTRACE_BUF_SIZE][256];
-static int ftrace_buf_cnt = 0;
-static int ftrace_depth = 0;
-
-static void ftrace_buf_write(const char *fmt, ...) {
-    if (ftrace_buf_cnt >= FTRACE_BUF_SIZE) return;
-
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(ftrace_buf[ftrace_buf_cnt], 256, fmt, args);
-    va_end(args);
-    ftrace_buf_cnt++;
-}
-
-void ftrace_buf_flush(FILE *fp) {
-    if (ftrace_buf_cnt == 0) return;
-
-    fprintf(fp, "========== FTRACE (%d entries) ==========\n", ftrace_buf_cnt);
-    for (int i = 0; i < ftrace_buf_cnt; i++) {
-        fputs(ftrace_buf[i], fp);
-    }
-    fprintf(fp, "========== FTRACE END ==========\n");
-}
-
 // ==================== call / ret 记录 ====================
+
+static int ftrace_depth = 0;
 
 static void log_ftrace_call(paddr_t pc, paddr_t dnpc) {
     const char* func_name = ftrace_get_func_name(dnpc);
-    ftrace_buf_write("[ftrace] 0x%08x: %*scall [%s@0x%08x]\n",
-                     pc, ftrace_depth * 2, "", func_name, dnpc);
+    iringbuf_push("[ftrace] 0x%08x: %*scall [%s@0x%08x]\n",
+                  pc, ftrace_depth * 2, "", func_name, dnpc);
     ftrace_depth++;
 }
 
@@ -163,8 +137,8 @@ static void log_ftrace_ret(paddr_t pc) {
     if (ftrace_depth < 0) ftrace_depth = 0;
 
     const char* func_name = ftrace_get_func_name(pc);
-    ftrace_buf_write("[ftrace] 0x%08x: %*sret  [%s]\n",
-                     pc, ftrace_depth * 2, "", func_name);
+    iringbuf_push("[ftrace] 0x%08x: %*sret  [%s]\n",
+                  pc, ftrace_depth * 2, "", func_name);
 }
 
 // ==================== 指令分析 ====================
