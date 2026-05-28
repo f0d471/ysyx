@@ -85,6 +85,7 @@
 `define INSTR_NOP         32'h00000013  // ADDI x0, x0, 0
 `define INSTR_MRET        32'h30200073  // MRET
 `define INSTR_RET         32'h00008067  // JALR x0, x1, 0
+`define TRAP_CAUSE_ECALL_M 32'd11        // M-mode ECALL 异常码
 
 //  op1 / op2 操作数选择
 `define OP1_RS1          2'b00

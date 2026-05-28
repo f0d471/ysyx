@@ -306,7 +306,7 @@ execute #(
     .alu_result_out  (ex_alu_result),
     .jump_flag_out   (ex_jump_flag),
     .jump_target_out (ex_jump_target),
-    .inst_ebreak_in  (id_ex_dn.inst_ebreak),
+    .inst_ebreak     (id_ex_dn.inst_ebreak),
     .csr_addr_in     (id_ex_dn.csr_addr),
     .rs1_addr_in     (id_ex_dn.rs1_addr),
     .inst_csrrw      (id_ex_dn.inst_csrrw),

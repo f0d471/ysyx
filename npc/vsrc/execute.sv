@@ -17,7 +17,7 @@ module execute #(
     output logic          jump_flag_out,  
     output logic [AW-1:0] jump_target_out, 
 
-    input  logic          inst_ebreak_in,
+    input  logic          inst_ebreak,
     input  logic [11:0]   csr_addr_in,
     input  logic [4:0]    rs1_addr_in,
     input  logic          inst_csrrw,
@@ -147,7 +147,7 @@ module execute #(
 
     assign trap_valid = inst_ecall;
     assign trap_pc    = pc_in;
-    assign trap_cause = 32'd11; 
+    assign trap_cause = `TRAP_CAUSE_ECALL_M;
 
     //  结果选择 
     always_comb begin
@@ -160,7 +160,7 @@ module execute #(
 
     //  ebreak 
     always_comb begin
-        if (inst_ebreak_in) begin
+        if (inst_ebreak) begin
             trap(op1_in, pc_in);
         end
     end
