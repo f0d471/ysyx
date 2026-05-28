@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
+#include <SDL2/SDL.h>
 
 #include "common.h"
 
@@ -90,4 +91,8 @@ void init_device() {
     init_timer();
     init_keyboard();
     init_vga();
+}
+
+void device_exit() {
+    SDL_Quit();
 }

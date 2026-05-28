@@ -146,7 +146,9 @@ void npc_quit() {
         top = nullptr;
     }
 
-    SDL_Quit();
+    #ifdef CONFIG_DEVICE
+      device_exit();
+    #endif
 
     if (npc_state == NPC_END) {
         exit(0);

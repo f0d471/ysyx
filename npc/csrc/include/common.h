@@ -118,6 +118,7 @@ void mmio_write(uint32_t addr, int len, uint32_t data);
 // 初始化所有设备
 void init_device();
 void device_poll();
+void device_exit();
 #endif
 
 #endif // __COMMON_H__
