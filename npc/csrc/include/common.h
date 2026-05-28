@@ -4,68 +4,49 @@
 #include <cstdint>
 #include <cassert>
 
-#include "Vtop.h" 
+#include "Vtop.h"
 #include "config.h"
 
-// 颜色
+// ANSI 颜色
 #define ANSI_FG_GREEN   "\33[1;32m"
 #define ANSI_FG_RED     "\33[1;31m"
 #define ANSI_NONE       "\33[0m"
 
-// NPC 运行状态机 
+// NPC 运行状态机
 enum NPCState {
-    NPC_RUNNING, // 运行
-    NPC_STOP,    // 暂停
-    NPC_END,     // 正常结束 
-    NPC_ABORT    // 异常结束 
+    NPC_RUNNING,
+    NPC_STOP,
+    NPC_END,
+    NPC_ABORT
 };
 
-// 仿真收尾 
-void npc_quit();
-
-// 全局变量声明 
+// 全局变量声明
 extern Vtop* top;
-extern bool difftest_skip;
 extern NPCState npc_state;
 extern uint64_t sim_time;
 
-// 核心仿真控制 
-void cpu_exec(uint64_t n); 
+// 核心仿真控制
+void npc_quit();
+void cpu_exec(uint64_t n);
 
-// 寄存器接口
-void isa_reg_display(); 
-uint32_t isa_reg_str2val(const char *s, bool *success); 
-
-// ================= 内存配置宏 =================
-#define CONFIG_MSIZE 0x10000000   // 128MB 
-#define CONFIG_MBASE 0x80000000
-
-// ================= 内存接口声明 =================
-void init_mem();
-void load_bin(const char *bin_file);
-
-uint8_t* guest_to_host(uint32_t paddr);
-
-// 供 SDB 使用的 C 环境接口
-uint32_t pmem_read(uint32_t addr, int len);
-void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data);
-
-// 供 DPI-C 调用的硬件接口
+// DPI-C trap（Verilog 侧调用）
 extern "C" void trap(int code, int pc);
-extern "C" uint32_t paddr_read(uint32_t addr);
-extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data);
 
-// sdb 
+// ============ 子系统头文件 ============
+#include "memory/memory.h"
+#include "device/device.h"
+#include "isa/isa.h"
+#include "utils/utils.h"
+
 #ifdef CONFIG_SDB
-void init_sdb();
-void sdb_mainloop();
+  #include "sdb/sdb.h"
+  void init_sdb();
+  void sdb_mainloop();
 #endif
 
-// difftest
 #ifdef CONFIG_DIFFTEST
-
 struct DiffContext {
-    uint32_t gpr[16]; 
+    uint32_t gpr[16];
     uint32_t pc;
 };
 
@@ -74,51 +55,6 @@ void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
 void difftest_regcpy(void *dut, int direction);
 void difftest_skip_ref();
 void difftest_commit(uint32_t commit_pc, uint32_t *regs);
-#endif
-
-
-void TRACE_LOG(const char *fmt, ...);
-
-#ifdef CONFIG_ITRACE
-extern "C" void init_disasm();
-extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-void init_trace(const char *filename);
-void trace_close();
-void log_itrace();
-#endif
-
-#ifdef CONFIG_MTRACE
-void init_trace(const char *filename);
-void trace_close();
-void log_mtrace(uint32_t addr, uint32_t data,  int is_write);
-#endif
-
-#ifdef CONFIG_DTRACE
-void init_trace(const char *filename);
-void trace_close();
-void log_dtrace(char type, uint32_t addr, int len, uint32_t data);
-#endif
-
-#ifdef CONFIG_FTRACE
-void init_ftrace(const char *elf_file);
-void ftrace_on_commit(uint32_t pc, uint32_t inst);
-#endif
-
-#ifdef CONFIG_DEVICE
-// 设备回调函数类型定义
-typedef void(*io_callback_t)(uint32_t offset, int len, bool is_write);
-
-// 注册 MMIO 映射
-void add_mmio_map(const char *name, uint32_t addr, uint8_t *space, uint32_t len, io_callback_t callback);
-
-// MMIO 读写接口
-uint32_t mmio_read(uint32_t addr, int len);
-void mmio_write(uint32_t addr, int len, uint32_t data);
-
-// 初始化所有设备
-void init_device();
-void device_poll();
-void device_exit();
 #endif
 
 #endif // __COMMON_H__

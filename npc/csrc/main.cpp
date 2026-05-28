@@ -6,7 +6,6 @@
 #include <string>
 
 #include "common.h"
-#include "config.h"
 
 // 全局变量  
 Vtop* top = nullptr;
