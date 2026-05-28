@@ -10,13 +10,13 @@
  #define CONFIG_SDB
 
 /************ DIFFTEST ***********/ 
-// #define CONFIG_DIFFTEST
+//#define CONFIG_DIFFTEST
 
 /************ ITRACE *************/ 
- #define CONFIG_ITRACE   
+// #define CONFIG_ITRACE   
 
 /************ MTRACE *************/ 
- #define CONFIG_MTRACE
+// #define CONFIG_MTRACE
 
 /************ DTRACE *************/ 
 //#define CONFIG_DTRACE
@@ -25,9 +25,9 @@
 // #define CONFIG_ETRACE
 
 /************ FTRACE *************/ 
- #define CONFIG_FTRACE
+#define CONFIG_FTRACE
 
-/************ DEVICE *************/ 
- #define CONFIG_DEVICE    
+/************ DEVICE *************/
+#define CONFIG_DEVICE
 
 #endif

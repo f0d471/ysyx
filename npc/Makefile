@@ -35,7 +35,10 @@ CFLAGS = -g \
 # === capstone 路径设置 ===
 CFLAGS += -I$(abspath ../nemu/tools/capstone/repo/include)
 
-LDFLAGS  += -lreadline -lncurses -ldl
+# === SDL2 路径（键盘 + VGA 显示）===
+CFLAGS += $(shell sdl2-config --cflags 2>/dev/null || echo "")
+
+LDFLAGS  += -lreadline -lncurses -ldl -lSDL2
 LDFLAGS  += $(abspath ../nemu/tools/capstone/repo/libcapstone.so.5)
 
 default: $(BIN)

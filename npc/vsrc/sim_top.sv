@@ -1,33 +1,23 @@
 `include "define.sv"
 
-// ===================================================================
-//  sim_top.sv — 随机延迟仿真存储器
-//
-//  ★ 关键设计：ifu_reqReady 始终为 1
-//    当 flush 导致 IFU 重新发请求时，新请求直接覆盖旧的在途请求，
-//    避免旧响应无人消费导致死锁。
-// ===================================================================
-
 import "DPI-C" function int  paddr_read (input int addr);
-import "DPI-C" function void paddr_write(input int addr, input int len, input int data);
+import "DPI-C" function void paddr_write(input int addr, input int wmask, input int data);
 
 module top (
     input  logic        clk,
     input  logic        rst_n,
 
-    output logic [31:0] pc,
-    output logic [31:0] instr,
-    output logic [31:0] regs [15:0],
+    output logic [31:0] debug_regs [15:0],
 
-    output logic        debug_wb_have,
-    output logic [31:0] debug_wb_pc,
-    output logic [31:0] debug_wb_instr,
-    output logic        debug_wb_en,
-    output logic [4:0]  debug_wb_addr,
-    output logic [31:0] debug_wb_data
+    output logic        debug_have,
+    output logic [31:0] debug_pc,
+    output logic [31:0] debug_instr,
+    output logic        debug_en,
+    output logic [4:0]  debug_addr,
+    output logic [31:0] debug_data
 );
 
-    // ========== IFU 信号 ==========
+    // IFU SimpleBus 信号 
     logic [31:0] ifu_raddr;
     logic [31:0] ifu_rdata;
     logic        ifu_reqValid;
@@ -35,7 +25,7 @@ module top (
     logic        ifu_respValid;
     logic        ifu_respReady;
 
-    // ========== LSU 信号 ==========
+    // LSU SimpleBus 信号 
     logic [31:0] lsu_addr;
     logic        lsu_ren;
     logic        lsu_wen;
@@ -47,13 +37,11 @@ module top (
     logic        lsu_respValid;
     logic        lsu_respReady;
 
-    // ========== CPU 核心 ==========
     core u_core (
         .clk            (clk),
         .rst_n          (rst_n),
-        .pc             (pc),
-        .instr          (instr),
-        .regs           (regs),
+
+        .debug_regs     (debug_regs),
 
         .ifu_raddr      (ifu_raddr),
         .ifu_rdata      (ifu_rdata),
@@ -73,28 +61,21 @@ module top (
         .lsu_respValid  (lsu_respValid),
         .lsu_respReady  (lsu_respReady),
 
-        .debug_wb_have  (debug_wb_have),
-        .debug_wb_pc    (debug_wb_pc),
-        .debug_wb_instr (debug_wb_instr),
-        .debug_wb_en    (debug_wb_en),
-        .debug_wb_addr  (debug_wb_addr),
-        .debug_wb_data  (debug_wb_data)
+        .debug_have     (debug_have),
+        .debug_pc       (debug_pc),
+        .debug_instr    (debug_instr),
+        .debug_en       (debug_en),
+        .debug_addr     (debug_addr),
+        .debug_data     (debug_data)
     );
 
-
-    // =================================================================
-    //  IFU 随机延迟存储器模型
-    //
-    //  ★ reqReady 始终为 1：新请求随时覆盖旧的在途请求。
-    //     解决 flush 后旧响应无人消费的死锁。
-    // =================================================================
-
+    // IFU
     localparam IFU_MAX_DELAY = 3;
-
-    logic [3:0]  ifu_delay_cnt;
-    logic [3:0]  ifu_delay_target;
-    logic        ifu_mem_busy;
-    logic [31:0] ifu_rdata_buf;
+    
+    logic        ifu_mem_busy;      // 1=有在途请求，正在等延迟
+    logic [3:0]  ifu_delay_cnt;     // 已经等了几个周期
+    logic [3:0]  ifu_delay_target;  // 要等几个周期 (1~3, 随机)
+    logic [31:0] ifu_rdata_buf;     // 从 paddr_read 读回的指令暂存
 
     logic [7:0] ifu_lfsr;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -104,8 +85,7 @@ module top (
             ifu_lfsr <= {ifu_lfsr[6:0], ifu_lfsr[7] ^ ifu_lfsr[5] ^ ifu_lfsr[4] ^ ifu_lfsr[3]};
     end
 
-    // ★ 始终接受新请求
-    assign ifu_reqReady = 1'b1;
+    assign ifu_reqReady = 1'b1; //IFU永远接受
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -116,21 +96,18 @@ module top (
             ifu_respValid    <= 1'b0;
             ifu_rdata        <= 32'h00000013;
         end else begin
-            // ★ 最高优先级：新请求到达 → 覆盖一切旧状态
-            if (ifu_reqValid && ifu_reqReady) begin
+            if (ifu_reqValid && ifu_reqReady) begin // 请求握手
                 ifu_rdata_buf    <= paddr_read(ifu_raddr);
                 ifu_delay_target <= 4'(ifu_lfsr[1:0] % IFU_MAX_DELAY) + 4'd1;
                 ifu_delay_cnt    <= 4'd1;
                 ifu_mem_busy     <= 1'b1;
-                ifu_respValid    <= 1'b0;   // 取消旧响应
+                ifu_respValid    <= 1'b0;   
             end
-            // 响应被消费
-            else if (ifu_respValid && ifu_respReady) begin
+            else if (ifu_respValid && ifu_respReady) begin // 响应握手
                 ifu_mem_busy  <= 1'b0;
                 ifu_respValid <= 1'b0;
             end
-            // 延迟计数中
-            else if (ifu_mem_busy && !ifu_respValid) begin
+            else if (ifu_mem_busy && !ifu_respValid) begin  // 模拟延迟中：计数到目标值后返回数据
                 if (ifu_delay_cnt >= ifu_delay_target) begin
                     ifu_respValid <= 1'b1;
                     ifu_rdata     <= ifu_rdata_buf;
@@ -141,13 +118,7 @@ module top (
         end
     end
 
-
-    // =================================================================
-    //  LSU 随机延迟存储器模型
-    //
-    //  LSU 不存在 flush 问题，reqReady = !busy 即可。
-    // =================================================================
-
+    // LSU
     localparam LSU_MAX_DELAY = 3;
 
     logic [3:0]  lsu_delay_cnt;
@@ -162,14 +133,6 @@ module top (
         else
             lsu_lfsr <= {lsu_lfsr[6:0], lsu_lfsr[7] ^ lsu_lfsr[5] ^ lsu_lfsr[4] ^ lsu_lfsr[3]};
     end
-
-    function automatic int wmask2len(input logic [3:0] mask);
-        case (mask)
-            4'b0001, 4'b0010, 4'b0100, 4'b1000: return 1;
-            4'b0011, 4'b1100:                    return 2;
-            default:                             return 4;
-        endcase
-    endfunction
 
     assign lsu_reqReady = !lsu_mem_busy;
 
@@ -186,7 +149,7 @@ module top (
                 lsu_respValid <= 1'b0;
                 if (lsu_reqValid && lsu_reqReady) begin
                     if (lsu_wen) begin
-                        paddr_write(lsu_addr, wmask2len(lsu_wmask), lsu_wdata);
+                        paddr_write(lsu_addr, {28'b0, lsu_wmask}, lsu_wdata);
                         lsu_rdata_buf <= 32'h0;
                     end else begin
                         lsu_rdata_buf <= paddr_read(lsu_addr);

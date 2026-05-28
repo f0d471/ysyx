@@ -48,9 +48,9 @@ void trace_close() {
 void log_itrace() {
 #ifdef CONFIG_ITRACE
     char asm_buf[128];
-    uint32_t inst = top->instr; 
-    disassemble(asm_buf, sizeof(asm_buf), top->pc, (uint8_t *)&inst, 4);
-    TRACE_LOG("[itrace] 0x%08x: 0x%08x  %s\n", top->pc, inst, asm_buf);
+    uint32_t inst = top->debug_instr;
+    disassemble(asm_buf, sizeof(asm_buf), top->debug_pc, (uint8_t *)&inst, 4);
+    TRACE_LOG("[itrace] 0x%08x: 0x%08x  %s\n", top->debug_pc, inst, asm_buf);
 #endif
 }
 
@@ -80,17 +80,17 @@ static const char* get_mop_name(uint32_t inst, int is_write) {
 
 void log_mtrace(uint32_t addr, uint32_t data, int is_write) {
 #ifdef CONFIG_MTRACE
-    const char *op_name = get_mop_name(top->instr, is_write);
+    const char *op_name = get_mop_name(top->debug_instr, is_write);
 
-    uint32_t rd  = (top->instr >> 7) & 0x1F;
-    uint32_t rs2 = (top->instr >> 20) & 0x1F;
+    uint32_t rd  = (top->debug_instr >> 7) & 0x1F;
+    uint32_t rs2 = (top->debug_instr >> 20) & 0x1F;
 
     if (!is_write) {
         TRACE_LOG("[mtrace] pc:0x%08x %-3s  x%-2d <- mem[0x%08x] = 0x%08x\n", 
-                  top->pc, op_name, rd, addr, data);
+                  top->debug_pc, op_name, rd, addr, data);
     } else {
         TRACE_LOG("[mtrace] pc:0x%08x %-3s  mem[0x%08x] <- x%-2d = 0x%08x\n", 
-                  top->pc, op_name, addr, rs2, data);
+                  top->debug_pc, op_name, addr, rs2, data);
     }
 #endif
 }
@@ -255,7 +255,7 @@ void log_ftrace_ret(paddr_t pc) {
 }
 
 // ================= 解耦封装：分析指令并触发 FTrace =================
-void do_ftrace(paddr_t pc, paddr_t dnpc, uint32_t inst) {
+static void do_ftrace(paddr_t pc, paddr_t dnpc, uint32_t inst) {
 #ifdef CONFIG_FTRACE
     if (!FTRACE_COND) return;
 
@@ -263,16 +263,28 @@ void do_ftrace(paddr_t pc, paddr_t dnpc, uint32_t inst) {
     uint32_t rd  = (inst >> 7) & 0x1F;
     uint32_t rs1 = (inst >> 15) & 0x1F;
 
-    bool is_jal  = (opcode == 0x6f); // 1101111
-    bool is_jalr = (opcode == 0x67); // 1100111
+    bool is_jal  = (opcode == 0x6f);
+    bool is_jalr = (opcode == 0x67);
 
-    // 标准 RISC-V 调用约定: call 通常是 jal/jalr 且目标寄存器 rd 是 x1 (ra)
     if ((is_jal || is_jalr) && rd == 1) {
         log_ftrace_call(pc, dnpc);
     }
-    // 标准 RISC-V 调用约定: ret 通常是 jalr 且源寄存器 rs1 是 x1 (ra), rd 是 x0
     else if (is_jalr && rs1 == 1 && rd == 0) {
         log_ftrace_ret(pc);
     }
+#endif
+}
+
+void ftrace_on_commit(uint32_t pc, uint32_t inst) {
+#ifdef CONFIG_FTRACE
+    static uint32_t last_pc = 0, last_inst = 0;
+    static bool has_last = false;
+
+    if (has_last) {
+        do_ftrace(last_pc, pc, last_inst);
+    }
+    last_pc   = pc;
+    last_inst = inst;
+    has_last  = true;
 #endif
 }

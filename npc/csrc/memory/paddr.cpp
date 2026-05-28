@@ -73,7 +73,7 @@ uint32_t pmem_read(uint32_t addr, int len) {
 
         #ifdef CONFIG_MTRACE
         // 只有当访问的地址不是当前取指地址时，才认为是 Load 访存
-        if (addr != top->pc) { 
+        if (addr != top->debug_pc) { 
             log_mtrace(addr, data, 0); 
         }
         #endif
@@ -85,29 +85,30 @@ uint32_t pmem_read(uint32_t addr, int len) {
     }
 }
 
-void pmem_write(uint32_t addr, int len, uint32_t data) {
+void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data) {
+    // 真实硬件约定：地址已对齐，按 wmask 逐字节 lane 写入
     if (in_pmem(addr)) {
-        switch (len) {
-            case 1: *(uint8_t  *)guest_to_host(addr) = (uint8_t)data;  break;
-            case 2: *(uint16_t *)guest_to_host(addr) = (uint16_t)data; break;
-            case 4: *(uint32_t *)guest_to_host(addr) = (uint32_t)data; break;
-            default: assert(0);
-        }
+        uint8_t *p = (uint8_t *)guest_to_host(addr);
+        if (wmask & 1) p[0] = (uint8_t)(data);
+        if (wmask & 2) p[1] = (uint8_t)(data >> 8);
+        if (wmask & 4) p[2] = (uint8_t)(data >> 16);
+        if (wmask & 8) p[3] = (uint8_t)(data >> 24);
 
         #ifdef CONFIG_MTRACE
-        log_mtrace(addr, data, 1); 
+        log_mtrace(addr, data, 1);
         #endif
 
     } else {
-        out_of_bound(addr, true); 
+        out_of_bound(addr, true);
     }
 }
 
 // ================= 硬件DPI-C调用接口 ================================
 extern "C" uint32_t paddr_read(uint32_t addr) {
   if (addr == 0) return 0; // 保护一下，防止取指地址为 0 报错
-  
-  if (__builtin_expect(in_pmem(addr), 1)) return pmem_read(addr, 4);
+
+  uint32_t aligned = addr & ~3u;
+  if (__builtin_expect(in_pmem(aligned), 1)) return pmem_read(aligned, 4);
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
@@ -127,21 +128,25 @@ extern "C" uint32_t paddr_read(uint32_t addr) {
   return 0;
 }
 
-extern "C" void paddr_write(uint32_t addr, int len, uint32_t data) {
-  if (__builtin_expect(in_pmem(addr), 1)) { 
-      pmem_write(addr, len, data); 
-      return; 
+extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data) {
+  uint32_t aligned = addr & ~3u;
+  if (__builtin_expect(in_pmem(aligned), 1)) {
+      pmem_write(aligned, wmask, data);
+      return;
   }
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
-        // === 接入 MMIO 框架 ===
-        mmio_write(addr, len, data);
+        // RTL 按真实硬件将数据移位到了对应 byte lane，MMIO 需要移回 byte 0
+        uint32_t unshifted = data >> (8 * (addr & 3));
+        int len = (wmask == 0x1 || wmask == 0x2 || wmask == 0x4 || wmask == 0x8) ? 1 :
+                  (wmask == 0x3 || wmask == 0xC) ? 2 : 4;
+        mmio_write(addr, len, unshifted);
         #ifdef CONFIG_DTRACE
-          log_dtrace('W', addr, len, data);
+          log_dtrace('W', addr, len, unshifted);
         #endif
         #ifdef CONFIG_DIFFTEST
-          difftest_skip_ref(); 
+          difftest_skip_ref();
         #endif
 
         return;

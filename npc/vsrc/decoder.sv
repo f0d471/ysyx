@@ -4,33 +4,31 @@ module decode #(
     parameter AW = 32,
     parameter DW = 32
 )(
-    input  logic [AW-1:0] instr_addr_in, // PC 
-    input  logic [DW-1:0] instr_in,      // Instruction 
+    input  logic [AW-1:0] inst_addr_in,
+    input  logic [DW-1:0] inst_in,
+
+    output logic [4:0]    rs1_addr,
+    output logic [4:0]    rs2_addr,
     
-    // To Register (Read Addr) 
-    output logic [4:0]    rd_rs1_addr,
-    output logic [4:0]    rd_rs2_addr,
-    
-    // To Execute 
-    output logic [4:0]    rd_addr_out,   // 目标寄存器 (rd)
-    output logic [DW-1:0] imm_out,       // 立即数
-    output logic [1:0]    op1_sel_out,   // op1选择控制：0=0，1=rs1，2=PC，3=PC+4（扩展用）
-    output logic [1:0]    op2_sel_out,   // op2选择控制：0=0，1=rs2，2=imm，3=4（返回地址用）
-    
-    // To Execute for decode
+    output logic [4:0]    rd_addr_out,   
+    output logic [DW-1:0] imm_out,       
+    output logic [1:0]    op1_sel_out,   
+    output logic [1:0]    op2_sel_out,   
     output logic [6:0]    opcode_out,
     output logic [2:0]    funct3_out,
     output logic [6:0]    funct7_out,
 
-    // ebreak
     output logic inst_ebreak,
 
     // CSR 
-    output logic [11:0]   csr_addr_out,  // 12 位 CSR 地址
-    output logic          inst_csrrw,    // 是否为 csrrw 指令
-    output logic          inst_csrrs,    // 是否为 csrrs 指令
-    output logic          inst_ecall,    // 是否为 ecall 指令
-    output logic          inst_mret      // 是否为 mret 指令
+    output logic [11:0]   csr_addr,
+    output logic          inst_csrrw,   
+    output logic          inst_csrrs,   
+    output logic          inst_ecall,    
+    output logic          inst_mret,
+    output logic          inst_wr_en,
+    output logic          inst_is_load,
+    output logic          inst_is_store
 );
 
     logic [6:0] opcode;
@@ -42,12 +40,12 @@ module decode #(
     logic [31:0] imm;
 
     // 字段提取
-    assign opcode = instr_in[6:0];
-    assign rd     = instr_in[11:7];
-    assign funct3 = instr_in[14:12];
-    assign rs1    = instr_in[19:15];
-    assign rs2    = instr_in[24:20];
-    assign funct7 = instr_in[31:25];
+    assign opcode = inst_in[6:0];
+    assign rd     = inst_in[11:7];
+    assign funct3 = inst_in[14:12];
+    assign rs1    = inst_in[19:15];
+    assign rs2    = inst_in[24:20];
+    assign funct7 = inst_in[31:25];
 
     assign opcode_out  = opcode;
     assign rd_addr_out = rd;
@@ -55,169 +53,152 @@ module decode #(
     assign funct7_out  = funct7;
     assign imm_out     = imm;
 
-    // CSR 地址提取 
-    assign csr_addr_out = instr_in[31:20];
+    assign csr_addr    = inst_in[31:20];
+    assign inst_ebreak = (inst_in == 32'h00100073);
+    assign inst_csrrw  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b001);
+    assign inst_csrrs  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b010);
+    assign inst_ecall  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h000);
+    assign inst_mret   = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h302);
 
-    // ebreak
-    wire is_ebreak = (instr_in == 32'h00100073); // ebreak 的机器码
-    assign inst_ebreak = is_ebreak;
+    // 指令属性：写 rd / load / store
+    assign inst_wr_en   = (opcode == `INST_TYPE_R) || (opcode == `INST_TYPE_I)
+                       || (opcode == `INST_TYPE_L) || (opcode == `INST_TYPE_J)
+                       || (opcode == `INST_TYPE_JALR) || (opcode == `INST_TYPE_U_LUI)
+                       || (opcode == `INST_TYPE_U_AUIPC)
+                       || ((opcode == `INST_TYPE_SYSTEM) && (inst_csrrw || inst_csrrs));
+    assign inst_is_load  = (opcode == `INST_TYPE_L);
+    assign inst_is_store = (opcode == `INST_TYPE_S);
 
-    // SYSTEM 
-    wire is_system = (opcode == 7'b1110011);
-    
-    // CSRRW
-    assign inst_csrrw = is_system && (funct3 == 3'b001);
-
-    // CSRRS
-    assign inst_csrrs = is_system && (funct3 == 3'b010);
-    
-    // ECALL
-    assign inst_ecall = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h000);
-
-    // MRET
-    assign inst_mret  = is_system && (funct3 == 3'b000) && (csr_addr_out == 12'h302);
-
-
-    // 立即数生成 
+    // 立即数生成
     always_comb begin
         case(opcode)
             `INST_TYPE_I, `INST_TYPE_L, `INST_TYPE_JALR:
-                imm = {{20{instr_in[31]}}, instr_in[31:20]};
+                imm = {{20{inst_in[31]}}, inst_in[31:20]};
             `INST_TYPE_S:
-                imm = {{20{instr_in[31]}}, instr_in[31:25], instr_in[11:7]};
+                imm = {{20{inst_in[31]}}, inst_in[31:25], inst_in[11:7]};
             `INST_TYPE_B:
-                imm = {{20{instr_in[31]}}, instr_in[7], instr_in[30:25], instr_in[11:8], 1'b0};
+                imm = {{20{inst_in[31]}}, inst_in[7], inst_in[30:25], inst_in[11:8], 1'b0};
             `INST_TYPE_J: // JAL
-                imm = {{12{instr_in[31]}}, instr_in[19:12], instr_in[20], instr_in[30:21], 1'b0};
+                imm = {{12{inst_in[31]}}, inst_in[19:12], inst_in[20], inst_in[30:21], 1'b0};
             `INST_TYPE_U_LUI, `INST_TYPE_U_AUIPC:
-                imm = {instr_in[31:12], 12'h0};
+                imm = {inst_in[31:12], 12'h0};
             default:
                 imm = 32'h0;
         endcase
     end
 
-    // op1 select
-    localparam logic [1:0] OP1_RS1  = 2'b00;
-    localparam logic [1:0] OP1_PC   = 2'b01;
-    localparam logic [1:0] OP1_ZERO = 2'b10;
-
-    // op2 select
-    localparam logic [1:0] OP2_RS2 = 2'b00;
-    localparam logic [1:0] OP2_IMM = 2'b01;
-    localparam logic [1:0] OP2_4   = 2'b10;
 
     // 指令行为
     always_comb begin
-        // 默认行为
-        rd_rs1_addr = 5'h0;
-        rd_rs2_addr = 5'h0;
-
-        op1_sel_out = OP1_ZERO;
-        op2_sel_out = OP2_RS2;
+        rs1_addr = 5'h0;
+        rs2_addr = 5'h0;
+        
+        op1_sel_out = `OP1_ZERO;
+        op2_sel_out = `OP2_RS2;
 
         case(opcode)
             `INST_TYPE_I: begin // ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI 
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = rs1;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_R: begin // ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR ,AND 
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = rs2;
+                rs1_addr = rs1;
+                rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_RS2;
             end
             
             `INST_TYPE_B: begin // BEQ, BNE, BEQ, BNE, BLT, BGE, BLTU, BGEU
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = rs2;
+                rs1_addr = rs1;
+                rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_RS2;
             end
             
             `INST_TYPE_S: begin // SW, SH, SB
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = rs2;
+                rs1_addr = rs1;
+                rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_L: begin // LW, LH, LB, LBU, LHU
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = rs1;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_J: begin // JAL
-                rd_rs1_addr = 5'h0;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = 5'h0;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_4;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_4;
             end
             
             `INST_TYPE_JALR: begin // JALR
-                rd_rs1_addr = rs1;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = rs1;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_4;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_4;
             end
             
             `INST_TYPE_U_LUI: begin // LUI
-                rd_rs1_addr = 5'h0;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = 5'h0;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_ZERO;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_ZERO;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_U_AUIPC: begin // AUIPC
-                rd_rs1_addr = 5'h0;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = 5'h0;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_IMM;
             end
             
-            7'b1110011: begin 
-                if (is_ebreak) begin // EBREAK
-                    rd_rs1_addr = 5'd10;
-                    rd_rs2_addr = 5'h0;
+            `INST_TYPE_SYSTEM: begin
+                if (inst_ebreak) begin // EBREAK
+                    rs1_addr = 5'ha;
+                    rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1;
-                    op2_sel_out = OP2_RS2;
+                    op1_sel_out = `OP1_RS1;
+                    op2_sel_out = `OP2_RS2;
                 end 
                 else if (inst_csrrw || inst_csrrs) begin // CSRRW,CSRRS
-                    rd_rs1_addr = rs1;
-                    rd_rs2_addr = 5'h0;
+                    rs1_addr = rs1;
+                    rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1; 
-                    op2_sel_out = OP2_RS2; 
+                    op1_sel_out = `OP1_RS1; 
+                    op2_sel_out = `OP2_RS2; 
                 end
                 else begin // ECALL, MRET 
-                    rd_rs1_addr = 5'h0;
-                    rd_rs2_addr = 5'h0;
+                    rs1_addr = 5'h0;
+                    rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_ZERO;
-                    op2_sel_out = OP2_RS2;
+                    op1_sel_out = `OP1_ZERO;
+                    op2_sel_out = `OP2_RS2;
                 end
             end
             
             default: begin
-                rd_rs1_addr = 5'h0;
-                rd_rs2_addr = 5'h0;
+                rs1_addr = 5'h0;
+                rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_ZERO;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_ZERO;
+                op2_sel_out = `OP2_RS2;
             end
         endcase
     end

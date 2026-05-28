@@ -15,21 +15,21 @@ const char *regs[] = {
 void isa_reg_display() {
   printf("General Purpose Registers:\n");
   for (int i = 0; i < 16; i++) {
-    printf("%-4s: 0x%08x  ", regs[i], top->regs[i]);
+    printf("%-4s: 0x%08x  ", regs[i], top->debug_regs[i]);
     if ((i + 1) % 4 == 0) printf("\n");
   }
-  printf("pc  : 0x%08x\n", top->pc);
+  printf("pc  : 0x%08x\n", top->debug_pc);
 }
 
 // 将寄存器名转换为对应的值
 uint32_t isa_reg_str2val(const char *s, bool *success) {
   *success = true;
 
-  if (strcmp(s, "pc") == 0) return top->pc;
+  if (strcmp(s, "pc") == 0) return top->debug_pc;
 
   for (int i = 0; i < 16; i++) {
     if (strcmp(s, regs[i]) == 0) {
-      return top->regs[i];
+      return top->debug_regs[i];
     }
   }
 

@@ -5,80 +5,63 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-// ============================================================================
-// 1. 基础工具函数：向 buffer 安全写入字符
-// ============================================================================
+// 向输出缓冲区安全追加一个字符，超出容量则丢弃
 static void append_char(char *out, size_t n, size_t *pos, char c) {
-  if (*pos < n - 1) { // 留一个位置给 '\0'
+  if (*pos < n - 1) {
     out[*pos] = c;
   }
   (*pos)++;
 }
 
-// ============================================================================
-// 2. 核心逻辑：打印数字 (支持进制、宽度、补零)
-// ============================================================================
+// 将整数按指定进制、宽度和填充符格式化到输出缓冲区
 static void print_num(char *out, size_t n, size_t *pos, long long val, int base, int width, char pad) {
-  char buf[32]; // 足够存 64 位整数
+  char buf[32];
   int i = 0;
   unsigned long long uval = (unsigned long long)val;
   int sign = 0;
 
-  // 处理负数 (仅限十进制)
   if (base == 10 && val < 0) {
     sign = 1;
     uval = -val;
   }
 
-  // 1. 转换数字为字符串 (逆序)
   if (uval == 0) {
     buf[i++] = '0';
   } else {
     while (uval > 0) {
       int digit = uval % base;
-      // 支持十六进制小写
-      buf[i++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'a'); 
+      buf[i++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'a');
       uval /= base;
     }
   }
 
-  // 2. 计算实际需要的长度 (数字位数 + 符号位)
   int real_len = i + sign;
-
-  // 3. 计算需要填充的字符数
   int pad_len = width - real_len;
 
-  // 4. 打印逻辑 (注意：如果 pad 是 '0'，符号要写在 padding 之前)
   if (sign && pad == '0') {
     append_char(out, n, pos, '-');
-    sign = 0; // 符号已处理
+    sign = 0;
   }
 
-  // 打印前导填充
   while (pad_len > 0) {
     append_char(out, n, pos, pad);
     pad_len--;
   }
 
-  // 打印符号 (如果 pad 是空格，符号紧贴数字)
   if (sign) {
     append_char(out, n, pos, '-');
   }
 
-  // 打印数字 (逆序输出)
   while (i > 0) {
     append_char(out, n, pos, buf[--i]);
   }
 }
 
-// ============================================================================
-// 3. 核心逻辑：打印字符串 (支持宽度对齐)
-// ============================================================================
+// 将字符串按指定宽度右对齐格式化到输出缓冲区
 static void print_string(char *out, size_t n, size_t *pos, const char *s, int width) {
   size_t len = strlen(s);
   int pad_len = width - len;
-  
-  // 打印前导空格 (默认右对齐)
+
   while (pad_len > 0) {
     append_char(out, n, pos, ' ');
     pad_len--;
@@ -89,9 +72,7 @@ static void print_string(char *out, size_t n, size_t *pos, const char *s, int wi
   }
 }
 
-// ============================================================================
-// 4. 全能格式化函数 vsnprintf
-// ============================================================================
+// 核心格式化引擎：解析 fmt 字符串，将结果写入 out，返回写入字符数（不含 '\0'）
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   size_t pos = 0;
 
@@ -101,23 +82,20 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       continue;
     }
 
-    fmt++; // 跳过 '%'
+    fmt++;
 
-    // --- 解析 Flags (补零 '0') ---
     char pad = ' ';
     if (*fmt == '0') {
       pad = '0';
       fmt++;
     }
 
-    // --- 解析 Width (宽度) ---
     int width = 0;
     while (*fmt >= '0' && *fmt <= '9') {
       width = width * 10 + (*fmt - '0');
       fmt++;
     }
 
-    // --- 解析 Specifier (类型) ---
     switch (*fmt) {
       case 'd': {
         int val = va_arg(ap, int);
@@ -125,8 +103,8 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         break;
       }
       case 'x':
-      case 'p': { // 指针和十六进制都按 hex 处理
-        unsigned int val = va_arg(ap, unsigned int); // 这里简化为 32 位，若需 64 位可用 unsigned long long
+      case 'p': {
+        unsigned int val = va_arg(ap, unsigned int);
         print_num(out, n, &pos, val, 16, width, pad);
         break;
       }
@@ -145,14 +123,13 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         append_char(out, n, &pos, '%');
         break;
       }
-      default: // 未知格式，原样输出
+      default:
         append_char(out, n, &pos, '%');
         append_char(out, n, &pos, *fmt);
     }
     fmt++;
   }
 
-  // 确保字符串以 '\0' 结尾
   if (n > 0) {
     if (pos < n) out[pos] = '\0';
     else out[n - 1] = '\0';
@@ -161,18 +138,16 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   return pos;
 }
 
-// ============================================================================
-// 5. 包装函数 (Wrapper)
-// ============================================================================
-
+// 格式化字符串到 out（无长度限制）
 int sprintf(char *out, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  int ret = vsnprintf(out, INT32_MAX, fmt, ap); // 假设足够大
+  int ret = vsnprintf(out, INT32_MAX, fmt, ap);
   va_end(ap);
   return ret;
 }
 
+// 格式化字符串到 out，最多写入 n-1 个字符加 '\0'
 int snprintf(char *out, size_t n, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -181,12 +156,14 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
   return ret;
 }
 
+// 格式化字符串到 out，使用已有的 va_list
 int vsprintf(char *out, const char *fmt, va_list ap) {
   return vsnprintf(out, INT32_MAX, fmt, ap);
 }
 
+// 格式化输出到串口：先格式化到栈缓冲区，再逐字符通过 putch 输出
 int printf(const char *fmt, ...) {
-  char buf[2048]; // 增大缓冲区以防溢出
+  char buf[2048];
   va_list ap;
   va_start(ap, fmt);
   int len = vsnprintf(buf, sizeof(buf), fmt, ap);

@@ -48,12 +48,12 @@ uint8_t* guest_to_host(uint32_t paddr);
 
 // 供 SDB 使用的 C 环境接口
 uint32_t pmem_read(uint32_t addr, int len);
-void pmem_write(uint32_t addr, int len, uint32_t data);
+void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data);
 
 // 供 DPI-C 调用的硬件接口
 extern "C" void trap(int code, int pc);
 extern "C" uint32_t paddr_read(uint32_t addr);
-extern "C" void paddr_write(uint32_t addr, int len, uint32_t data);
+extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data);
 
 // sdb 
 #ifdef CONFIG_SDB
@@ -73,7 +73,7 @@ void difftest_init(const char *so_file);
 void difftest_memcpy(uint32_t addr, void *buf, size_t n, int direction);
 void difftest_regcpy(void *dut, int direction);
 void difftest_skip_ref();
-void difftest_step(uint32_t commit_pc);
+void difftest_commit(uint32_t commit_pc, uint32_t *regs);
 #endif
 
 
@@ -101,7 +101,7 @@ void log_dtrace(char type, uint32_t addr, int len, uint32_t data);
 
 #ifdef CONFIG_FTRACE
 void init_ftrace(const char *elf_file);
-void do_ftrace(uint32_t pc, uint32_t dnpc, uint32_t inst);
+void ftrace_on_commit(uint32_t pc, uint32_t inst);
 #endif
 
 #ifdef CONFIG_DEVICE
@@ -117,6 +117,7 @@ void mmio_write(uint32_t addr, int len, uint32_t data);
 
 // 初始化所有设备
 void init_device();
+void device_poll();
 #endif
 
 #endif // __COMMON_H__

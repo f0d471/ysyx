@@ -41,11 +41,11 @@ uint32_t mmio_read(uint32_t addr, int len) {
         fprintf(stderr, "MMIO Read out of bound: addr=0x%08x\n", addr);
         return 0;
     }
-    
+
     uint32_t offset = addr - map->low;
     // 1. NEMU 规则：读操作先触发回调（如果有需要更新状态的设备）
     if (map->callback) map->callback(offset, len, false);
-    
+
     // 2. 从设备的局部空间读取数据
     uint32_t data = 0;
     switch (len) {
@@ -73,23 +73,21 @@ void mmio_write(uint32_t addr, int len, uint32_t data) {
         case 4: *(uint32_t *)(map->space + offset) = (uint32_t)data; break;
         default: assert(0);
     }
-    
+
     // 2. 触发回调，让设备干活
     if (map->callback) map->callback(offset, len, true);
 }
 
 extern void init_serial();
 extern void init_timer();
+extern void init_keyboard();
+extern void init_vga();
 
 void init_device() {
-    // 可以在这里加一个日志打印，方便调试
     printf("Initializing devices...\n");
-    
-    // 初始化所有挂载在 MMIO 上的设备
+
     init_serial();
     init_timer();
-    
-    // 以后开发新设备，继续往这里加即可：
-    // init_vga();
-    // init_keyboard();
+    init_keyboard();
+    init_vga();
 }
