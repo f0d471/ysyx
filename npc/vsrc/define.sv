@@ -37,7 +37,7 @@
 `define INST_ANDI         3'b111
 `define INST_SLLI         3'b001  // 移位类I型
 `define INST_SRLI         3'b101  // 逻辑右移I型
-`define INST_SRAI         3'b101  // 算术右移I型（通过funct7=0100000区分）
+`define INST_SRAI         3'b101  // 算术右移I型（funct7=0100000）
 
 // 加载类I型 funct3
 `define INST_LB           3'b000
@@ -81,12 +81,12 @@
 `define INST_BLTU         3'b110
 `define INST_BGEU         3'b111
 
-//  完整 32-bit 指令机器码（前缀 INSTR 区分于 opcode/funct3 片段）
+//  
 `define INSTR_NOP         32'h00000013  // ADDI x0, x0, 0
 `define INSTR_MRET        32'h30200073  // MRET
 `define INSTR_RET         32'h00008067  // JALR x0, x1, 0
 
-//  op1 / op2 操作数选择编码（decode 与 core_top 共享）
+//  op1 / op2 操作数选择
 `define OP1_RS1          2'b00
 `define OP1_PC           2'b01
 `define OP1_ZERO         2'b10

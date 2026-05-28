@@ -50,18 +50,12 @@ module decode #(
     assign funct7_out  = funct7;
     assign imm_out     = imm;
 
-    // CSR 地址提取 
-    assign csr_addr = inst_in[31:20];
-
-    // ebreak
+    assign csr_addr    = inst_in[31:20];
     assign inst_ebreak = (inst_in == 32'h00100073);
-
-    // SYSTEM
-    assign inst_csrrw = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b001);
-    assign inst_csrrs = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b010);
-    assign inst_ecall = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h000);
-    assign inst_mret  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h302);
-
+    assign inst_csrrw  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b001);
+    assign inst_csrrs  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b010);
+    assign inst_ecall  = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h000);
+    assign inst_mret   = (opcode == `INST_TYPE_SYSTEM) && (funct3 == 3'b000) && (csr_addr == 12'h302);
 
     // 立即数生成 
     always_comb begin
@@ -84,10 +78,9 @@ module decode #(
 
     // 指令行为
     always_comb begin
-        // 默认行为
         rs1_addr = 5'h0;
         rs2_addr = 5'h0;
-
+        
         op1_sel_out = `OP1_ZERO;
         op2_sel_out = `OP2_RS2;
 
