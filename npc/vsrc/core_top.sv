@@ -246,16 +246,16 @@ forward_unit u_forward (
 // EX
 always_comb begin
     case (decode_op1_sel)
-        2'b00:   id_op1 = fwd_rs1_data;
-        2'b01:   id_op1 = if_id_dn.pc;
-        2'b10:   id_op1 = 32'h0;
-        default: id_op1 = 32'h0;
+        `OP1_RS1:  id_op1 = fwd_rs1_data;
+        `OP1_PC:   id_op1 = if_id_dn.pc;
+        `OP1_ZERO: id_op1 = 32'h0;
+        default:   id_op1 = 32'h0;
     endcase
     case (decode_op2_sel)
-        2'b00:   id_op2 = fwd_rs2_data;
-        2'b01:   id_op2 = decode_imm;
-        2'b10:   id_op2 = 32'd4;
-        default: id_op2 = 32'h0;
+        `OP2_RS2: id_op2 = fwd_rs2_data;
+        `OP2_IMM: id_op2 = decode_imm;
+        `OP2_4:   id_op2 = 32'd4;
+        default:  id_op2 = 32'h0;
     endcase
 end
 

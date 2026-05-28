@@ -81,10 +81,18 @@
 `define INST_BLTU         3'b110
 `define INST_BGEU         3'b111
 
-//  常用指令常量 
-`define INST_NOP          32'h00000013  // ADDI x0, x0, 0
-`define INST_MRET         32'h30200073  // 系统指令（SYSTEM类型）
-`define INST_RET          32'h00008067  // JALR x0, x1, 0
+//  完整 32-bit 指令机器码（前缀 INSTR 区分于 opcode/funct3 片段）
+`define INSTR_NOP         32'h00000013  // ADDI x0, x0, 0
+`define INSTR_MRET        32'h30200073  // MRET
+`define INSTR_RET         32'h00008067  // JALR x0, x1, 0
+
+//  op1 / op2 操作数选择编码（decode 与 core_top 共享）
+`define OP1_RS1          2'b00
+`define OP1_PC           2'b01
+`define OP1_ZERO         2'b10
+`define OP2_RS2          2'b00
+`define OP2_IMM          2'b01
+`define OP2_4            2'b10
 
 //  IF → ID 通道 
 typedef struct packed {

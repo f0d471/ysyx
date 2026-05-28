@@ -76,11 +76,11 @@ module fetch #(
     // 锁存响应数据
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
-            instr_latch <= `INST_NOP;
+            instr_latch <= `INSTR_NOP;
         else if (state == S_WAIT_RESP && ifu_respValid && ifu_respReady && !flush)
             instr_latch <= ifu_rdata;
         else if (flush)
-            instr_latch <= `INST_NOP;
+            instr_latch <= `INSTR_NOP;
     end
 
     // =============================================================
@@ -90,6 +90,6 @@ module fetch #(
     assign ifu_reqValid  = (state == S_REQ) && !flush && !stall;
     assign ifu_respReady = (state == S_WAIT_RESP) && !flush;
     assign ifu_valid     = (state == S_DONE) && !flush;
-    assign instr_out     = ifu_valid ? instr_latch : `INST_NOP;
+    assign instr_out     = ifu_valid ? instr_latch : `INSTR_NOP;
 
 endmodule

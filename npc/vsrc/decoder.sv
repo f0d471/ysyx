@@ -57,7 +57,7 @@ module decode #(
     assign inst_ebreak = (inst_in == 32'h00100073);
 
     // SYSTEM 
-    wire is_system = (opcode == 7'b1110011);
+    wire is_system = (opcode == `INST_TYPE_SYSTEM);
     
     // CSRRW
     assign inst_csrrw = is_system && (funct3 == 3'b001);
@@ -90,15 +90,6 @@ module decode #(
         endcase
     end
 
-    // op1 select
-    localparam logic [1:0] OP1_RS1  = 2'b00;
-    localparam logic [1:0] OP1_PC   = 2'b01;
-    localparam logic [1:0] OP1_ZERO = 2'b10;
-
-    // op2 select
-    localparam logic [1:0] OP2_RS2 = 2'b00;
-    localparam logic [1:0] OP2_IMM = 2'b01;
-    localparam logic [1:0] OP2_4   = 2'b10;
 
     // 指令行为
     always_comb begin
@@ -106,103 +97,103 @@ module decode #(
         rs1_addr = 5'h0;
         rs2_addr = 5'h0;
 
-        op1_sel_out = OP1_ZERO;
-        op2_sel_out = OP2_RS2;
+        op1_sel_out = `OP1_ZERO;
+        op2_sel_out = `OP2_RS2;
 
         case(opcode)
             `INST_TYPE_I: begin // ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI 
                 rs1_addr = rs1;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_R: begin // ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR ,AND 
                 rs1_addr = rs1;
                 rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_RS2;
             end
             
             `INST_TYPE_B: begin // BEQ, BNE, BEQ, BNE, BLT, BGE, BLTU, BGEU
                 rs1_addr = rs1;
                 rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_RS2;
             end
             
             `INST_TYPE_S: begin // SW, SH, SB
                 rs1_addr = rs1;
                 rs2_addr = rs2;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_L: begin // LW, LH, LB, LBU, LHU
                 rs1_addr = rs1;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_RS1;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_RS1;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_J: begin // JAL
                 rs1_addr = 5'h0;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_4;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_4;
             end
             
             `INST_TYPE_JALR: begin // JALR
                 rs1_addr = rs1;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_4;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_4;
             end
             
             `INST_TYPE_U_LUI: begin // LUI
                 rs1_addr = 5'h0;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_ZERO;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_ZERO;
+                op2_sel_out = `OP2_IMM;
             end
             
             `INST_TYPE_U_AUIPC: begin // AUIPC
                 rs1_addr = 5'h0;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_PC;
-                op2_sel_out = OP2_IMM;
+                op1_sel_out = `OP1_PC;
+                op2_sel_out = `OP2_IMM;
             end
             
-            7'b1110011: begin 
+            `INST_TYPE_SYSTEM: begin
                 if (inst_ebreak) begin // EBREAK
                     rs1_addr = 5'ha;
                     rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1;
-                    op2_sel_out = OP2_RS2;
+                    op1_sel_out = `OP1_RS1;
+                    op2_sel_out = `OP2_RS2;
                 end 
                 else if (inst_csrrw || inst_csrrs) begin // CSRRW,CSRRS
                     rs1_addr = rs1;
                     rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_RS1; 
-                    op2_sel_out = OP2_RS2; 
+                    op1_sel_out = `OP1_RS1; 
+                    op2_sel_out = `OP2_RS2; 
                 end
                 else begin // ECALL, MRET 
                     rs1_addr = 5'h0;
                     rs2_addr = 5'h0;
 
-                    op1_sel_out = OP1_ZERO;
-                    op2_sel_out = OP2_RS2;
+                    op1_sel_out = `OP1_ZERO;
+                    op2_sel_out = `OP2_RS2;
                 end
             end
             
@@ -210,8 +201,8 @@ module decode #(
                 rs1_addr = 5'h0;
                 rs2_addr = 5'h0;
 
-                op1_sel_out = OP1_ZERO;
-                op2_sel_out = OP2_RS2;
+                op1_sel_out = `OP1_ZERO;
+                op2_sel_out = `OP2_RS2;
             end
         endcase
     end
