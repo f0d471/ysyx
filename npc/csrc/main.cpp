@@ -8,14 +8,14 @@
 #include "common.h"
 #include "config.h"
 
-// =================== 全局变量 =================== //
+// 全局变量  
 Vtop* top = nullptr;
 VerilatedVcdC* tfp = nullptr;
 uint64_t sim_time = 0;
 const char *img_file = NULL;
 NPCState npc_state = NPC_STOP;
 
-// =================== 时钟 =================== //
+// 时钟  
 static void single_cycle() {
     top->clk = 0;
     top->eval();
@@ -28,7 +28,7 @@ static void single_cycle() {
     sim_time++;
 }
 
-// =================== 复位 =================== //
+// 复位  
 static void reset(int n) {
     top->rst_n = 0;
     while (n-- > 0) {
@@ -43,7 +43,7 @@ static void reset(int n) {
     top->rst_n = 1;
 }
 
-// =================== DPI-C: Trap =================== //
+//  DPI-C: Trap  
 extern "C" void trap(int code, int pc) {
     if (code == 0) {
         printf(ANSI_FG_GREEN "HIT GOOD TRAP" ANSI_NONE " at pc = 0x%08x\n", pc);
@@ -54,7 +54,7 @@ extern "C" void trap(int code, int pc) {
     Verilated::gotFinish(true);
 }
 
-// =================== 初始化 =================== //
+//  初始化  
 void init_sim(int argc, char** argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <bin_file>\n", argv[0]);
@@ -122,7 +122,7 @@ void init_sim(int argc, char** argv) {
     #endif
 }
 
-// =================== 退出 =================== //
+//  退出  
 void npc_quit() {
     if (npc_state == NPC_END) {
         printf(ANSI_FG_GREEN "Simulation Ended: HIT GOOD TRAP\n" ANSI_NONE);
@@ -155,7 +155,7 @@ void npc_quit() {
     }
 }
 
-// =================== 主执行循环 =================== //
+//  主执行循环  
 void cpu_exec(uint64_t n) {
     if (npc_state == NPC_END || npc_state == NPC_ABORT) {
         printf("Program execution has ended. Restart NPC to run again.\n");
@@ -203,7 +203,6 @@ void cpu_exec(uint64_t n) {
     }
 }
 
-// =================== 入口 =================== //
 int main(int argc, char **argv) {
     init_sim(argc, argv);
 
