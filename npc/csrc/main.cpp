@@ -105,7 +105,7 @@ void init_sim(int argc, char** argv) {
 
     // 初始化 difftest
     #ifdef CONFIG_DIFFTEST
-      difftest_init("/home/normal/ysyx-workbench/nemu/build/riscv32-nemu-interpreter-so");
+      difftest_init("/home/normal/ysyx-workbench/npc/csrc/difftest/riscv32-nemu-interpreter-so");
       difftest_memcpy(0x80000000, guest_to_host(0x80000000), CONFIG_MSIZE, 1);
     #endif
 

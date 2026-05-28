@@ -10,6 +10,7 @@ static void (*ref_memcpy)(uint32_t addr, void *buf, size_t n, int direction) = N
 static void (*ref_regcpy)(void *dut, int direction) = NULL;
 static void (*ref_exec)(uint64_t n) = NULL;
 static void (*ref_raise_intr)(int NO) = NULL;
+static void (*ref_init)(int port) = NULL;
 static void *handle = NULL;
 
 void difftest_init(const char *so_file) {
@@ -23,11 +24,14 @@ void difftest_init(const char *so_file) {
   ref_regcpy     = (void (*)(void*, int))                   dlsym(handle, "difftest_regcpy");
   ref_exec       = (void (*)(uint64_t))                     dlsym(handle, "difftest_exec");
   ref_raise_intr = (void (*)(int))                          dlsym(handle, "difftest_raise_intr");
+  ref_init       = (void (*)(int))                          dlsym(handle, "difftest_init");
 
-  if (!ref_memcpy || !ref_regcpy || !ref_exec) {
+  if (!ref_memcpy || !ref_regcpy || !ref_exec || !ref_raise_intr || !ref_init) {
     fprintf(stderr, "dlsym error\n");
-    npc_state = NPC_ABORT; 
+    npc_state = NPC_ABORT;
     npc_quit();  }
+
+  ref_init(0);
 
   printf("DiffTest REF loaded: %s\n", so_file);
 }
