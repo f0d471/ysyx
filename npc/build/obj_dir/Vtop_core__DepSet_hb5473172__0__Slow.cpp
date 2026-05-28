@@ -19,13 +19,21 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
         vlSelf->__PVT__regs[__Vi0] = 0;
     }
     vlSelf->__PVT__ifu_raddr = 0;
+    vlSelf->__PVT__ifu_reqValid = 0;
+    vlSelf->__PVT__ifu_reqReady = 0;
     vlSelf->__PVT__ifu_rdata = 0;
+    vlSelf->__PVT__ifu_respValid = 0;
+    vlSelf->__PVT__ifu_respReady = 0;
     vlSelf->__PVT__lsu_addr = 0;
     vlSelf->__PVT__lsu_ren = 0;
     vlSelf->__PVT__lsu_wen = 0;
     vlSelf->__PVT__lsu_wdata = 0;
     vlSelf->__PVT__lsu_wmask = 0;
+    vlSelf->__PVT__lsu_reqValid = 0;
+    vlSelf->__PVT__lsu_reqReady = 0;
     vlSelf->__PVT__lsu_rdata = 0;
+    vlSelf->__PVT__lsu_respValid = 0;
+    vlSelf->__PVT__lsu_respReady = 0;
     vlSelf->__PVT__debug_wb_have = 0;
     vlSelf->__PVT__debug_wb_pc = 0;
     vlSelf->__PVT__debug_wb_instr = 0;
@@ -91,10 +99,10 @@ VL_ATTR_COLD void Vtop_core___ctor_var_reset(Vtop_core* vlSelf) {
     vlSelf->__PVT__trap_cause = 0;
     vlSelf->__PVT__trap_mtvec = 0;
     vlSelf->__PVT__trap_mepc = 0;
-    vlSelf->__Vcellinp__u_pc_counter__pc_hold = 0;
+    vlSelf->__PVT__backend_stall = 0;
+    vlSelf->__PVT__pc_hold_sig = 0;
     vlSelf->__Vcellout__u_if2id__dn_data = 0;
     vlSelf->__Vcellinp__u_if2id__up_data = 0;
-    vlSelf->__Vcellinp__u_if2id__stall = 0;
     vlSelf->__Vcellinp__u_decode__instr_in = 0;
     vlSelf->__Vcellinp__u_decode__instr_addr_in = 0;
     vlSelf->__Vcellinp__u_csr_file__rst = 0;

@@ -12,8 +12,15 @@ VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__0(Vtop_top* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+      Vtop_top___stl_sequent__TOP__top__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSymsp->TOP__top__u_core.__PVT__ifu_rdata = vlSelfRef.__PVT__ifu_rdata;
     vlSymsp->TOP__top__u_core.__PVT__lsu_rdata = vlSelfRef.__PVT__lsu_rdata;
+    vlSymsp->TOP__top__u_core.__PVT__ifu_rdata = vlSelfRef.__PVT__ifu_rdata;
+    vlSymsp->TOP__top__u_core.__PVT__lsu_respValid 
+        = vlSelfRef.__PVT__lsu_respValid;
+    vlSymsp->TOP__top__u_core.__PVT__ifu_respValid 
+        = vlSelfRef.__PVT__ifu_respValid;
+    vlSymsp->TOP__top__u_core.__PVT__ifu_reqReady = vlSelfRef.__PVT__ifu_reqReady;
+    vlSelfRef.__PVT__lsu_reqReady = (1U & (~ (IData)(vlSelfRef.__PVT__lsu_mem_busy)));
+    vlSymsp->TOP__top__u_core.__PVT__lsu_reqReady = vlSelfRef.__PVT__lsu_reqReady;
 }
 
 VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__1(Vtop_top* vlSelf) {
@@ -24,6 +31,7 @@ VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__1(Vtop_top* vlSelf) {
     // Body
     vlSymsp->TOP__top__u_core.__PVT__clk = vlSelfRef.clk;
     vlSymsp->TOP__top__u_core.__PVT__rst_n = vlSelfRef.rst_n;
+    vlSelfRef.__PVT__lsu_respReady = vlSymsp->TOP__top__u_core.__PVT__lsu_respReady;
     vlSelfRef.pc = vlSymsp->TOP__top__u_core.__PVT__pc;
     vlSelfRef.regs[0xfU] = vlSymsp->TOP__top__u_core.__PVT__regs
         [0xfU];
@@ -72,8 +80,9 @@ VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__2(Vtop_top* vlSelf) {
     vlSelfRef.__PVT__lsu_wdata = vlSymsp->TOP__top__u_core.__PVT__lsu_wdata;
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core.__PVT__lsu_wen;
-    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core.__PVT__lsu_wmask;
     vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core.__PVT__lsu_ren;
+    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_reqValid = vlSymsp->TOP__top__u_core.__PVT__lsu_reqValid;
     vlSelfRef.debug_wb_addr = vlSymsp->TOP__top__u_core.__PVT__debug_wb_addr;
     vlSelfRef.debug_wb_en = vlSymsp->TOP__top__u_core.__PVT__debug_wb_en;
     vlSelfRef.debug_wb_data = vlSymsp->TOP__top__u_core.__PVT__debug_wb_data;
@@ -85,5 +94,15 @@ VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__3(Vtop_top* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+      Vtop_top___stl_sequent__TOP__top__3\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
+    vlSelfRef.__PVT__ifu_respReady = vlSymsp->TOP__top__u_core.__PVT__ifu_respReady;
     vlSelfRef.instr = vlSymsp->TOP__top__u_core.__PVT__instr;
+}
+
+VL_ATTR_COLD void Vtop_top___stl_sequent__TOP__top__4(Vtop_top* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+      Vtop_top___stl_sequent__TOP__top__4\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__ifu_reqValid = vlSymsp->TOP__top__u_core.__PVT__ifu_reqValid;
 }

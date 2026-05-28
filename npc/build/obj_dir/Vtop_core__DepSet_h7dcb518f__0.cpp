@@ -54,9 +54,8 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__0(Vtop_core* vlSel
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__pc = vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc;
-    vlSymsp->TOP__top__u_core__u_fetch.__PVT__pc_pointer 
-        = vlSelfRef.__PVT__pc;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_reqReady 
+        = vlSelfRef.__PVT__lsu_reqReady;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__1(Vtop_core* vlSelf) {
@@ -65,13 +64,24 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__1(Vtop_core* vlSel
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__ifu_raddr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_raddr;
+    vlSelfRef.__PVT__pc = vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__pc_pointer 
+        = vlSelfRef.__PVT__pc;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__2(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__2\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__ifu_raddr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_raddr;
+}
+
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__3(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__3\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__trap_mtvec = vlSymsp->TOP__top__u_core__u_csr_file.__PVT__trap_mtvec;
@@ -82,10 +92,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__2(Vtop_core* vlSel
         = vlSelfRef.__PVT__trap_mepc;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__3(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__4(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__3\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__4\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__regs[0xfU] = vlSymsp->TOP__top__u_core__u_reg_file.__PVT__regs
@@ -120,18 +130,6 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__3(Vtop_core* vlSel
         [1U];
     vlSelfRef.__PVT__regs[0U] = vlSymsp->TOP__top__u_core__u_reg_file.__PVT__regs
         [0U];
-}
-
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__4(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__4\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_rdata 
-        = vlSelfRef.__PVT__ifu_rdata;
-    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_rdata 
-        = vlSelfRef.__PVT__lsu_rdata;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__5(Vtop_core* vlSelf) {
@@ -202,6 +200,15 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__7(Vtop_core* vlSel
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__7\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__lsu_respReady = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_respReady;
+}
+
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__8\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
     VlWide<3>/*95:0*/ __Vtemp_1;
     // Body
@@ -224,10 +231,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__7(Vtop_core* vlSel
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0U, 3U));
     vlSelfRef.__Vcellinp__u_forward__mem_rd_addr = 
         (0x1fU & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0xaU, 5U));
-    vlSelfRef.__Vcellinp__u_memory__opcode_in = (0x7fU 
-                                                 & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
     vlSelfRef.__Vcellinp__u_forward__mem_opcode = (0x7fU 
                                                    & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
+    vlSelfRef.__Vcellinp__u_memory__opcode_in = (0x7fU 
+                                                 & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
     vlSymsp->TOP__top__u_core__u_memory.__PVT__rs2_data_in 
         = vlSelfRef.__Vcellinp__u_memory__rs2_data_in;
     vlSymsp->TOP__top__u_core__u_memory.__PVT__alu_result_in 
@@ -238,29 +245,29 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__7(Vtop_core* vlSel
         = vlSelfRef.__Vcellinp__u_memory__funct3_in;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_rd_addr 
         = vlSelfRef.__Vcellinp__u_forward__mem_rd_addr;
-    vlSymsp->TOP__top__u_core__u_memory.__PVT__opcode_in 
-        = vlSelfRef.__Vcellinp__u_memory__opcode_in;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_opcode 
         = vlSelfRef.__Vcellinp__u_forward__mem_opcode;
-}
-
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__8(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__8\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSelfRef.__PVT__lsu_wdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wdata;
-    vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_addr;
-    vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wen;
-    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
-    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_ren;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__opcode_in 
+        = vlSelfRef.__Vcellinp__u_memory__opcode_in;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__9(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__9\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__lsu_wdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wdata;
+    vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_addr;
+    vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wen;
+    vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_ren;
+    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
+}
+
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__10(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__10\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__id2ex_dn_valid = vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_valid;
@@ -286,11 +293,11 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__9(Vtop_core* vlSel
     vlSelfRef.__Vcellinp__u_execute__imm_in = VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x62U, 0x20U);
     vlSelfRef.__Vcellinp__u_execute__rs1_data_in = 
         VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x31U, 0x20U);
-    vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr = (0x1fU 
-                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x82U, 5U));
     vlSelfRef.__Vcellinp__u_execute__inst_ecall = (1U 
                                                    & VL_BITSEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 2U));
     vlSelfRef.__Vcellinp__u_execute__pc_in = VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0xe7U, 0x20U);
+    vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr = (0x1fU 
+                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x82U, 5U));
     vlSelfRef.__Vcellinp__u_execute__funct7_in = (0x7fU 
                                                   & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x51U, 7U));
     vlSelfRef.__Vcellinp__u_execute__inst_csrrs = (1U 
@@ -319,12 +326,12 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__9(Vtop_core* vlSel
         = vlSelfRef.__Vcellinp__u_execute__imm_in;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__rs1_data_in 
         = vlSelfRef.__Vcellinp__u_execute__rs1_data_in;
-    vlSymsp->TOP__top__u_core__u_hazard.__PVT__ex_rd_addr 
-        = vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__inst_ecall 
         = vlSelfRef.__Vcellinp__u_execute__inst_ecall;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__pc_in 
         = vlSelfRef.__Vcellinp__u_execute__pc_in;
+    vlSymsp->TOP__top__u_core__u_hazard.__PVT__ex_rd_addr 
+        = vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__funct7_in 
         = vlSelfRef.__Vcellinp__u_execute__funct7_in;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__inst_csrrs 
@@ -347,10 +354,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__9(Vtop_core* vlSel
         = vlSelfRef.__Vcellinp__u_execute__opcode_in;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__10(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__11(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__10\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__11\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__trap_valid = vlSymsp->TOP__top__u_core__u_execute.__PVT__trap_valid;
@@ -370,10 +377,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__10(Vtop_core* vlSe
         = vlSelfRef.__PVT__csr_wen;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__11(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__12(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__11\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__12\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__if2id_dn_valid = vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_valid;
@@ -390,10 +397,10 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__11(Vtop_core* vlSe
         = vlSelfRef.__Vcellinp__u_decode__instr_in;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__12(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__13(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__12\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__13\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__decode_csr_addr = vlSymsp->TOP__top__u_core__u_decode.__PVT__csr_addr_out;
@@ -433,30 +440,31 @@ VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__12(Vtop_core* vlSe
         = vlSelfRef.__PVT__decode_rs2_addr;
 }
 
+VL_INLINE_OPT void Vtop_core___nba_sequent__TOP__top__u_core__14(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_sequent__TOP__top__u_core__14\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_rdata 
+        = vlSelfRef.__PVT__ifu_rdata;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_respValid 
+        = vlSelfRef.__PVT__ifu_respValid;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_rdata 
+        = vlSelfRef.__PVT__lsu_rdata;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_respValid 
+        = vlSelfRef.__PVT__lsu_respValid;
+}
+
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__0(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__0\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__lsu_busy = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_busy;
-    vlSelfRef.__Vcellinp__u_mem2wb__up_valid = ((IData)(vlSelfRef.__PVT__ex2mem_dn_valid) 
-                                                & (~ (IData)(vlSelfRef.__PVT__lsu_busy)));
-    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__stall 
-        = vlSelfRef.__PVT__lsu_busy;
-    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__stall 
-        = vlSelfRef.__PVT__lsu_busy;
-    vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_valid 
-        = vlSelfRef.__Vcellinp__u_mem2wb__up_valid;
-}
-
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__1(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__1\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
     vlSelfRef.__PVT__mem_rdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__mem_rdata_out;
+    vlSelfRef.__PVT__lsu_reqValid = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_reqValid;
+    vlSelfRef.__PVT__lsu_busy = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_busy;
     VL_ASSIGNSEL_WQ(140,44,0U, vlSelfRef.__PVT__mem_wb_up, 
                     VL_CONCAT_QII(44,32,12, vlSelfRef.__PVT__mem_rdata, 
                                   VL_CONCAT_III(12,5,7, 
@@ -466,14 +474,22 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__1(Vtop_core* vlSelf) 
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U)))));
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_rdata 
         = vlSelfRef.__PVT__mem_rdata;
+    vlSelfRef.__Vcellinp__u_mem2wb__up_valid = ((IData)(vlSelfRef.__PVT__ex2mem_dn_valid) 
+                                                & (~ (IData)(vlSelfRef.__PVT__lsu_busy)));
+    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__stall 
+        = vlSelfRef.__PVT__lsu_busy;
+    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__stall 
+        = vlSelfRef.__PVT__lsu_busy;
     VL_ASSIGN_W(140,vlSelfRef.__Vcellinp__u_mem2wb__up_data, vlSelfRef.__PVT__mem_wb_up);
+    vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_valid 
+        = vlSelfRef.__Vcellinp__u_mem2wb__up_valid;
     VL_ASSIGN_W(140,vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_data, vlSelfRef.__Vcellinp__u_mem2wb__up_data);
 }
 
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__2(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__1(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__2\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__1\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__ex_jump_target = vlSymsp->TOP__top__u_core__u_execute.__PVT__jump_target_out;
@@ -491,10 +507,10 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__2(Vtop_core* vlSelf) 
         = vlSelfRef.__PVT__csr_rdata;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__3(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__2(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__3\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__2\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
     VlWide<3>/*95:0*/ __Vtemp_1;
@@ -513,19 +529,19 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__3(Vtop_core* vlSelf) 
     VL_ASSIGN_W(143,vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_data, vlSelfRef.__Vcellinp__u_ex2mem__up_data);
 }
 
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__4(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__3(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__4\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__3\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__load_stall = vlSymsp->TOP__top__u_core__u_hazard.__PVT__stall;
 }
 
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__5(Vtop_core* vlSelf) {
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__4(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__5\n"); );
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__4\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__reg_rs1_data = vlSymsp->TOP__top__u_core__u_reg_file.__PVT__rs1_data;
@@ -536,15 +552,28 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__5(Vtop_core* vlSelf) 
         = vlSelfRef.__PVT__reg_rs2_data;
 }
 
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__5(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__5\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__ex2mem_up_ready = vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_ready;
+    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_ready 
+        = vlSelfRef.__PVT__ex2mem_up_ready;
+}
+
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__6(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__6\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__ex2mem_up_ready = vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_ready;
-    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_ready 
-        = vlSelfRef.__PVT__ex2mem_up_ready;
+    vlSelfRef.__PVT__ifu_respReady = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_respReady;
+    vlSelfRef.__PVT__ifu_valid = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_valid;
+    vlSelfRef.__PVT__instr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__instr_out;
+    vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_valid 
+        = vlSelfRef.__PVT__ifu_valid;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__7(Vtop_core* vlSelf) {
@@ -553,9 +582,10 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__7(Vtop_core* vlSelf) 
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__7\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__ifu_valid = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_valid;
-    vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_valid 
-        = vlSelfRef.__PVT__ifu_valid;
+    vlSelfRef.__Vcellinp__u_id2ex__flush = ((IData)(vlSelfRef.__PVT__ex_jump_flag) 
+                                            | (IData)(vlSelfRef.__PVT__load_stall));
+    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__flush 
+        = vlSelfRef.__Vcellinp__u_id2ex__flush;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__8(Vtop_core* vlSelf) {
@@ -564,28 +594,18 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__8(Vtop_core* vlSelf) 
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__8\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__Vcellinp__u_id2ex__flush = ((IData)(vlSelfRef.__PVT__ex_jump_flag) 
-                                            | (IData)(vlSelfRef.__PVT__load_stall));
-    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__flush 
-        = vlSelfRef.__Vcellinp__u_id2ex__flush;
+    vlSelfRef.__PVT__backend_stall = ((IData)(vlSelfRef.__PVT__load_stall) 
+                                      | (IData)(vlSelfRef.__PVT__lsu_busy));
+    vlSymsp->TOP__top__u_core__u_if2id.__PVT__stall 
+        = vlSelfRef.__PVT__backend_stall;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__stall 
+        = vlSelfRef.__PVT__backend_stall;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__9(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__9\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSelfRef.__Vcellinp__u_if2id__stall = ((IData)(vlSelfRef.__PVT__load_stall) 
-                                            | (IData)(vlSelfRef.__PVT__lsu_busy));
-    vlSymsp->TOP__top__u_core__u_if2id.__PVT__stall 
-        = vlSelfRef.__Vcellinp__u_if2id__stall;
-}
-
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__10(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__10\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
     VlWide<3>/*95:0*/ __Vtemp_1;
@@ -617,15 +637,27 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__10(Vtop_core* vlSelf)
     VL_ASSIGN_W(263,vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_data, vlSelfRef.__Vcellinp__u_id2ex__up_data);
 }
 
+VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__10(Vtop_core* vlSelf) {
+    (void)vlSelf;  // Prevent unused variable warning
+    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__10\n"); );
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__PVT__id2ex_up_ready = vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_ready;
+    vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_ready 
+        = vlSelfRef.__PVT__id2ex_up_ready;
+}
+
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__11(Vtop_core* vlSelf) {
     (void)vlSelf;  // Prevent unused variable warning
     Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__11\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__id2ex_up_ready = vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_ready;
-    vlSymsp->TOP__top__u_core__u_if2id.__PVT__dn_ready 
-        = vlSelfRef.__PVT__id2ex_up_ready;
+    vlSelfRef.__PVT__if_id_up = VL_CONCAT_QII(64,32,32, vlSelfRef.__PVT__pc, vlSelfRef.__PVT__instr);
+    vlSelfRef.__Vcellinp__u_if2id__up_data = vlSelfRef.__PVT__if_id_up;
+    vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_data 
+        = vlSelfRef.__Vcellinp__u_if2id__up_data;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__12(Vtop_core* vlSelf) {
@@ -634,7 +666,10 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__12(Vtop_core* vlSelf)
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__12\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__PVT__instr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__instr_out;
+    vlSelfRef.__PVT__pc_hold_sig = (1U & ((~ (IData)(vlSelfRef.__PVT__ifu_valid)) 
+                                          | (IData)(vlSelfRef.__PVT__backend_stall)));
+    vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc_hold 
+        = vlSelfRef.__PVT__pc_hold_sig;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__13(Vtop_core* vlSelf) {
@@ -643,12 +678,7 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__13(Vtop_core* vlSelf)
     VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__13\n"); );
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.__Vcellinp__u_pc_counter__pc_hold = (1U 
-                                                   & (((~ (IData)(vlSelfRef.__PVT__ifu_valid)) 
-                                                       | (IData)(vlSelfRef.__PVT__load_stall)) 
-                                                      | (IData)(vlSelfRef.__PVT__lsu_busy)));
-    vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc_hold 
-        = vlSelfRef.__Vcellinp__u_pc_counter__pc_hold;
+    vlSelfRef.__PVT__ifu_reqValid = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_reqValid;
 }
 
 VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__14(Vtop_core* vlSelf) {
@@ -658,16 +688,4 @@ VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__14(Vtop_core* vlSelf)
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__if2id_up_ready = vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_ready;
-}
-
-VL_INLINE_OPT void Vtop_core___nba_comb__TOP__top__u_core__15(Vtop_core* vlSelf) {
-    (void)vlSelf;  // Prevent unused variable warning
-    Vtop__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
-    VL_DEBUG_IF(VL_DBG_MSGF("+        Vtop_core___nba_comb__TOP__top__u_core__15\n"); );
-    auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Body
-    vlSelfRef.__PVT__if_id_up = VL_CONCAT_QII(64,32,32, vlSelfRef.__PVT__pc, vlSelfRef.__PVT__instr);
-    vlSelfRef.__Vcellinp__u_if2id__up_data = vlSelfRef.__PVT__if_id_up;
-    vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_data 
-        = vlSelfRef.__Vcellinp__u_if2id__up_data;
 }

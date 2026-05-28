@@ -25,6 +25,18 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__0(Vtop_core* vlSelf
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     vlSelfRef.__PVT__trap_cause = vlSymsp->TOP__top__u_core__u_execute.__PVT__trap_cause;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_rdata 
+        = vlSelfRef.__PVT__lsu_rdata;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_rdata 
+        = vlSelfRef.__PVT__ifu_rdata;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_respValid 
+        = vlSelfRef.__PVT__lsu_respValid;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_respValid 
+        = vlSelfRef.__PVT__ifu_respValid;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_reqReady 
+        = vlSelfRef.__PVT__ifu_reqReady;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_reqReady 
+        = vlSelfRef.__PVT__lsu_reqReady;
     vlSymsp->TOP__top__u_core__u_csr_file.__PVT__trap_cause 
         = vlSelfRef.__PVT__trap_cause;
 }
@@ -44,10 +56,7 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__1(Vtop_core* vlSelf
     vlSelfRef.__PVT__mem2wb_dn_valid = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_valid;
     vlSelfRef.__PVT__mem2wb_up_ready = vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_ready;
     VL_ASSIGN_W(140,vlSelfRef.__Vcellout__u_mem2wb__dn_data, vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__dn_data);
-    vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_rdata 
-        = vlSelfRef.__PVT__ifu_rdata;
-    vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_rdata 
-        = vlSelfRef.__PVT__lsu_rdata;
+    vlSelfRef.__PVT__lsu_respReady = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_respReady;
     vlSelfRef.__PVT__pc = vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc;
     vlSelfRef.__PVT__trap_mtvec = vlSymsp->TOP__top__u_core__u_csr_file.__PVT__trap_mtvec;
     vlSelfRef.__PVT__trap_mepc = vlSymsp->TOP__top__u_core__u_csr_file.__PVT__trap_mepc;
@@ -125,11 +134,11 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__1(Vtop_core* vlSelf
     vlSelfRef.__Vcellinp__u_execute__imm_in = VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x62U, 0x20U);
     vlSelfRef.__Vcellinp__u_execute__rs1_data_in = 
         VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x31U, 0x20U);
-    vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr = (0x1fU 
-                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x82U, 5U));
     vlSelfRef.__Vcellinp__u_execute__inst_ecall = (1U 
                                                    & VL_BITSEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 2U));
     vlSelfRef.__Vcellinp__u_execute__pc_in = VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0xe7U, 0x20U);
+    vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr = (0x1fU 
+                                                  & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x82U, 5U));
     vlSelfRef.__Vcellinp__u_execute__funct7_in = (0x7fU 
                                                   & VL_SEL_IWII(263, vlSelfRef.__PVT__id_ex_dn, 0x51U, 7U));
     vlSelfRef.__Vcellinp__u_execute__inst_csrrs = (1U 
@@ -176,10 +185,10 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__1(Vtop_core* vlSelf
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0U, 3U));
     vlSelfRef.__Vcellinp__u_forward__mem_rd_addr = 
         (0x1fU & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 0xaU, 5U));
-    vlSelfRef.__Vcellinp__u_memory__opcode_in = (0x7fU 
-                                                 & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
     vlSelfRef.__Vcellinp__u_forward__mem_opcode = (0x7fU 
                                                    & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
+    vlSelfRef.__Vcellinp__u_memory__opcode_in = (0x7fU 
+                                                 & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U));
     vlSymsp->TOP__top__u_core__u_decode.__PVT__instr_addr_in 
         = vlSelfRef.__Vcellinp__u_decode__instr_addr_in;
     vlSymsp->TOP__top__u_core__u_decode.__PVT__instr_in 
@@ -194,12 +203,12 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__1(Vtop_core* vlSelf
         = vlSelfRef.__Vcellinp__u_execute__imm_in;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__rs1_data_in 
         = vlSelfRef.__Vcellinp__u_execute__rs1_data_in;
-    vlSymsp->TOP__top__u_core__u_hazard.__PVT__ex_rd_addr 
-        = vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__inst_ecall 
         = vlSelfRef.__Vcellinp__u_execute__inst_ecall;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__pc_in 
         = vlSelfRef.__Vcellinp__u_execute__pc_in;
+    vlSymsp->TOP__top__u_core__u_hazard.__PVT__ex_rd_addr 
+        = vlSelfRef.__Vcellinp__u_hazard__ex_rd_addr;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__funct7_in 
         = vlSelfRef.__Vcellinp__u_execute__funct7_in;
     vlSymsp->TOP__top__u_core__u_execute.__PVT__inst_csrrs 
@@ -242,10 +251,10 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__1(Vtop_core* vlSelf
         = vlSelfRef.__Vcellinp__u_memory__funct3_in;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_rd_addr 
         = vlSelfRef.__Vcellinp__u_forward__mem_rd_addr;
-    vlSymsp->TOP__top__u_core__u_memory.__PVT__opcode_in 
-        = vlSelfRef.__Vcellinp__u_memory__opcode_in;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_opcode 
         = vlSelfRef.__Vcellinp__u_forward__mem_opcode;
+    vlSymsp->TOP__top__u_core__u_memory.__PVT__opcode_in 
+        = vlSelfRef.__Vcellinp__u_memory__opcode_in;
 }
 
 VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__2(Vtop_core* vlSelf) {
@@ -315,10 +324,11 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__2(Vtop_core* vlSelf
     vlSelfRef.__PVT__lsu_wdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wdata;
     vlSelfRef.__PVT__lsu_addr = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_addr;
     vlSelfRef.__PVT__lsu_wen = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wen;
-    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
     vlSelfRef.__PVT__lsu_ren = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_ren;
-    vlSelfRef.__PVT__lsu_busy = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_busy;
     vlSelfRef.__PVT__mem_rdata = vlSymsp->TOP__top__u_core__u_memory.__PVT__mem_rdata_out;
+    vlSelfRef.__PVT__lsu_wmask = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_wmask;
+    vlSelfRef.__PVT__lsu_reqValid = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_reqValid;
+    vlSelfRef.__PVT__lsu_busy = vlSymsp->TOP__top__u_core__u_memory.__PVT__lsu_busy;
     vlSymsp->TOP__top__u_core__u_csr_file.__PVT__rst 
         = vlSelfRef.__Vcellinp__u_csr_file__rst;
     VL_ASSIGNBIT_WI(0U, vlSelfRef.__PVT__id_ex_up, vlSelfRef.__PVT__decode_inst_ebreak);
@@ -370,12 +380,6 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__2(Vtop_core* vlSelf
     vlSelfRef.__PVT__debug_wb_data = vlSelfRef.__PVT__wb_wr_data;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__wb_wr_data 
         = vlSelfRef.__PVT__wb_wr_data;
-    vlSelfRef.__Vcellinp__u_mem2wb__up_valid = ((IData)(vlSelfRef.__PVT__ex2mem_dn_valid) 
-                                                & (~ (IData)(vlSelfRef.__PVT__lsu_busy)));
-    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__stall 
-        = vlSelfRef.__PVT__lsu_busy;
-    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__stall 
-        = vlSelfRef.__PVT__lsu_busy;
     VL_ASSIGNSEL_WQ(140,44,0U, vlSelfRef.__PVT__mem_wb_up, 
                     VL_CONCAT_QII(44,32,12, vlSelfRef.__PVT__mem_rdata, 
                                   VL_CONCAT_III(12,5,7, 
@@ -385,9 +389,15 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__2(Vtop_core* vlSelf
                                                  & VL_SEL_IWII(143, vlSelfRef.__PVT__ex_mem_dn, 3U, 7U)))));
     vlSymsp->TOP__top__u_core__u_forward.__PVT__mem_rdata 
         = vlSelfRef.__PVT__mem_rdata;
+    vlSelfRef.__Vcellinp__u_mem2wb__up_valid = ((IData)(vlSelfRef.__PVT__ex2mem_dn_valid) 
+                                                & (~ (IData)(vlSelfRef.__PVT__lsu_busy)));
+    vlSymsp->TOP__top__u_core__u_id2ex.__PVT__stall 
+        = vlSelfRef.__PVT__lsu_busy;
+    vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__stall 
+        = vlSelfRef.__PVT__lsu_busy;
+    VL_ASSIGN_W(140,vlSelfRef.__Vcellinp__u_mem2wb__up_data, vlSelfRef.__PVT__mem_wb_up);
     vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_valid 
         = vlSelfRef.__Vcellinp__u_mem2wb__up_valid;
-    VL_ASSIGN_W(140,vlSelfRef.__Vcellinp__u_mem2wb__up_data, vlSelfRef.__PVT__mem_wb_up);
     VL_ASSIGN_W(140,vlSymsp->TOP__top__u_core__u_mem2wb.__PVT__up_data, vlSelfRef.__Vcellinp__u_mem2wb__up_data);
 }
 
@@ -401,13 +411,14 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__3(Vtop_core* vlSelf
     vlSelfRef.__PVT__reg_rs1_data = vlSymsp->TOP__top__u_core__u_reg_file.__PVT__rs1_data;
     vlSelfRef.__PVT__reg_rs2_data = vlSymsp->TOP__top__u_core__u_reg_file.__PVT__rs2_data;
     vlSelfRef.__PVT__csr_rdata = vlSymsp->TOP__top__u_core__u_csr_file.__PVT__csr_rdata;
+    vlSelfRef.__PVT__ifu_respReady = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_respReady;
     vlSelfRef.__PVT__ifu_valid = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_valid;
     vlSelfRef.__PVT__instr = vlSymsp->TOP__top__u_core__u_fetch.__PVT__instr_out;
     vlSelfRef.__PVT__ex2mem_up_ready = vlSymsp->TOP__top__u_core__u_ex2mem.__PVT__up_ready;
     vlSelfRef.__Vcellinp__u_id2ex__flush = ((IData)(vlSelfRef.__PVT__ex_jump_flag) 
                                             | (IData)(vlSelfRef.__PVT__load_stall));
-    vlSelfRef.__Vcellinp__u_if2id__stall = ((IData)(vlSelfRef.__PVT__load_stall) 
-                                            | (IData)(vlSelfRef.__PVT__lsu_busy));
+    vlSelfRef.__PVT__backend_stall = ((IData)(vlSelfRef.__PVT__load_stall) 
+                                      | (IData)(vlSelfRef.__PVT__lsu_busy));
     vlSymsp->TOP__top__u_core__u_forward.__PVT__reg_rs1_data 
         = vlSelfRef.__PVT__reg_rs1_data;
     vlSymsp->TOP__top__u_core__u_forward.__PVT__reg_rs2_data 
@@ -416,20 +427,20 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__3(Vtop_core* vlSelf
         = vlSelfRef.__PVT__csr_rdata;
     vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_valid 
         = vlSelfRef.__PVT__ifu_valid;
-    vlSelfRef.__Vcellinp__u_pc_counter__pc_hold = (1U 
-                                                   & (((~ (IData)(vlSelfRef.__PVT__ifu_valid)) 
-                                                       | (IData)(vlSelfRef.__PVT__load_stall)) 
-                                                      | (IData)(vlSelfRef.__PVT__lsu_busy)));
     vlSelfRef.__PVT__if_id_up = VL_CONCAT_QII(64,32,32, vlSelfRef.__PVT__pc, vlSelfRef.__PVT__instr);
     vlSymsp->TOP__top__u_core__u_id2ex.__PVT__dn_ready 
         = vlSelfRef.__PVT__ex2mem_up_ready;
     vlSymsp->TOP__top__u_core__u_id2ex.__PVT__flush 
         = vlSelfRef.__Vcellinp__u_id2ex__flush;
+    vlSelfRef.__PVT__pc_hold_sig = (1U & ((~ (IData)(vlSelfRef.__PVT__ifu_valid)) 
+                                          | (IData)(vlSelfRef.__PVT__backend_stall)));
     vlSymsp->TOP__top__u_core__u_if2id.__PVT__stall 
-        = vlSelfRef.__Vcellinp__u_if2id__stall;
-    vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc_hold 
-        = vlSelfRef.__Vcellinp__u_pc_counter__pc_hold;
+        = vlSelfRef.__PVT__backend_stall;
+    vlSymsp->TOP__top__u_core__u_fetch.__PVT__stall 
+        = vlSelfRef.__PVT__backend_stall;
     vlSelfRef.__Vcellinp__u_if2id__up_data = vlSelfRef.__PVT__if_id_up;
+    vlSymsp->TOP__top__u_core__u_pc_counter.__PVT__pc_hold 
+        = vlSelfRef.__PVT__pc_hold_sig;
     vlSymsp->TOP__top__u_core__u_if2id.__PVT__up_data 
         = vlSelfRef.__Vcellinp__u_if2id__up_data;
 }
@@ -445,6 +456,7 @@ VL_ATTR_COLD void Vtop_core___stl_sequent__TOP__top__u_core__4(Vtop_core* vlSelf
     vlSelfRef.__PVT__csr_wdata = vlSymsp->TOP__top__u_core__u_execute.__PVT__csr_wdata;
     vlSelfRef.__PVT__ex_alu_result = vlSymsp->TOP__top__u_core__u_execute.__PVT__alu_result_out;
     vlSelfRef.__PVT__id2ex_up_ready = vlSymsp->TOP__top__u_core__u_id2ex.__PVT__up_ready;
+    vlSelfRef.__PVT__ifu_reqValid = vlSymsp->TOP__top__u_core__u_fetch.__PVT__ifu_reqValid;
     vlSymsp->TOP__top__u_core__u_csr_file.__PVT__csr_wdata 
         = vlSelfRef.__PVT__csr_wdata;
     VL_CONCAT_WQI(96,64,32, __Vtemp_1, VL_CONCAT_QII(64,32,32, 

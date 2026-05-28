@@ -22,18 +22,26 @@ class alignas(VL_CACHE_LINE_BYTES) Vtop_memory final : public VerilatedModule {
     VL_OUT8(__PVT__lsu_ren,0,0);
     VL_OUT8(__PVT__lsu_wen,0,0);
     VL_OUT8(__PVT__lsu_wmask,3,0);
+    VL_OUT8(__PVT__lsu_reqValid,0,0);
+    VL_IN8(__PVT__lsu_reqReady,0,0);
+    VL_IN8(__PVT__lsu_respValid,0,0);
+    VL_OUT8(__PVT__lsu_respReady,0,0);
     VL_OUT8(__PVT__lsu_busy,0,0);
     CData/*0:0*/ __PVT__is_load;
     CData/*0:0*/ __PVT__is_store;
-    CData/*0:0*/ __PVT__state;
-    CData/*0:0*/ __PVT__state_next;
-    CData/*0:0*/ __Vdly__state;
+    CData/*0:0*/ __PVT__is_mem;
+    CData/*1:0*/ __PVT__state;
+    CData/*1:0*/ __PVT__state_next;
+    CData/*3:0*/ __PVT__wmask_gen;
+    CData/*1:0*/ __Vdly__state;
     VL_IN(__PVT__alu_result_in,31,0);
     VL_IN(__PVT__rs2_data_in,31,0);
     VL_OUT(__PVT__lsu_addr,31,0);
     VL_OUT(__PVT__lsu_wdata,31,0);
     VL_IN(__PVT__lsu_rdata,31,0);
     VL_OUT(__PVT__mem_rdata_out,31,0);
+    IData/*31:0*/ __PVT__rdata_latch;
+    IData/*31:0*/ __Vdly__rdata_latch;
 
     // INTERNAL VARIABLES
     Vtop__Syms* const vlSymsp;
