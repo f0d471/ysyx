@@ -223,8 +223,8 @@ hazard_unit u_hazard (
 
 //  Forward 
 forward_unit u_forward (
-    .ex_rs1_addr      (decode_rs1_addr),
-    .ex_rs2_addr      (decode_rs2_addr),
+    .id_rs1_addr      (decode_rs1_addr),
+    .id_rs2_addr      (decode_rs2_addr),
 
     .ex_wr_en         (id_ex_dn.wr_en),
     .ex_rd_addr       (id_ex_dn.rd_addr),
