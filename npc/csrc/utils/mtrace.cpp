@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdint>
 
-#include "Vtop.h"
+#include "common.h"
 #include "utils.h"
 
 #ifdef CONFIG_MTRACE

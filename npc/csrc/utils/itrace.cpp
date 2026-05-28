@@ -3,7 +3,7 @@
 #include <cassert>
 #include <capstone/capstone.h>
 
-#include "Vtop.h"
+#include "common.h"
 #include "utils.h"
 
 #ifdef CONFIG_ITRACE
