@@ -20,11 +20,11 @@ module pc_counter #(
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             pc_pointer <= RESET_PC;
-        else if (jump_en)               // 优先级 1：跳转
+        else if (jump_en)               
             pc_pointer <= jump_addr;
-        else if (pc_hold)               // 优先级 2：保持（IFU 忙/stall）
+        else if (pc_hold)               // 保持（IFU 忙/stall）
             pc_pointer <= pc_pointer;
-        else                            // 默认：顺序执行
+        else                            
             pc_pointer <= pc_pointer + 32'h4;
     end
  

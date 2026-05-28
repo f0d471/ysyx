@@ -96,18 +96,18 @@ module top (
             ifu_respValid    <= 1'b0;
             ifu_rdata        <= 32'h00000013;
         end else begin
-            if (ifu_reqValid && ifu_reqReady) begin
+            if (ifu_reqValid && ifu_reqReady) begin // 请求握手
                 ifu_rdata_buf    <= paddr_read(ifu_raddr);
                 ifu_delay_target <= 4'(ifu_lfsr[1:0] % IFU_MAX_DELAY) + 4'd1;
                 ifu_delay_cnt    <= 4'd1;
                 ifu_mem_busy     <= 1'b1;
                 ifu_respValid    <= 1'b0;   
             end
-            else if (ifu_respValid && ifu_respReady) begin
+            else if (ifu_respValid && ifu_respReady) begin // 响应握手
                 ifu_mem_busy  <= 1'b0;
                 ifu_respValid <= 1'b0;
             end
-            else if (ifu_mem_busy && !ifu_respValid) begin
+            else if (ifu_mem_busy && !ifu_respValid) begin  // 模拟延迟中：计数到目标值后返回数据
                 if (ifu_delay_cnt >= ifu_delay_target) begin
                     ifu_respValid <= 1'b1;
                     ifu_rdata     <= ifu_rdata_buf;
