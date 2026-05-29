@@ -9,12 +9,12 @@ Context* __am_irq_handle(Context *c) {
     Event ev = {0};
     switch (c->mcause) {
       case 11: 
-        // 根据架构选择检查 a7 (gpr[17]) 还是 a5 (gpr[15])
-#ifdef __riscv_e
-        if (c->gpr[15] == -1) { // RV32E: a5 是 x15
-#else
-        if (c->gpr[17] == -1) { // RV32I: a7 是 x17
-#endif
+        // 根据架构选择检查 a7 还是 a5 
+        #ifdef __riscv_e
+          if (c->gpr[15] == -1) { 
+        #else
+          if (c->gpr[17] == -1) { 
+        #endif
           ev.event = EVENT_YIELD;
         } else {
           ev.event = EVENT_SYSCALL;
@@ -34,12 +34,8 @@ Context* __am_irq_handle(Context *c) {
 extern void __am_asm_trap(void);
 
 bool cte_init(Context*(*handler)(Event, Context*)) {
-  // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));
-
-  // register event handler
   user_handler = handler;
-
   return true;
 }
 
@@ -47,7 +43,6 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   Context *c = (Context *)((uintptr_t)kstack.end - sizeof(Context));
   memset(c, 0, sizeof(Context));
   c->mepc = (uintptr_t)entry;
-  c->gpr[2] = (uintptr_t)kstack.end; // x2 = sp
   c->gpr[10] = (uintptr_t)arg; // x10 = a0
   c->mstatus = 0x1800; 
 
