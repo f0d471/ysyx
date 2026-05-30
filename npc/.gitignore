@@ -2,3 +2,5 @@ build/
 *.vcd
 *.txt
 csrc/difftest/*.so
+test/*.bin
+test/*.elf
