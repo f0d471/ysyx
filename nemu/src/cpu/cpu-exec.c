@@ -42,7 +42,6 @@
     IRBEntry *e = &irb[irb_head];
     e->pc   = pc;
     e->inst = inst;
-    // 安全复制，防止溢出
     snprintf(e->disasm, sizeof(e->disasm), "%.*s", (int)sizeof(e->disasm)-1, disasm);
     irb_head = (irb_head + 1) % IRB_N;
     if (irb_cnt < IRB_N) irb_cnt++;
@@ -55,9 +54,7 @@
     TRACE_LOG("----- recent %d instructions (IRingBuf) -----\n", irb_cnt);
     for (int i = 0; i < irb_cnt; i++) {
       IRBEntry *e = &irb[(start + i) % IRB_N];
-      // 标记出错的那条指令
       const char *mark = (e->pc == bad_pc) ? "-->" : "   ";
-      // 注意：TRACE_LOG 内部用的是 fprintf，所以末尾必须自己加上 \n
       TRACE_LOG("%s " FMT_WORD ": %08x %s\n", mark, e->pc, e->inst, e->disasm);
     }
     TRACE_LOG("----- end IRingBuf dump -----\n");
@@ -117,7 +114,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
     // 情况 A: ITRACE 开了，直接复用 logbuf，省性能
     irb_record(s->pc, s->isa.inst, s->logbuf);
   #else
-    // 情况 B: ITRACE 没开，我们需要自己反汇编（这是必须的代价）
+    // 情况 B: ITRACE 没开，我们需要自己反汇编
     char temp_buf[128];
     char *p_irb = temp_buf;
     p_irb += snprintf(p_irb, 128, FMT_WORD ":", s->pc);

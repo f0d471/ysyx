@@ -56,7 +56,6 @@ void load_bin(const char *bin_file) {
     printf("Loaded binary file: %s (size: %ld bytes)\n", bin_file, size);
 }
 
-// ====================== C 环境内存接口 ==========================
 uint32_t pmem_read(uint32_t addr, int len) {
     if (in_pmem(addr)) {
         uint32_t data = 0;
@@ -82,7 +81,6 @@ uint32_t pmem_read(uint32_t addr, int len) {
 }
 
 void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data) {
-    // 真实硬件约定：地址已对齐，按 wmask 逐字节 lane 写入
     if (in_pmem(addr)) {
         uint8_t *p = (uint8_t *)guest_to_host(addr);
         if (wmask & 1) p[0] = (uint8_t)(data);
@@ -99,7 +97,6 @@ void pmem_write(uint32_t addr, uint32_t wmask, uint32_t data) {
     }
 }
 
-// ================= 硬件DPI-C调用接口 ================================
 extern "C" uint32_t paddr_read(uint32_t addr) {
   if (addr == 0) return 0; // 保护一下，防止取指地址为 0 报错
 
@@ -133,7 +130,6 @@ extern "C" void paddr_write(uint32_t addr, uint32_t wmask, uint32_t data) {
 
   #ifdef CONFIG_DEVICE
     if (is_mmio(addr)) {
-        // RTL 按真实硬件将数据移位到了对应 byte lane，MMIO 需要移回 byte 0
         uint32_t unshifted = data >> (8 * (addr & 3));
         int len = (wmask == 0x1 || wmask == 0x2 || wmask == 0x4 || wmask == 0x8) ? 1 :
                   (wmask == 0x3 || wmask == 0xC) ? 2 : 4;

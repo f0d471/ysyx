@@ -6,6 +6,7 @@
 #include ISA_H // the macro `ISA_H` is defined in CFLAGS
                // it will be expanded as "x86/x86.h", "mips/mips32.h", ...
 
+// 各架构的 trap 指令               
 #if defined(__ISA_X86__)
 # define nemu_trap(code) asm volatile ("int3" : :"a"(code))
 #elif defined(__ISA_MIPS32__)
@@ -18,14 +19,15 @@
 # error unsupported ISA __ISA__
 #endif
 
+// MMIO 基地址
 #if defined(__ARCH_X86_NEMU)
 # define DEVICE_BASE 0x0
 #else
 # define DEVICE_BASE 0xa0000000
 #endif
-
 #define MMIO_BASE 0xa0000000
 
+ // 外设寄存器地址
 #define SERIAL_PORT     (DEVICE_BASE + 0x00003f8)
 #define KBD_ADDR        (DEVICE_BASE + 0x0000060)
 #define RTC_ADDR        (DEVICE_BASE + 0x0000048)
@@ -35,6 +37,7 @@
 #define FB_ADDR         (MMIO_BASE   + 0x1000000)
 #define AUDIO_SBUF_ADDR (MMIO_BASE   + 0x1200000)
 
+ // 物理内存布局
 extern char _pmem_start;
 #define PMEM_SIZE (128 * 1024 * 1024)
 #define PMEM_END  ((uintptr_t)&_pmem_start + PMEM_SIZE)
@@ -43,8 +46,8 @@ extern char _pmem_start;
   RANGE(FB_ADDR, FB_ADDR + 0x200000), \
   RANGE(MMIO_BASE, MMIO_BASE + 0x1000) /* serial, rtc, screen, keyboard */
 
+// 虚拟内存  
 typedef uintptr_t PTE;
-
 #define PGSIZE    4096
 
 #endif

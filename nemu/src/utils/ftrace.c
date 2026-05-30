@@ -6,7 +6,7 @@
 
 #define MAX_FUNCS 1024 // 假设程序中最多有 1024 个函数
 
-// 定义保存函数信息的结构体
+// 保存函数信息
 typedef struct {
     char name[64];
     paddr_t addr;
@@ -29,18 +29,17 @@ void init_ftrace(const char *elf_file) {
     FILE *fp = fopen(elf_file, "rb");
     Assert(fp, "Can not open '%s'", elf_file);
 
-    // 1. 读取 ELF 头 (ELF Header)
+    // 读取 ELF 头 (ELF Header)
     Elf32_Ehdr ehdr;
     if (fread(&ehdr, sizeof(Elf32_Ehdr), 1, fp) != 1) {
         panic("Failed to read ELF header");
     }
 
-    // 简单校验一下 Magic Number (7f 45 4c 46 -> "\x7fELF")
     if (*(uint32_t *)ehdr.e_ident != 0x464c457f) {
         panic("Not a valid ELF file: %s", elf_file);
     }
 
-    // 2. 读取所有的节头表 (Section Headers)
+    // 读取节头表 (Section Headers)
     Elf32_Shdr *shdrs = malloc(ehdr.e_shentsize * ehdr.e_shnum);
     assert(shdrs);
     fseek(fp, ehdr.e_shoff, SEEK_SET);
@@ -48,14 +47,13 @@ void init_ftrace(const char *elf_file) {
         panic("Failed to read Section Headers");
     }
 
-    // 3. 寻找符号表 (.symtab) 和对应的字符串表 (.strtab)
+    // 寻找符号表 (.symtab) 和对应的字符串表 (.strtab)
     Elf32_Shdr *symtab_shdr = NULL;
     Elf32_Shdr *strtab_shdr = NULL;
 
     for (int i = 0; i < ehdr.e_shnum; i++) {
         if (shdrs[i].sh_type == SHT_SYMTAB) {
             symtab_shdr = &shdrs[i];
-            // 💡 神奇的技巧：符号表节的 sh_link 字段，刚好记录了它对应的字符串表的索引！
             strtab_shdr = &shdrs[symtab_shdr->sh_link]; 
             break;
         }
@@ -68,7 +66,7 @@ void init_ftrace(const char *elf_file) {
         return;
     }
 
-    // 4. 把字符串表整个读进内存
+    // 把字符串表整个读进内存
     char *strtab = malloc(strtab_shdr->sh_size);
     assert(strtab);
     fseek(fp, strtab_shdr->sh_offset, SEEK_SET);
@@ -76,7 +74,7 @@ void init_ftrace(const char *elf_file) {
         panic("Failed to read string table");
     }
 
-    // 5. 读取符号表，并提取所有的函数 (STT_FUNC)
+    // 读取符号表，并提取所有的函数 (STT_FUNC)
     int sym_num = symtab_shdr->sh_size / symtab_shdr->sh_entsize;
     Elf32_Sym *syms = malloc(symtab_shdr->sh_size);
     assert(syms);
@@ -91,9 +89,8 @@ void init_ftrace(const char *elf_file) {
             FuncSymbol *f = &func_syms[func_sym_cnt++];
             f->addr = syms[i].st_value;
             f->size = syms[i].st_size;
-            // syms[i].st_name 是函数名在字符串表中的字节偏移量
             strncpy(f->name, strtab + syms[i].st_name, sizeof(f->name) - 1);
-            f->name[sizeof(f->name) - 1] = '\0'; // 确保字符串结尾有 \0
+            f->name[sizeof(f->name) - 1] = '\0'; 
 
             if (func_sym_cnt >= MAX_FUNCS) {
                 Log("Warning: Too many functions, truncating!");
@@ -104,17 +101,15 @@ void init_ftrace(const char *elf_file) {
 
     Log("Loaded %d functions from %s for ftrace.", func_sym_cnt, elf_file);
 
-    // 释放临时申请的内存
     free(syms);
     free(strtab);
     free(shdrs);
     fclose(fp);
 }
 
-// 供外部 CPU 调用：给定一个地址，查字典找函数名
+// 给定一个地址，查字典找函数名
 const char* ftrace_get_func_name(paddr_t addr) {
     for (int i = 0; i < func_sym_cnt; i++) {
-        // 如果地址落在这个函数的区间内 [addr, addr + size)
         if (addr >= func_syms[i].addr && addr < func_syms[i].addr + func_syms[i].size) {
             return func_syms[i].name;
         }
@@ -122,10 +117,9 @@ const char* ftrace_get_func_name(paddr_t addr) {
     return "???";
 }
 
-// ================= 解耦封装：记录 Call 操作 =================
+// 记录 Call 操作 
 void log_ftrace_call(paddr_t pc, paddr_t dnpc) {
 #ifdef CONFIG_FTRACE
-    // 如果条件不满足，直接返回
     if (likely(!FTRACE_COND)) return;
 
     const char* func_name = ftrace_get_func_name(dnpc);
@@ -134,7 +128,7 @@ void log_ftrace_call(paddr_t pc, paddr_t dnpc) {
 #endif
 }
 
-// ================= 解耦封装：记录 Ret 操作 =================
+// 记录 Ret 操作 
 void log_ftrace_ret(paddr_t pc) {
 #ifdef CONFIG_FTRACE
     if (likely(!FTRACE_COND)) return;
