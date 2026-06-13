@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 技术报告 — 错误处理与 Access Fault 异常</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2129;
+    --border: #30363d; --text: #e6edf3; --text2: #8b949e;
+    --blue: #58a6ff; --green: #3fb950; --yellow: #d29922;
+    --red: #f85149; --purple: #bc8cff; --orange: #f0883e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.7; font-size: 15px; }
+  .container { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 22px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h2 .num { color: var(--blue); margin-right: 8px; }
+  h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 12px; color: var(--blue); }
+  h4 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 12px; }
+  .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+  pre { background: #0d1117; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px; overflow-x: auto; font-size: 13px; line-height: 1.65; font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace; }
+  code { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace; font-size: 13px; }
+  p code, li code { background: rgba(110,118,129,.15); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--blue); }
+  .kw  { color: #ff7b72; } .ty  { color: #79c0ff; } .cm  { color: #8b949e; font-style: italic; }
+  .str { color: #a5d6ff; } .num { color: #79c0ff; } .mac { color: #d2a8ff; }
+  .fn  { color: #d2a8ff; } .sig { color: #ffa657; } .dir { color: #ff7b72; }
+  .callout { border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 14px; line-height: 1.6; }
+  .callout-blue  { background: rgba(88,166,255,.08); border-left: 3px solid var(--blue); }
+  .callout-green { background: rgba(63,185,80,.08); border-left: 3px solid var(--green); }
+  .callout-yellow { background: rgba(210,153,34,.08); border-left: 3px solid var(--yellow); }
+  .callout-red   { background: rgba(248,81,73,.08); border-left: 3px solid var(--red); }
+  .callout-label { font-weight: 700; margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; background: rgba(88,166,255,.06); color: var(--blue); border-bottom: 2px solid var(--border); font-weight: 600; }
+  td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  ul, ol { padding-left: 24px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+  .file-header { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px 8px 0 0; padding: 10px 18px; font-family: 'Cascadia Code', monospace; font-size: 13px; color: var(--text2); border-bottom: none; }
+  .file-header + pre { border-radius: 0 0 8px 8px; margin-top: 0; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-blue { background: rgba(88,166,255,.12); color: var(--blue); }
+  .badge-green { background: rgba(63,185,80,.12); color: var(--green); }
+  .badge-red { background: rgba(248,81,73,.12); color: var(--red); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Phase 2 技术报告</h1>
+<p class="subtitle">错误处理与 Access Fault 异常 · 6 个文件改动 · AXI4 rresp/bresp → RISC-V 异常</p>
+
+<!-- Overview -->
+<h2><span class="num">0</span>概述</h2>
+
+<p>Phase 1 完成了 AXI4 信号的布线，但 <code>rresp</code> / <code>bresp</code> 只是"穿过"了 core，没有被使用。Phase 2 的目标是：<strong>当 AXI4 Slave 返回非 OKAY 响应时，触发 RISC-V Access Fault 异常</strong>。</p>
+
+<div style="display:flex;justify-content:center;margin:16px 0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 180" width="780" height="180" style="max-width:100%">
+  <defs>
+    <marker id="p1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#58a6ff"/></marker>
+    <marker id="p2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#f85149"/></marker>
+    <marker id="p3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3fb950"/></marker>
+  </defs>
+  <!-- Boxes -->
+  <rect x="20" y="60" width="120" height="50" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="80" y="83" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">SoC</text>
+  <text x="80" y="99" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">rresp / bresp</text>
+
+  <rect x="200" y="60" width="120" height="50" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="260" y="83" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">arbiter</text>
+  <text x="260" y="99" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">透传 rresp</text>
+
+  <rect x="380" y="60" width="120" height="50" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="440" y="83" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">fetch / mem</text>
+  <text x="440" y="99" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">锁存 rresp → error</text>
+
+  <rect x="560" y="60" width="120" height="50" rx="8" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+  <text x="620" y="83" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">execute</text>
+  <text x="620" y="99" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">trap → mtvec</text>
+
+  <!-- Arrows -->
+  <line x1="140" y1="85" x2="196" y2="85" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#p1)"/>
+  <line x1="320" y1="85" x2="376" y2="85" stroke="#3fb950" stroke-width="1.5" marker-end="url(#p3)"/>
+  <line x1="500" y1="85" x2="556" y2="85" stroke="#f85149" stroke-width="1.5" marker-end="url(#p2)"/>
+  <text x="168" y="78" fill="#58a6ff" font-size="9" font-family="system-ui">rresp</text>
+  <text x="348" y="78" fill="#3fb950" font-size="9" font-family="system-ui">rresp</text>
+  <text x="520" y="78" fill="#f85149" font-size="9" font-family="system-ui">error flag</text>
+
+  <!-- Pipeline propagation for ifu_error -->
+  <rect x="380" y="130" width="300" height="36" rx="6" fill="rgba(248,81,73,.06)" stroke="rgba(248,81,73,.2)" stroke-width="1"/>
+  <text x="530" y="153" text-anchor="middle" fill="#f85149" font-size="11" font-family="system-ui">ifu_error: IF → ID → EX（通过 if_id_t / id_ex_t 流水线寄存器）</text>
+  <line x1="440" y1="110" x2="440" y2="128" stroke="#f85149" stroke-width="1" stroke-dasharray="3,2"/>
+</svg>
+</div>
+
+<table>
+  <tr><th>文件</th><th>改动类型</th><th>改动内容</th></tr>
+  <tr><td><code>define.sv</code></td><td><span class="badge badge-blue">定义</span></td><td>+3 个 mcause 常量；<code>if_id_t</code> / <code>id_ex_t</code> 加 <code>ifu_error</code></td></tr>
+  <tr><td><code>fetch.sv</code></td><td><span class="badge badge-green">端口</span></td><td>+<code>ifu_rresp</code> 输入、+<code>ifu_error</code> 输出、+<code>rresp_latch</code></td></tr>
+  <tr><td><code>mem.sv</code></td><td><span class="badge badge-green">端口</span></td><td>+<code>lsu_rresp</code>/<code>lsu_bresp</code> 输入、+<code>lsu_error</code> 输出</td></tr>
+  <tr><td><code>core_top.sv</code></td><td><span class="badge badge-green">连线</span></td><td>+4 端口、error 信号通过流水线传到 EX</td></tr>
+  <tr><td><code>execute.sv</code></td><td><span class="badge badge-red">逻辑</span></td><td>新增 Access Fault 异常触发（mcause=1/5/7）</td></tr>
+  <tr><td><code>sim_top.sv</code></td><td><span class="badge badge-blue">适配</span></td><td>+rresp/bresp 信号，赋值 OKAY</td></tr>
+  <tr><td><code>ysyx_250309.sv</code></td><td><span class="badge badge-blue">适配</span></td><td>rresp/bresp 连入 core</td></tr>
+</table>
+
+<!-- File 1: define.sv -->
+<h2><span class="num">1</span><code>define.sv</code> — 异常码常量 + 流水线字段</h2>
+
+<h3>1.1 Access Fault 异常码</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> define.sv · 第 88-91 行</div>
+<pre><span class="mac">`define TRAP_CAUSE_ECALL_M</span>       <span class="num">32'd11</span>   <span class="cm">// M-mode ECALL 异常码</span>
+<span class="mac">`define TRAP_CAUSE_IF_ACCESS</span>     <span class="num">32'd1</span>    <span class="cm">// Instruction Access Fault</span>
+<span class="mac">`define TRAP_CAUSE_LD_ACCESS</span>     <span class="num">32'd5</span>    <span class="cm">// Load Access Fault</span>
+<span class="mac">`define TRAP_CAUSE_ST_ACCESS</span>     <span class="num">32'd7</span>    <span class="cm">// Store Access Fault</span></pre>
+
+<p>来自 RISC-V Privileged Spec 的 <code>mcause</code> 编码：</p>
+<table>
+  <tr><th>mcause 值</th><th>异常名称</th><th>触发条件</th></tr>
+  <tr><td>1</td><td>Instruction Access Fault</td><td>取指时 SoC 返回 rresp ≠ OKAY</td></tr>
+  <tr><td>5</td><td>Load Access Fault</td><td>load 时 SoC 返回 rresp ≠ OKAY</td></tr>
+  <tr><td>7</td><td>Store Access Fault</td><td>store 时 SoC 返回 bresp ≠ OKAY</td></tr>
+  <tr><td>11</td><td>M-mode ECALL</td><td>已有，不变</td></tr>
+</table>
+
+<h3>1.2 流水线结构体新增字段</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> define.sv · 第 101-106 行</div>
+<pre><span class="cm">//  IF → ID 通道 </span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">pc</span>;
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">instr</span>;
+    <span class="ty">logic</span>        <span class="sig">ifu_error</span>;  <span class="cm">// ← 新增</span>
+} <span class="ty">if_id_t</span>;</pre>
+
+<div class="file-header"><span class="file-icon">📄</span> define.sv · 第 130-132 行</div>
+<pre>    <span class="ty">logic</span>        <span class="sig">inst_ebreak</span>;
+    <span class="ty">logic</span>        <span class="sig">ifu_error</span>;  <span class="cm">// ← 新增</span>
+} <span class="ty">id_ex_t</span>;</pre>
+
+<p><code>ifu_error</code> 需要从 IF 阶段传播到 EX 阶段，因为取指错误的异常需要在 EX 阶段触发（与 ECALL 同一位置），这样 trap 逻辑才能统一处理。</p>
+
+<div class="callout callout-blue">
+  <div class="callout-label">为什么 ifu_error 要过流水线？</div>
+  <code>ifu_error</code> 在 IF 阶段（fetch.sv）产生，但该指令可能被 flush 掉（分支预测错误）。只有当指令真正到达 EX 阶段时，才应该触发异常。通过流水线寄存器传播，可以确保只在指令"生效"时才报告错误。
+</div>
+
+<!-- File 2: fetch.sv -->
+<h2><span class="num">2</span><code>fetch.sv</code> — 取指错误检测</h2>
+
+<h3>2.1 新增端口</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 13-28 行</div>
+<pre><span class="cm">// SimpleBus </span>
+<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">AW-1</span>:<span class="num">0</span>] <span class="sig">ifu_raddr</span>,
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">ifu_rdata</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_reqValid</span>,
+<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_reqReady</span>,
+<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_respValid</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_respReady</span>,
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_rresp</span>,     <span class="cm">// ← 新增</span>
+
+<span class="cm">// 流水线控制</span>
+<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">flush</span>,
+<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">stall</span>,    
+
+<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">instr_out</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_valid</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_error</span>      <span class="cm">// ← 新增</span></pre>
+
+<p>两个新信号：<code>ifu_rresp</code> 来自 arbiter（SoC 的读响应码），<code>ifu_error</code> 输出给流水线（非 OKAY 时为 1）。</p>
+
+<h3>2.2 rresp 锁存寄存器</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 37-39 行</div>
+<pre><span class="ty">state_t</span> <span class="sig">state</span>, <span class="sig">state_next</span>;
+<span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">instr_latch</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">rresp_latch</span>;  <span class="cm">// ← 新增</span></pre>
+
+<h3>2.3 锁存逻辑扩展</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 73-85 行</div>
+<pre><span class="cm">// 锁存响应数据</span>
+<span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="mac">`INSTR_NOP</span>;
+        <span class="sig">rresp_latch</span> &lt;= <span class="num">2'b00</span>;
+    <span class="kw">end else if</span> (<span class="sig">state</span> == <span class="sig">S_WAIT_RESP</span> && <span class="sig">ifu_respValid</span> && <span class="sig">ifu_respReady</span> && !<span class="sig">flush</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="sig">ifu_rdata</span>;
+        <span class="sig">rresp_latch</span> &lt;= <span class="sig">ifu_rresp</span>;   <span class="cm">// ← 新增：同时锁存响应码</span>
+    <span class="kw">end else if</span> (<span class="sig">flush</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="mac">`INSTR_NOP</span>;
+        <span class="sig">rresp_latch</span> &lt;= <span class="num">2'b00</span>;      <span class="cm">// ← 新增：flush 时清除</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+
+<p>在响应握手成功的同一周期，同时锁存 <code>ifu_rdata</code>（指令）和 <code>ifu_rresp</code>（响应码）。flush 时两者都清除。</p>
+
+<h3>2.4 错误输出</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 87-92 行</div>
+<pre><span class="kw">assign</span> <span class="sig">ifu_raddr</span>     = <span class="sig">pc_pointer</span>;
+<span class="kw">assign</span> <span class="sig">ifu_reqValid</span>  = (<span class="sig">state</span> == <span class="sig">S_REQ</span>) && !<span class="sig">flush</span> && !<span class="sig">stall</span>;
+<span class="kw">assign</span> <span class="sig">ifu_respReady</span> = (<span class="sig">state</span> == <span class="sig">S_WAIT_RESP</span>) && !<span class="sig">flush</span>;
+<span class="kw">assign</span> <span class="sig">ifu_valid</span>     = (<span class="sig">state</span> == <span class="sig">S_DONE</span>) && !<span class="sig">flush</span>;
+<span class="kw">assign</span> <span class="sig">instr_out</span>     = <span class="sig">ifu_valid</span> ? <span class="sig">instr_latch</span> : <span class="mac">`INSTR_NOP</span>;
+<span class="kw">assign</span> <span class="sig">ifu_error</span>     = <span class="sig">ifu_valid</span> && (<span class="sig">rresp_latch</span> != <span class="mac">`AXI4_RESP_OKAY</span>);  <span class="cm">// ← 新增</span></pre>
+
+<p><code>ifu_error</code> 仅在 <code>ifu_valid</code>（指令有效且未被 flush）且 <code>rresp_latch ≠ OKAY</code> 时为 1。这确保了只有真正"生效"的指令才会报告取指错误。</p>
+
+<!-- File 3: mem.sv -->
+<h2><span class="num">3</span><code>mem.sv</code> — 访存错误检测</h2>
+
+<h3>3.1 新增端口</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> mem.sv · 第 23-34 行</div>
+<pre><span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">lsu_respValid</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">lsu_respReady</span>,
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">lsu_rdata</span>,
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">lsu_rresp</span>,     <span class="cm">// ← 新增：读响应码</span>
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">lsu_bresp</span>,     <span class="cm">// ← 新增：写回复码</span>
+
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">lsu_busy</span>,
+<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">lsu_error</span>,     <span class="cm">// ← 新增</span></pre>
+
+<p>两个响应码输入：load 操作返回 <code>rresp</code>，store 操作返回 <code>bresp</code>。统一输出一个 <code>lsu_error</code> 标志。</p>
+
+<h3>3.2 响应码锁存</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> mem.sv · 第 47-49 行</div>
+<pre><span class="ty">state_t</span> <span class="sig">state</span>, <span class="sig">state_next</span>;
+<span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">rdata_latch</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">resp_latch</span>;   <span class="cm">// ← 新增</span></pre>
+
+<h3>3.3 锁存逻辑扩展</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> mem.sv · 第 76-85 行</div>
+<pre><span class="cm">// 锁存读数据</span>
+<span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="kw">begin</span>
+        <span class="sig">rdata_latch</span> &lt;= <span class="num">32'h0</span>;
+        <span class="sig">resp_latch</span>  &lt;= <span class="num">2'b00</span>;
+    <span class="kw">end else if</span> (<span class="sig">state</span> == <span class="sig">S_WAIT_RESP</span> && <span class="sig">lsu_respValid</span> && <span class="sig">lsu_respReady</span>) <span class="kw">begin</span>
+        <span class="sig">rdata_latch</span> &lt;= <span class="sig">lsu_rdata</span>;
+        <span class="sig">resp_latch</span>  &lt;= <span class="sig">is_load</span> ? <span class="sig">lsu_rresp</span> : <span class="sig">lsu_bresp</span>;  <span class="cm">// ← 关键：load 取 rresp，store 取 bresp</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+
+<p>关键设计：根据当前操作类型（load/store）选择锁存哪个响应码。load 操作的回复在 R 通道（rresp），store 操作的回复在 B 通道（bresp）。</p>
+
+<h3>3.4 错误输出</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> mem.sv · 第 115-119 行</div>
+<pre><span class="cm">// 有访存操作且尚未到 DONE</span>
+<span class="kw">assign</span> <span class="sig">lsu_busy</span> = <span class="sig">is_mem</span> && (<span class="sig">state</span> != <span class="sig">S_DONE</span>);
+
+<span class="cm">// 总线错误</span>
+<span class="kw">assign</span> <span class="sig">lsu_error</span> = <span class="sig">is_mem</span> && (<span class="sig">state</span> == <span class="sig">S_DONE</span>) && (<span class="sig">resp_latch</span> != <span class="mac">`AXI4_RESP_OKAY</span>);</pre>
+
+<p><code>lsu_error</code> 在访存完成（S_DONE）且响应码非 OKAY 时有效。由于 MEM 阶段在流水线中紧跟 EX，这个信号可以直接送到 execute 模块，无需过流水线寄存器。</p>
+
+<!-- File 4: execute.sv -->
+<h2><span class="num">4</span><code>execute.sv</code> — Access Fault 异常触发</h2>
+
+<h3>4.1 新增端口</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> execute.sv · 第 23-28 行</div>
+<pre>    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">inst_csrrw</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">inst_csrrs</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">inst_ecall</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">inst_mret</span>,
+
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_access_fault</span>,  <span class="cm">// ← 新增</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">lsu_access_fault</span>,  <span class="cm">// ← 新增</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">is_load_in</span>,        <span class="cm">// ← 新增</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">is_store_in</span>,       <span class="cm">// ← 新增</span></pre>
+
+<h3>4.2 异常优先级逻辑</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> execute.sv · 第 147-161 行</div>
+<pre><span class="cm">// CSR 操作与异常响应</span>
+<span class="kw">assign</span> <span class="sig">csr_raddr</span> = <span class="sig">csr_addr_in</span>;
+<span class="kw">assign</span> <span class="sig">csr_wen</span>   = <span class="sig">inst_csrrw</span> | (<span class="sig">inst_csrrs</span> & (<span class="sig">rs1_addr_in</span> != <span class="num">5'b0</span>));
+<span class="kw">assign</span> <span class="sig">csr_waddr</span> = <span class="sig">csr_addr_in</span>;
+<span class="kw">assign</span> <span class="sig">csr_wdata</span> = <span class="sig">inst_csrrw</span> ? <span class="sig">op1_in</span> : (<span class="sig">csr_rdata</span> | <span class="sig">op1_in</span>);
+
+<span class="cm">// 异常优先级：Access Fault > ECALL</span>
+<span class="ty">wire</span> <span class="sig">access_fault</span> = <span class="sig">ifu_access_fault</span> | <span class="sig">lsu_access_fault</span>;
+
+<span class="kw">assign</span> <span class="sig">trap_valid</span> = <span class="sig">access_fault</span> | <span class="sig">inst_ecall</span>;
+<span class="kw">assign</span> <span class="sig">trap_pc</span>    = <span class="sig">pc_in</span>;
+<span class="kw">assign</span> <span class="sig">trap_cause</span> = <span class="sig">ifu_access_fault</span> ? <span class="mac">`TRAP_CAUSE_IF_ACCESS</span> :
+                    <span class="sig">lsu_access_fault</span> ? (<span class="sig">is_store_in</span> ? <span class="mac">`TRAP_CAUSE_ST_ACCESS</span>
+                                                    : <span class="mac">`TRAP_CAUSE_LD_ACCESS</span>) :
+                    <span class="mac">`TRAP_CAUSE_ECALL_M</span>;</pre>
+
+<p>三目运算符实现了优先级编码：</p>
+<ol>
+  <li><strong>ifu_access_fault</strong>（最高）→ mcause = 1（Instruction Access Fault）</li>
+  <li><strong>lsu_access_fault</strong> → 根据 is_store 区分：mcause = 7（Store）或 5（Load）</li>
+  <li><strong>inst_ecall</strong>（最低）→ mcause = 11</li>
+</ol>
+
+<div class="callout callout-yellow">
+  <div class="callout-label">为什么 Access Fault 优先级高于 ECALL？</div>
+  在同一条指令中，如果同时触发了 Access Fault 和 ECALL（理论上不会发生），硬件错误应该优先报告。RISC-V 规范中，硬件异常的优先级高于软件异常。
+</div>
+
+<!-- File 5: core_top.sv -->
+<h2><span class="num">5</span><code>core_top.sv</code> — 端口与连线</h2>
+
+<h3>5.1 新增端口</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> core_top.sv · 第 19-33 行</div>
+<pre><span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_rresp</span>,     <span class="cm">// ← 新增</span>
+
+<span class="cm">// LSU 握手接口</span>
+<span class="cm">// ...</span>
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">lsu_rresp</span>,     <span class="cm">// ← 新增</span>
+<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">lsu_bresp</span>,     <span class="cm">// ← 新增</span></pre>
+
+<h3>5.2 内部 error 信号</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> core_top.sv · 第 110-111 行</div>
+<pre><span class="ty">logic</span>        <span class="sig">ifu_error</span>;   <span class="cm">// ← fetch 输出</span>
+<span class="ty">logic</span>        <span class="sig">lsu_error</span>;   <span class="cm">// ← memory 输出</span></pre>
+
+<h3>5.3 ifu_error 流水线传播</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> core_top.sv · 第 158 行</div>
+<pre><span class="kw">assign</span> <span class="sig">if_id_up.ifu_error</span> = <span class="sig">ifu_error</span>;</pre>
+
+<div class="file-header"><span class="file-icon">📄</span> core_top.sv · 第 311 行</div>
+<pre><span class="kw">assign</span> <span class="sig">id_ex_up.ifu_error</span> = <span class="sig">if_id_dn.ifu_error</span>;</pre>
+
+<p>两次赋值将 <code>ifu_error</code> 从 IF 阶段传播到 EX 阶段，经过 IF→ID 和 ID→EX 两级流水线寄存器。</p>
+
+<h3>5.4 连接到 execute</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> core_top.sv · 第 340-343 行</div>
+<pre>.<span class="sig">ifu_access_fault</span>(<span class="sig">id_ex_dn.ifu_error</span>),   <span class="cm">// 从流水线寄存器来</span>
+.<span class="sig">lsu_access_fault</span>(<span class="sig">lsu_error</span>),           <span class="cm">// 从 memory 模块直接来</span>
+.<span class="sig">is_load_in</span>      (<span class="sig">id_ex_dn.is_load</span>),
+.<span class="sig">is_store_in</span>     (<span class="sig">id_ex_dn.is_store</span>),</pre>
+
+<!-- File 6: sim_top.sv & ysyx_250309.sv -->
+<h2><span class="num">6</span><code>sim_top.sv</code> / <code>ysyx_250309.sv</code> — 适配</h2>
+
+<h3>6.1 sim_top.sv</h3>
+
+<div class="file-header"><span class="file-icon">📄</span> sim_top.sv · 新增信号声明</div>
+<pre><span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">ifu_rresp</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">lsu_rresp</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">lsu_bresp</span>;</pre>
+
+<div class="file-header"><span class="file-icon">📄</span> sim_top.sv · 赋值（正常情况）</div>
+<pre><span class="kw">assign</span> <span class="sig">ifu_rresp</span> = <span class="num">2'b00</span>; <span class="cm">// OKAY</span>
+<span class="kw">assign</span> <span class="sig">lsu_rresp</span> = <span class="num">2'b00</span>; <span class="cm">// OKAY</span>
+<span class="kw">assign</span> <span class="sig">lsu_bresp</span> = <span class="num">2'b00</span>; <span class="cm">// OKAY</span></pre>
+
+<p>当前仿真环境永远不会返回错误。将来可以在地址越限时返回 <code>DECERR</code> 来测试 Access Fault 异常。</p>
+
+<h3>6.2 ysyx_250309.sv</h3>
+
+<p>rresp/bresp 信号已在 Phase 1 中声明，Phase 2 只需连接到 core 端口：</p>
+
+<pre>.<span class="sig">ifu_rresp</span>     (<span class="sig">ifu_rresp</span>),
+.<span class="sig">lsu_rresp</span>     (<span class="sig">lsu_rresp</span>),
+.<span class="sig">lsu_bresp</span>     (<span class="sig">lsu_bresp</span>),</pre>
+
+<!-- Data Flow Diagram -->
+<h2><span class="num">7</span>完整数据流</h2>
+
+<div style="display:flex;justify-content:center;margin:16px 0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 260" width="800" height="260" style="max-width:100%">
+  <defs>
+    <marker id="d1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#58a6ff"/></marker>
+    <marker id="d2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#f85149"/></marker>
+  </defs>
+  <!-- Row 1: Signal path -->
+  <rect x="10" y="10" width="780" height="110" rx="10" fill="rgba(88,166,255,.04)" stroke="rgba(88,166,255,.15)" stroke-width="1"/>
+  <text x="25" y="30" fill="#58a6ff" font-size="12" font-weight="700" font-family="system-ui">信号传播路径</text>
+
+  <rect x="30" y="45" width="100" height="40" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="80" y="62" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">SoC</text>
+  <text x="80" y="76" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">rresp≠OKAY</text>
+
+  <rect x="175" y="45" width="100" height="40" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="225" y="62" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">arbiter</text>
+  <text x="225" y="76" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">透传</text>
+
+  <rect x="320" y="45" width="110" height="40" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="375" y="62" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">fetch / mem</text>
+  <text x="375" y="76" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">锁存 → error</text>
+
+  <rect x="480" y="45" width="100" height="40" rx="6" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+  <text x="530" y="62" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">core_top</text>
+  <text x="530" y="76" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">传播</text>
+
+  <rect x="630" y="45" width="100" height="40" rx="6" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+  <text x="680" y="62" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">execute</text>
+  <text x="680" y="76" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">trap</text>
+
+  <line x1="130" y1="65" x2="171" y2="65" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#d1)"/>
+  <line x1="275" y1="65" x2="316" y2="65" stroke="#3fb950" stroke-width="1.5" marker-end="url(#d1)"/>
+  <line x1="430" y1="65" x2="476" y2="65" stroke="#f85149" stroke-width="1.5" marker-end="url(#d2)"/>
+  <line x1="580" y1="65" x2="626" y2="65" stroke="#f85149" stroke-width="1.5" marker-end="url(#d2)"/>
+
+  <text x="150" y="58" fill="#58a6ff" font-size="9" font-family="system-ui">rresp</text>
+  <text x="295" y="58" fill="#3fb950" font-size="9" font-family="system-ui">rresp</text>
+  <text x="448" y="58" fill="#f85149" font-size="9" font-family="system-ui">error</text>
+  <text x="600" y="58" fill="#f85149" font-size="9" font-family="system-ui">fault</text>
+
+  <!-- Row 2: Exception path -->
+  <rect x="10" y="135" width="780" height="115" rx="10" fill="rgba(248,81,73,.04)" stroke="rgba(248,81,73,.15)" stroke-width="1"/>
+  <text x="25" y="155" fill="#f85149" font-size="12" font-weight="700" font-family="system-ui">异常触发路径</text>
+
+  <rect x="30" y="170" width="150" height="50" rx="6" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+  <text x="105" y="190" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">execute</text>
+  <text x="105" y="206" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">trap_valid=1</text>
+
+  <rect x="240" y="170" width="150" height="50" rx="6" fill="#161b22" stroke="#d29922" stroke-width="1.5"/>
+  <text x="315" y="190" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">csr_file</text>
+  <text x="315" y="206" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">mepc ← pc, mcause ← cause</text>
+
+  <rect x="450" y="170" width="150" height="50" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="525" y="190" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">pc_counter</text>
+  <text x="525" y="206" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">PC ← mtvec</text>
+
+  <rect x="660" y="170" width="100" height="50" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="710" y="190" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="system-ui">trap handler</text>
+  <text x="710" y="206" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">软件处理</text>
+
+  <line x1="180" y1="195" x2="236" y2="195" stroke="#d29922" stroke-width="1.5" marker-end="url(#d1)"/>
+  <line x1="390" y1="195" x2="446" y2="195" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#d1)"/>
+  <line x1="600" y1="195" x2="656" y2="195" stroke="#3fb950" stroke-width="1.5" marker-end="url(#d1)"/>
+</svg>
+</div>
+
+<!-- Summary -->
+<h2><span class="num">8</span>改动统计</h2>
+
+<table>
+  <tr><th>文件</th><th>新增行</th><th>改动行</th><th>净增端口</th></tr>
+  <tr><td><code>define.sv</code></td><td>5</td><td>2</td><td>0（结构体字段）</td></tr>
+  <tr><td><code>fetch.sv</code></td><td>8</td><td>4</td><td>+2（rresp, error）</td></tr>
+  <tr><td><code>mem.sv</code></td><td>7</td><td>3</td><td>+3（rresp, bresp, error）</td></tr>
+  <tr><td><code>core_top.sv</code></td><td>10</td><td>4</td><td>+4（rresp×3 无直接 error）</td></tr>
+  <tr><td><code>execute.sv</code></td><td>8</td><td>3</td><td>+4（fault×2, load, store）</td></tr>
+  <tr><td><code>sim_top.sv</code></td><td>6</td><td>2</td><td>0（仿真适配）</td></tr>
+  <tr><td><code>ysyx_250309.sv</code></td><td>3</td><td>0</td><td>0（连线）</td></tr>
+  <tr style="font-weight:700"><td>合计</td><td>47</td><td>18</td><td></td></tr>
+</table>
+
+<p style="text-align:center; color:var(--text2); margin-top:48px; font-size:12px;">
+  ysyx_250309 · Phase 2 技术报告 · 错误处理与 Access Fault 异常
+</p>
+
+</div>
+</body>
+</html>
