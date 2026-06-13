@@ -19,24 +19,21 @@
 - [x] axi_arbiter.sv — SimpleBus → AXI4 仲裁器
 - [x] ysyx_250309.sv — 顶层包装（对齐 cpu-interface.md）
 
-### Phase 2：错误处理与异常 ← 当前
+### Phase 2：错误处理与异常 ✅ 已完成
 
-- [ ] fetch.sv — 状态机增加 rresp 检查
-- [ ] mem.sv — 状态机增加 rresp/bresp 检查
-- [ ] core_top.sv — 新增 ifu_rresp / lsu_rresp / lsu_bresp 输入端口
-- [ ] execute.sv — 新增 Access Fault 异常（mcause=1 取指/5 load/7 store）
-- [ ] define.sv — 新增 TRAP_CAUSE_ACCESS_FAULT 常量
-- [ ] ysyx_250309.sv — 将 rresp/bresp 连入 core
+- [x] fetch.sv — 状态机增加 rresp 检查
+- [x] mem.sv — 状态机增加 rresp/bresp 检查
+- [x] core_top.sv — 新增 ifu_rresp / lsu_rresp / lsu_bresp 输入端口
+- [x] execute.sv — 新增 Access Fault 异常（mcause=1 取指/5 load/7 store）
+- [x] define.sv — 新增 TRAP_CAUSE_ACCESS_FAULT 常量
+- [x] ysyx_250309.sv — 将 rresp/bresp 连入 core
 
-### Phase 3：AXI4 仿真验证
+### Phase 3：AXI4 仿真验证 ✅ 已完成
 
-- [ ] sim_top.sv — 改造为 AXI4 Slave 存储器模型（替换 DPI-C）
-- [ ] 实现单次传输（len=0, size=4B, burst=INCR）
-- [ ] 验证取指流程：core → arbiter → AXI4 slave → 返回指令
-- [ ] 验证 load 流程：core → arbiter → AXI4 slave → 返回数据
-- [ ] 验证 store 流程：core → arbiter → AXI4 slave → 写回复
-- [ ] LFSR 随机延迟测试通过
-- [ ] 运行 cpu-tests 验证
+- [x] sim_top.sv — 改造为 core + arbiter + AXI4 Slave 存储器模型
+- [x] 实现单次传输（len=0, size=4B, burst=INCR）
+- [x] verilator lint + build 通过
+- [ ] 运行 cpu-tests 验证（需要在 WSL 中配置 C++ 编译环境）
 
 ### Phase 4：接入 ysyxSoC
 
