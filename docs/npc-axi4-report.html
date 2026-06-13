@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NPC AXI4 技术报告 — ysyx_250309</title>
+<title>NPC AXI4 完整技术报告 — ysyx_250309</title>
 <style>
   :root {
     --bg: #0d1117; --surface: #161b22; --border: #30363d;
@@ -16,403 +16,737 @@
   .container { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
   h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
   h2 { font-size: 22px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-  h2 .num { color: var(--blue); margin-right: 8px; }
+  h2 .n { color: var(--blue); margin-right: 8px; }
   h3 { font-size: 17px; font-weight: 600; margin-top: 28px; margin-bottom: 12px; color: var(--blue); }
+  h4 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 8px; }
   p { margin-bottom: 12px; }
-  .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+  .sub { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
   pre { background: #0d1117; border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px; overflow-x: auto; font-size: 13px; line-height: 1.65; font-family: 'Cascadia Code', 'Fira Code', monospace; }
   code { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px; }
   p code, li code { background: rgba(110,118,129,.15); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--blue); }
-  .kw { color: #ff7b72; } .ty { color: #79c0ff; } .cm { color: #8b949e; font-style: italic; }
-  .num { color: #79c0ff; } .mac { color: #d2a8ff; } .sig { color: #ffa657; } .dir { color: #ff7b72; }
-  .callout { border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 14px; line-height: 1.6; }
-  .callout-blue { background: rgba(88,166,255,.08); border-left: 3px solid var(--blue); }
-  .callout-green { background: rgba(63,185,80,.08); border-left: 3px solid var(--green); }
-  .callout-yellow { background: rgba(210,153,34,.08); border-left: 3px solid var(--yellow); }
-  .callout-label { font-weight: 700; margin-bottom: 4px; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
-  th { text-align: left; padding: 8px 12px; background: rgba(88,166,255,.06); color: var(--blue); border-bottom: 2px solid var(--border); font-weight: 600; }
-  td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
-  tr:hover td { background: rgba(255,255,255,.02); }
-  ul, ol { padding-left: 24px; margin-bottom: 12px; }
-  li { margin-bottom: 4px; }
-  .file-header { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px 8px 0 0; padding: 10px 18px; font-family: 'Cascadia Code', monospace; font-size: 13px; color: var(--text2); border-bottom: none; }
-  .file-header + pre { border-radius: 0 0 8px 8px; margin-top: 0; }
-  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: rgba(63,185,80,.12); color: var(--green); }
-  .badge-blue { background: rgba(88,166,255,.12); color: var(--blue); }
-  .badge-yellow { background: rgba(210,153,34,.12); color: var(--yellow); }
-  .file-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 16px 0; }
-  .file-item { padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); }
-  .file-item .name { font-family: monospace; font-weight: 700; font-size: 13px; color: var(--blue); }
-  .file-item .desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .file-item .lines { font-size: 11px; color: var(--text2); }
+  .kw{color:#ff7b72}.ty{color:#79c0ff}.cm{color:#8b949e;font-style:italic}.num{color:#79c0ff}.mac{color:#d2a8ff}.sig{color:#ffa657}.dir{color:#ff7b72}.fn{color:#d2a8ff}
+  .cb{border-radius:8px;padding:14px 18px;margin:16px 0;font-size:14px;line-height:1.6}
+  .cb-b{background:rgba(88,166,255,.08);border-left:3px solid var(--blue)}
+  .cb-g{background:rgba(63,185,80,.08);border-left:3px solid var(--green)}
+  .cb-y{background:rgba(210,153,34,.08);border-left:3px solid var(--yellow)}
+  .cb-r{background:rgba(248,81,73,.08);border-left:3px solid var(--red)}
+  .cb-l{font-weight:700;margin-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px}
+  th{text-align:left;padding:8px 12px;background:rgba(88,166,255,.06);color:var(--blue);border-bottom:2px solid var(--border);font-weight:600}
+  td{padding:7px 12px;border-bottom:1px solid var(--border)}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  ul,ol{padding-left:24px;margin-bottom:12px}li{margin-bottom:4px}
+  .fh{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px 8px 0 0;padding:10px 18px;font-family:'Cascadia Code',monospace;font-size:13px;color:var(--text2);border-bottom:none}
+  .fh+pre{border-radius:0 0 8px 8px;margin-top:0}
+  .b{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .b-g{background:rgba(63,185,80,.12);color:var(--green)}.b-b{background:rgba(88,166,255,.12);color:var(--blue)}.b-y{background:rgba(210,153,34,.12);color:var(--yellow)}
 </style>
 </head>
 <body>
 <div class="container">
 
-<h1>NPC AXI4 技术报告</h1>
-<p class="subtitle">ysyx_250309 · 五级流水线 RV32I · 原生 AXI4 总线 · 7 个文件 · 1166 行</p>
+<h1>NPC AXI4 完整技术报告</h1>
+<p class="sub">ysyx_250309 · 覆盖全部代码 · 7 个文件 · 1166 行</p>
 
-<!-- ============================================================ -->
-<h2><span class="num">1</span>架构总览</h2>
-
-<p>NPC 是一个五级流水线 RISC-V 处理器，通过原生 AXI4 总线与外部设备通信。所有模块直接驱动 AXI4 通道信号，没有中间协议翻译层。</p>
-
-<div style="display:flex;justify-content:center;margin:20px 0">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 320" width="820" height="320" style="max-width:100%">
-  <defs>
-    <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#58a6ff"/></marker>
-    <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3fb950"/></marker>
-    <marker id="ay" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#d29922"/></marker>
-  </defs>
-
-  <!-- Core box -->
-  <rect x="20" y="20" width="440" height="280" rx="12" fill="none" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <text x="30" y="42" fill="#58a6ff" font-size="12" font-weight="700" font-family="system-ui">core (ysyx_250309)</text>
-
-  <!-- Pipeline stages -->
-  <rect x="40" y="60" width="80" height="44" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
-  <text x="80" y="80" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">fetch</text>
-  <text x="80" y="95" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">AR + R</text>
-
-  <rect x="140" y="60" width="80" height="44" rx="8" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="180" y="80" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">decode</text>
-
-  <rect x="240" y="60" width="80" height="44" rx="8" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="280" y="80" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">execute</text>
-  <text x="280" y="95" text-anchor="middle" fill="#f85149" font-size="9" font-family="system-ui">trap</text>
-
-  <rect x="340" y="60" width="80" height="44" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
-  <text x="380" y="80" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="system-ui">memory</text>
-  <text x="380" y="95" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">AR+R / AW+W+B</text>
-
-  <!-- Pipeline arrows -->
-  <line x1="120" y1="82" x2="136" y2="82" stroke="#8b949e" stroke-width="1" marker-end="url(#ab)"/>
-  <line x1="220" y1="82" x2="236" y2="82" stroke="#8b949e" stroke-width="1" marker-end="url(#ab)"/>
-  <line x1="320" y1="82" x2="336" y2="82" stroke="#8b949e" stroke-width="1" marker-end="url(#ab)"/>
-
-  <!-- Other modules -->
-  <rect x="40" y="130" width="100" height="36" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="90" y="152" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">reg_file</text>
-  <rect x="150" y="130" width="100" height="36" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="200" y="152" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">csr_file</text>
-  <rect x="260" y="130" width="80" height="36" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="300" y="152" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">forward</text>
-  <rect x="350" y="130" width="80" height="36" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1"/>
-  <text x="390" y="152" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">hazard</text>
-
-  <!-- AXI4 ports from core -->
-  <line x1="80" y1="104" x2="80" y2="200" stroke="#58a6ff" stroke-width="1.5"/>
-  <line x1="380" y1="104" x2="380" y2="200" stroke="#3fb950" stroke-width="1.5"/>
-
-  <!-- AXI4 bus -->
-  <rect x="40" y="200" width="400" height="30" rx="6" fill="rgba(88,166,255,.08)" stroke="rgba(88,166,255,.3)" stroke-width="1"/>
-  <text x="240" y="220" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="700" font-family="system-ui">AXI4 总线（核心内部）</text>
-
-  <!-- AXI4 signals label -->
-  <text x="80" y="250" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="system-ui">AR/R 通道</text>
-  <text x="380" y="250" text-anchor="middle" fill="#3fb950" font-size="10" font-family="system-ui">AR/R + AW/W/B</text>
-
-  <!-- Arbiter -->
-  <rect x="510" y="80" width="120" height="120" rx="10" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-  <text x="570" y="115" text-anchor="middle" fill="#e6edf3" font-size="14" font-weight="700" font-family="system-ui">axi_arbiter</text>
-  <text x="570" y="135" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">组合逻辑 MUX</text>
-  <text x="570" y="155" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">读: LSU 优先</text>
-  <text x="570" y="175" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">写: 直通</text>
-
-  <!-- Arrow: core bus → arbiter -->
-  <line x1="440" y1="215" x2="506" y2="145" stroke="#d29922" stroke-width="2" marker-end="url(#ay)"/>
-
-  <!-- AXI4 Master output -->
-  <rect x="680" y="100" width="120" height="80" rx="10" fill="#161b22" stroke="#d29922" stroke-width="2"/>
-  <text x="740" y="130" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="700" font-family="system-ui">AXI4</text>
-  <text x="740" y="150" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="700" font-family="system-ui">Master</text>
-  <text x="740" y="170" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">20 根信号</text>
-
-  <line x1="630" y1="140" x2="676" y2="140" stroke="#d29922" stroke-width="2" marker-end="url(#ay)"/>
-
-  <!-- SoC -->
-  <rect x="680" y="230" width="120" height="50" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
-  <text x="740" y="255" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="600" font-family="system-ui">ysyxSoC</text>
-  <text x="740" y="270" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">目标</text>
-
-  <!-- Slave model (current) -->
-  <rect x="510" y="230" width="120" height="50" rx="8" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
-  <text x="570" y="252" text-anchor="middle" fill="#f85149" font-size="11" font-weight="600" font-family="system-ui">AXI4 Slave</text>
-  <text x="570" y="268" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">仿真用（DPI-C）</text>
-
-  <line x1="570" y1="200" x2="570" y2="226" stroke="#f85149" stroke-width="1.5" marker-end="url(#ab)"/>
-  <line x1="740" y1="200" x2="740" y2="226" stroke="#3fb950" stroke-width="1.5" marker-end="url(#ag)"/>
-</svg>
-</div>
-
-<!-- File inventory -->
-<h2><span class="num">2</span>文件清单</h2>
-
-<div class="file-list">
-  <div class="file-item"><div class="name">axi4.sv</div><div class="desc">AXI4 协议定义</div><div class="lines">141 行</div></div>
-  <div class="file-item"><div class="name">define.sv</div><div class="desc">指令/结构体/异常码</div><div class="lines">160 行</div></div>
-  <div class="file-item"><div class="name">fetch.sv</div><div class="desc">取指单元（AXI4 AR/R）</div><div class="lines">110 行</div></div>
-  <div class="file-item"><div class="name">decoder.sv</div><div class="desc">译码单元</div><div class="lines">-</div></div>
-  <div class="file-item"><div class="name">execute.sv</div><div class="desc">执行单元（ALU + trap）</div><div class="lines">179 行</div></div>
-  <div class="file-item"><div class="name">mem.sv</div><div class="desc">访存单元（AXI4 AR/R + AW/W/B）</div><div class="lines">232 行</div></div>
-  <div class="file-item"><div class="name">axi_arbiter.sv</div><div class="desc">AXI4 合并器</div><div class="lines">170 行</div></div>
-  <div class="file-item"><div class="name">sim_top.sv</div><div class="desc">仿真顶层（core + arbiter + Slave）</div><div class="lines">~300 行</div></div>
-  <div class="file-item"><div class="name">ysyx_250309.sv</div><div class="desc">SoC 顶层包装</div><div class="lines">~250 行</div></div>
-  <div class="file-item"><div class="name">core_top.sv</div><div class="desc">core 顶层（流水线连线）</div><div class="lines">~490 行</div></div>
-</div>
-
-<!-- ============================================================ -->
-<h2><span class="num">3</span><code>axi4.sv</code> — 协议定义</h2>
-
-<p>纯定义文件，无电路逻辑。定义 AXI4 参数、5 个通道结构体、3 个默认值工厂函数。</p>
-
-<h3>3.1 参数常量</h3>
-
-<div class="file-header"><span class="file-icon">📄</span> axi4.sv · 第 10-34 行</div>
-<pre><span class="cm">// 信号位宽</span>
-<span class="mac">`define AXI4_ADDR_W</span>   <span class="num">32</span>
-<span class="mac">`define AXI4_DATA_W</span>   <span class="num">32</span>
-<span class="mac">`define AXI4_ID_W</span>     <span class="num">4</span>
-<span class="mac">`define AXI4_LEN_W</span>    <span class="num">8</span>
-<span class="mac">`define AXI4_SIZE_W</span>   <span class="num">3</span>
-<span class="mac">`define AXI4_BURST_W</span>  <span class="num">2</span>
-<span class="mac">`define AXI4_RESP_W</span>   <span class="num">2</span>
-<span class="mac">`define AXI4_STRB_W</span>   <span class="num">4</span>
-
-<span class="cm">// 响应码</span>
-<span class="mac">`define AXI4_RESP_OKAY</span>   <span class="num">2'b00</span>  <span class="cm">// 成功</span>
-<span class="mac">`define AXI4_RESP_SLVERR</span> <span class="num">2'b10</span>  <span class="cm">// Slave 错误</span>
-<span class="mac">`define AXI4_RESP_DECERR</span> <span class="num">2'b11</span>  <span class="cm">// 地址译码错误</span>
-
-<span class="cm">// 传输宽度</span>
-<span class="mac">`define AXI4_SIZE_1B</span>   <span class="num">3'b000</span>  <span class="cm">// 1 字节 (lb/sb)</span>
-<span class="mac">`define AXI4_SIZE_2B</span>   <span class="num">3'b001</span>  <span class="cm">// 2 字节 (lh/sh)</span>
-<span class="mac">`define AXI4_SIZE_4B</span>   <span class="num">3'b010</span>  <span class="cm">// 4 字节 (lw/sw)</span></pre>
-
-<h3>3.2 通道结构体</h3>
-
+<!-- ==================== 目录 ==================== -->
+<h2><span class="n">0</span>目录</h2>
 <table>
-  <tr><th>结构体</th><th>通道</th><th>字段</th></tr>
-  <tr><td><code>axi4_ar_t</code></td><td>AR（读地址）</td><td>id, addr, len, size, burst</td></tr>
-  <tr><td><code>axi4_r_t</code></td><td>R（读数据）</td><td>id, data, resp, last</td></tr>
-  <tr><td><code>axi4_aw_t</code></td><td>AW（写地址）</td><td>id, addr, len, size, burst</td></tr>
-  <tr><td><code>axi4_w_t</code></td><td>W（写数据）</td><td>data, strb, last</td></tr>
-  <tr><td><code>axi4_b_t</code></td><td>B（写回复）</td><td>id, resp</td></tr>
+<tr><td>§1</td><td>架构总览 + 数据流</td></tr>
+<tr><td>§2</td><td><code>axi4.sv</code> — AXI4 协议定义（141 行）</td></tr>
+<tr><td>§3</td><td><code>define.sv</code> — 指令/结构体/异常码（160 行）</td></tr>
+<tr><td>§4</td><td><code>fetch.sv</code> — 取指单元（110 行）</td></tr>
+<tr><td>§5</td><td><code>mem.sv</code> — 访存单元（232 行）</td></tr>
+<tr><td>§6</td><td><code>axi_arbiter.sv</code> — AXI4 合并器（170 行）</td></tr>
+<tr><td>§7</td><td><code>execute.sv</code> — 异常处理（179 行）</td></tr>
+<tr><td>§8</td><td>验证状态 + 命令</td></tr>
 </table>
 
-<!-- ============================================================ -->
-<h2><span class="num">4</span><code>fetch.sv</code> — 取指单元</h2>
+<!-- ==================== §1 架构 ==================== -->
+<h2><span class="n">1</span>架构总览</h2>
 
-<p>直接驱动 AXI4 AR/R 通道，通过 3 状态机控制取指流程。</p>
+<h3>1.1 模块拓扑</h3>
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│  core (ysyx_250309)                                         │
+│                                                             │
+│  fetch ──AXI4 AR/R──┐                                       │
+│                      ├──► axi_arbiter ──AXI4──► SoC/Slave   │
+│  mem ──AXI4 AR/R + AW/W/B──┘                               │
+│                                                             │
+│  fetch 的 AR/R 通道：取指专用                                │
+│  mem 的 AR/R 通道：load 专用                                │
+│  mem 的 AW/W/B 通道：store 专用                             │
+│  arbiter：读通道 MUX + 写通道直通                           │
+└─────────────────────────────────────────────────────────────┘</pre>
 
-<h3>4.1 端口</h3>
+<h3>1.2 信号流</h3>
+<table>
+<tr><th>操作</th><th>路径</th><th>AXI4 通道</th></tr>
+<tr><td>取指</td><td>fetch → arbiter → Slave</td><td>AR(addr=PC) → R(data=instr)</td></tr>
+<tr><td>load</td><td>mem → arbiter → Slave</td><td>AR(addr=ALU) → R(data=rdata)</td></tr>
+<tr><td>store</td><td>mem → arbiter → Slave</td><td>AW(addr=ALU) + W(data=rs2) → B(resp)</td></tr>
+</table>
 
-<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 13-35 行</div>
-<pre><span class="cm">// AXI4 AR 通道 (读地址)</span>
-<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_arvalid</span>,
-<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_arready</span>,
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">AW-1</span>:<span class="num">0</span>] <span class="sig">ifu_araddr</span>,
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]    <span class="sig">ifu_arsize</span>,   <span class="cm">// 4B</span>
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">7</span>:<span class="num">0</span>]    <span class="sig">ifu_arlen</span>,    <span class="cm">// 0 (单次)</span>
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_arburst</span>,  <span class="cm">// INCR</span>
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">3</span>:<span class="num">0</span>]    <span class="sig">ifu_arid</span>,     <span class="cm">// 0</span>
+<!-- ==================== §2 axi4.sv ==================== -->
+<h2><span class="n">2</span><code>axi4.sv</code> — AXI4 协议定义</h2>
 
-<span class="cm">// AXI4 R 通道 (读数据)</span>
-<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_rvalid</span>,
-<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_rready</span>,
-<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">ifu_rdata</span>,
-<span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_rresp</span>,
-<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_rlast</span>,
+<h3>2.1 Include Guard</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 1-2 行</div>
+<pre><span class="mac">`ifndef AXI4_SV</span>
+<span class="mac">`define AXI4_SV</span></pre>
+<p>防止重复包含。与 C 的 <code>#ifndef</code> 机制相同。</p>
 
-<span class="cm">// 流水线控制</span>
-<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">flush</span>,
-<span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">stall</span>,
-<span class="dir">output</span> <span class="ty">logic</span> [<span class="num">DW-1</span>:<span class="num">0</span>] <span class="sig">instr_out</span>,
-<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_valid</span>,
-<span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_error</span></pre>
+<h3>2.2 信号位宽参数</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 10-18 行</div>
+<pre><span class="mac">`define AXI4_ADDR_W</span>   <span class="num">32</span>   <span class="cm">// 地址位宽</span>
+<span class="mac">`define AXI4_DATA_W</span>   <span class="num">32</span>   <span class="cm">// 数据位宽</span>
+<span class="mac">`define AXI4_ID_W</span>     <span class="num">4</span>    <span class="cm">// 事务 ID 位宽</span>
+<span class="mac">`define AXI4_LEN_W</span>    <span class="num">8</span>    <span class="cm">// burst 长度位宽</span>
+<span class="mac">`define AXI4_SIZE_W</span>   <span class="num">3</span>    <span class="cm">// 传输宽度位宽</span>
+<span class="mac">`define AXI4_BURST_W</span>  <span class="num">2</span>    <span class="cm">// burst 类型位宽</span>
+<span class="mac">`define AXI4_RESP_W</span>   <span class="num">2</span>    <span class="cm">// 响应码位宽</span>
+<span class="mac">`define AXI4_STRB_W</span>   <span class="num">4</span>    <span class="cm">// 写选通位宽</span></pre>
+<p>所有位宽直接来自 <code>cpu-interface.md</code> 规范。<code>arlen[7:0]</code> 值 0 表示单次传输（1 拍）。</p>
 
-<h3>4.2 状态机</h3>
+<h3>2.3 Burst 类型</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 20-23 行</div>
+<pre><span class="mac">`define AXI4_BURST_FIXED</span> <span class="num">2'b00</span>   <span class="cm">// 固定地址</span>
+<span class="mac">`define AXI4_BURST_INCR</span>  <span class="num">2'b01</span>   <span class="cm">// 递增地址 ← NPC 使用</span>
+<span class="mac">`define AXI4_BURST_WRAP</span>  <span class="num">2'b10</span>   <span class="cm">// 回环地址</span></pre>
+<p>NPC 固定使用 <code>INCR</code>。即使将来支持 burst，INCR 也够用。</p>
 
-<pre>S_REQ ──arvalid&&arready──► S_WAIT_RESP ──rvalid&&rready──► S_DONE
-  ▲                                                              │
-  └──────────────────── !stall ──────────────────────────────────┘</pre>
+<h3>2.4 响应码</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 25-29 行</div>
+<pre><span class="mac">`define AXI4_RESP_OKAY</span>   <span class="num">2'b00</span>   <span class="cm">// 成功</span>
+<span class="mac">`define AXI4_RESP_EXOKAY</span> <span class="num">2'b01</span>   <span class="cm">// 独占成功（暂不使用）</span>
+<span class="mac">`define AXI4_RESP_SLVERR</span> <span class="num">2'b10</span>   <span class="cm">// Slave 错误</span>
+<span class="mac">`define AXI4_RESP_DECERR</span> <span class="num">2'b11</span>   <span class="cm">// 地址译码错误</span></pre>
+<p>非 OKAY 响应触发 Access Fault 异常（mcause=1/5/7）。</p>
 
-<h3>4.3 关键逻辑</h3>
+<h3>2.5 传输宽度</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 31-34 行</div>
+<pre><span class="mac">`define AXI4_SIZE_1B</span>   <span class="num">3'b000</span>   <span class="cm">// 1 字节 (lb/sb)</span>
+<span class="mac">`define AXI4_SIZE_2B</span>   <span class="num">3'b001</span>   <span class="cm">// 2 字节 (lh/sh)</span>
+<span class="mac">`define AXI4_SIZE_4B</span>   <span class="num">3'b010</span>   <span class="cm">// 4 字节 (lw/sw)</span></pre>
+<p><code>arsize/awsize</code> 解决了 B2 讲义中 UART 寄存器访问问题：lb 只访问 1 字节，不误触相邻寄存器。</p>
 
-<div class="file-header"><span class="file-icon">📄</span> fetch.sv · 第 94-108 行</div>
+<h3>2.6 AR 通道结构体</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 38-45 行</div>
+<pre><span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ID_W</span>-<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">id</span>;      <span class="cm">// 事务 ID</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ADDR_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">addr</span>;    <span class="cm">// 读地址</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_LEN_W</span>-<span class="num">1</span>:<span class="num">0</span>]   <span class="sig">len</span>;     <span class="cm">// burst 长度 - 1</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_SIZE_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">size</span>;    <span class="cm">// 每拍字节数 = 2^size</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_BURST_W</span>-<span class="num">1</span>:<span class="num">0</span>] <span class="sig">burst</span>;   <span class="cm">// burst 类型</span>
+} <span class="ty">axi4_ar_t</span>;</pre>
+<table>
+<tr><th>字段</th><th>NPC 设定值</th><th>说明</th></tr>
+<tr><td>id</td><td>4'h0</td><td>固定 0，无需区分事务</td></tr>
+<tr><td>addr</td><td>PC 或 ALU 结果</td><td>取指用 PC，访存用 ALU</td></tr>
+<tr><td>len</td><td>8'h0</td><td>单次传输（1 拍）</td></tr>
+<tr><td>size</td><td>3'b010</td><td>4 字节</td></tr>
+<tr><td>burst</td><td>2'b01 (INCR)</td><td>递增地址</td></tr>
+</table>
+
+<h3>2.7 R 通道结构体</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 47-53 行</div>
+<pre><span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ID_W</span>-<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">id</span>;      <span class="cm">// 事务 ID</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_DATA_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">data</span>;    <span class="cm">// 读出数据</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_RESP_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">resp</span>;    <span class="cm">// 响应码</span>
+    <span class="ty">logic</span>                     <span class="sig">last</span>;    <span class="cm">// burst 最后一拍</span>
+} <span class="ty">axi4_r_t</span>;</pre>
+<p>Slave 输出。<code>resp ≠ OKAY</code> 时触发 Access Fault。</p>
+
+<h3>2.8 AW 通道结构体</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 55-62 行</div>
+<pre><span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ID_W</span>-<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">id</span>;
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ADDR_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">addr</span>;
+    <span class="ty">logic</span> [<span class="mac">`AXI4_LEN_W</span>-<span class="num">1</span>:<span class="num">0</span>]   <span class="sig">len</span>;
+    <span class="ty">logic</span> [<span class="mac">`AXI4_SIZE_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">size</span>;
+    <span class="ty">logic</span> [<span class="mac">`AXI4_BURST_W</span>-<span class="num">1</span>:<span class="num">0</span>] <span class="sig">burst</span>;
+} <span class="ty">axi4_aw_t</span>;</pre>
+<p>与 AR 结构对称。AXI4 的关键设计：写地址和写数据独立通道，允许 Slave 提前启动写操作。</p>
+
+<h3>2.9 W 通道结构体</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 64-69 行</div>
+<pre><span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="mac">`AXI4_DATA_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">data</span>;    <span class="cm">// 写入数据</span>
+    <span class="ty">logic</span> [<span class="mac">`AXI4_STRB_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">strb</span>;    <span class="cm">// 写选通（每 1 位对应 1 字节）</span>
+    <span class="ty">logic</span>                     <span class="sig">last</span>;    <span class="cm">// burst 最后一拍</span>
+} <span class="ty">axi4_w_t</span>;</pre>
+<p><code>strb</code> 对应 SimpleBus 的 <code>wmask</code>。<code>strb[0]=1</code> 写 data[7:0]，<code>strb[3]=1</code> 写 data[31:24]。</p>
+
+<h3>2.10 B 通道结构体</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 71-75 行</div>
+<pre><span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="mac">`AXI4_ID_W</span>-<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">id</span>;
+    <span class="ty">logic</span> [<span class="mac">`AXI4_RESP_W</span>-<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">resp</span>;
+} <span class="ty">axi4_b_t</span>;</pre>
+<p>写回复只有 ID 和响应码，无数据——写操作是单向的。</p>
+
+<h3>2.11 聚合结构体（预留）</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 77-109 行</div>
+<pre><span class="cm">// Master 输出方向</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span>        <span class="sig">arvalid</span>;
+    <span class="ty">axi4_ar_t</span>    <span class="sig">ar</span>;
+    <span class="ty">logic</span>        <span class="sig">rready</span>;
+    <span class="ty">logic</span>        <span class="sig">awvalid</span>;
+    <span class="ty">axi4_aw_t</span>    <span class="sig">aw</span>;
+    <span class="ty">logic</span>        <span class="sig">wvalid</span>;
+    <span class="ty">axi4_w_t</span>     <span class="sig">w</span>;
+    <span class="ty">logic</span>        <span class="sig">bready</span>;
+} <span class="ty">axi4_m_out_t</span>;
+
+<span class="cm">// Master 输入方向</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span>        <span class="sig">arready</span>;
+    <span class="ty">logic</span>        <span class="sig">rvalid</span>;
+    <span class="ty">axi4_r_t</span>     <span class="sig">r</span>;
+    <span class="ty">logic</span>        <span class="sig">awready</span>;
+    <span class="ty">logic</span>        <span class="sig">wready</span>;
+    <span class="ty">logic</span>        <span class="sig">bvalid</span>;
+    <span class="ty">axi4_b_t</span>     <span class="sig">b</span>;
+} <span class="ty">axi4_m_in_t</span>;</pre>
+<p>为将来模块化接口预留。当前未使用，但保留扩展性。</p>
+
+<h3>2.12 默认值工厂函数</h3>
+<div class="fh"><span>📄</span> axi4.sv · 第 111-139 行</div>
+<pre><span class="kw">function automatic</span> <span class="ty">axi4_ar_t</span> <span class="fn">axi4_default_ar</span>();
+    <span class="ty">axi4_ar_t</span> <span class="sig">ar</span>;
+    <span class="sig">ar</span>.<span class="sig">id</span>    = <span class="str">'0</span>;
+    <span class="sig">ar</span>.<span class="sig">addr</span>  = <span class="str">'0</span>;
+    <span class="sig">ar</span>.<span class="sig">len</span>   = <span class="num">8'h0</span>;
+    <span class="sig">ar</span>.<span class="sig">size</span>  = <span class="mac">`AXI4_SIZE_4B</span>;
+    <span class="sig">ar</span>.<span class="sig">burst</span> = <span class="mac">`AXI4_BURST_INCR</span>;
+    <span class="kw">return</span> <span class="sig">ar</span>;
+<span class="kw">endfunction</span></pre>
+<p><code>automatic</code> 确保每次调用创建新的局部变量。三个函数分别生成 AR、AW、W 的默认值。</p>
+
+<!-- ==================== §3 define.sv ==================== -->
+<h2><span class="n">3</span><code>define.sv</code> — 指令/结构体/异常码</h2>
+
+<h3>3.1 总线位宽</h3>
+<div class="fh"><span>📄</span> define.sv · 第 4-5 行</div>
+<pre><span class="mac">`define AW</span>    <span class="num">32</span>
+<span class="mac">`define DW</span>    <span class="num">32</span></pre>
+
+<h3>3.2 指令 opcode</h3>
+<div class="fh"><span>📄</span> define.sv · 第 7-29 行</div>
+<pre><span class="mac">`define INST_TYPE_I</span>       <span class="num">7'b0010011</span>   <span class="cm">// ADDI/SLLI 等</span>
+<span class="mac">`define INST_TYPE_L</span>       <span class="num">7'b0000011</span>   <span class="cm">// LB/LW 等</span>
+<span class="mac">`define INST_TYPE_JALR</span>    <span class="num">7'b1100111</span>   <span class="cm">// JALR</span>
+<span class="mac">`define INST_TYPE_S</span>       <span class="num">7'b0100011</span>   <span class="cm">// SB/SW 等</span>
+<span class="mac">`define INST_TYPE_R</span>       <span class="num">7'b0110011</span>   <span class="cm">// ADD/SUB 等</span>
+<span class="mac">`define INST_TYPE_B</span>       <span class="num">7'b1100011</span>   <span class="cm">// BEQ/BNE 等</span>
+<span class="mac">`define INST_TYPE_J</span>       <span class="num">7'b1101111</span>   <span class="cm">// JAL</span>
+<span class="mac">`define INST_TYPE_U_LUI</span>   <span class="num">7'b0110111</span>   <span class="cm">// LUI</span>
+<span class="mac">`define INST_TYPE_U_AUIPC</span> <span class="num">7'b0010111</span>   <span class="cm">// AUIPC</span>
+<span class="mac">`define INST_TYPE_SYSTEM</span>  <span class="num">7'b1110011</span>   <span class="cm">// MRET/ECALL</span></pre>
+<p>RV32I 全部指令类型的 opcode 编码。</p>
+
+<h3>3.3 funct3 编码</h3>
+<div class="fh"><span>📄</span> define.sv · 第 31-82 行</div>
+<pre><span class="cm">// I 型</span>
+<span class="mac">`define INST_ADDI</span>  <span class="num">3'b000</span>   <span class="mac">`define INST_SLTI</span>  <span class="num">3'b010</span>
+<span class="mac">`define INST_XORI</span>  <span class="num">3'b100</span>   <span class="mac">`define INST_ORI</span>   <span class="num">3'b110</span>
+<span class="mac">`define INST_ANDI</span>  <span class="num">3'b111</span>   <span class="mac">`define INST_SLLI</span>  <span class="num">3'b001</span>
+<span class="mac">`define INST_SRLI</span>  <span class="num">3'b101</span>   <span class="cm">// SRAI 同 funct3，靠 funct7 区分</span>
+
+<span class="cm">// Load</span>
+<span class="mac">`define INST_LB</span>   <span class="num">3'b000</span>   <span class="mac">`define INST_LH</span>   <span class="num">3'b001</span>   <span class="mac">`define INST_LW</span>   <span class="num">3'b010</span>
+<span class="mac">`define INST_LBU</span>  <span class="num">3'b100</span>   <span class="mac">`define INST_LHU</span>  <span class="num">3'b101</span>
+
+<span class="cm">// Store</span>
+<span class="mac">`define INST_SB</span>   <span class="num">3'b000</span>   <span class="mac">`define INST_SH</span>   <span class="num">3'b001</span>   <span class="mac">`define INST_SW</span>   <span class="num">3'b010</span>
+
+<span class="cm">// R 型</span>
+<span class="mac">`define INST_ADD</span>  <span class="num">3'b000</span>   <span class="cm">// SUB 同 funct3，靠 funct7[5] 区分</span>
+<span class="mac">`define INST_SLL</span>  <span class="num">3'b001</span>   <span class="mac">`define INST_SLT</span>  <span class="num">3'b010</span>
+<span class="mac">`define INST_XOR</span>  <span class="num">3'b100</span>   <span class="mac">`define INST_SRL</span>  <span class="num">3'b101</span>   <span class="mac">`define INST_OR</span>   <span class="num">3'b110</span>
+
+<span class="cm">// B 型</span>
+<span class="mac">`define INST_BEQ</span>  <span class="num">3'b000</span>   <span class="mac">`define INST_BNE</span>  <span class="num">3'b001</span>
+<span class="mac">`define INST_BLT</span>  <span class="num">3'b100</span>   <span class="mac">`define INST_BGE</span>  <span class="num">3'b101</span></pre>
+
+<h3>3.4 常量</h3>
+<div class="fh"><span>📄</span> define.sv · 第 84-91 行</div>
+<pre><span class="mac">`define INSTR_NOP</span>    <span class="num">32'h00000013</span>   <span class="cm">// ADDI x0, x0, 0</span>
+<span class="mac">`define INSTR_MRET</span>   <span class="num">32'h30200073</span>   <span class="cm">// MRET</span>
+<span class="mac">`define TRAP_CAUSE_ECALL_M</span>   <span class="num">32'd11</span>   <span class="cm">// M-mode ECALL</span>
+<span class="mac">`define TRAP_CAUSE_IF_ACCESS</span> <span class="num">32'd1</span>    <span class="cm">// Instruction Access Fault</span>
+<span class="mac">`define TRAP_CAUSE_LD_ACCESS</span> <span class="num">32'd5</span>    <span class="cm">// Load Access Fault</span>
+<span class="mac">`define TRAP_CAUSE_ST_ACCESS</span> <span class="num">32'd7</span>    <span class="cm">// Store Access Fault</span></pre>
+
+<h3>3.5 操作数选择</h3>
+<div class="fh"><span>📄</span> define.sv · 第 93-99 行</div>
+<pre><span class="mac">`define OP1_RS1</span>   <span class="num">2'b00</span>   <span class="mac">`define OP1_PC</span>    <span class="num">2'b01</span>   <span class="mac">`define OP1_ZERO</span>  <span class="num">2'b10</span>
+<span class="mac">`define OP2_RS2</span>   <span class="num">2'b00</span>   <span class="mac">`define OP2_IMM</span>   <span class="num">2'b01</span>   <span class="mac">`define OP2_4</span>     <span class="num">2'b10</span></pre>
+<p>ALU 操作数的 MUX 选择信号。OP1 选择 rs1/PC/0，OP2 选择 rs2/imm/4。</p>
+
+<h3>3.6 流水线结构体</h3>
+<div class="fh"><span>📄</span> define.sv · 第 101-158 行</div>
+<pre><span class="cm">// IF → ID</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">pc</span>;
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">instr</span>;
+    <span class="ty">logic</span>        <span class="sig">ifu_error</span>;   <span class="cm">// 取指错误标志</span>
+} <span class="ty">if_id_t</span>;
+
+<span class="cm">// ID → EX（22 个字段）</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">pc</span>, <span class="sig">instr</span>, <span class="sig">op1</span>, <span class="sig">op2</span>, <span class="sig">imm</span>, <span class="sig">rs1_data</span>, <span class="sig">rs2_data</span>;
+    <span class="ty">logic</span> [<span class="num">4</span>:<span class="num">0</span>]  <span class="sig">rd_addr</span>, <span class="sig">rs1_addr</span>;
+    <span class="ty">logic</span> [<span class="num">6</span>:<span class="num">0</span>]  <span class="sig">opcode</span>, <span class="sig">funct7</span>;
+    <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]  <span class="sig">funct3</span>;
+    <span class="ty">logic</span> [<span class="num">11</span>:<span class="num">0</span>] <span class="sig">csr_addr</span>;
+    <span class="ty">logic</span>        <span class="sig">wr_en</span>, <span class="sig">is_load</span>, <span class="sig">is_store</span>;
+    <span class="ty">logic</span>        <span class="sig">inst_csrrw</span>, <span class="sig">inst_csrrs</span>, <span class="sig">inst_ecall</span>, <span class="sig">inst_mret</span>, <span class="sig">inst_ebreak</span>;
+    <span class="ty">logic</span>        <span class="sig">ifu_error</span>;   <span class="cm">// 从 IF 阶段传播到 EX</span>
+} <span class="ty">id_ex_t</span>;
+
+<span class="cm">// EX → MEM（10 个字段）</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">pc</span>, <span class="sig">instr</span>, <span class="sig">alu_result</span>, <span class="sig">rs2_data</span>;
+    <span class="ty">logic</span> [<span class="num">4</span>:<span class="num">0</span>]  <span class="sig">rd_addr</span>;
+    <span class="ty">logic</span>        <span class="sig">wr_en</span>, <span class="sig">is_load</span>, <span class="sig">is_store</span>;
+    <span class="ty">logic</span> [<span class="num">6</span>:<span class="num">0</span>]  <span class="sig">opcode</span>;
+    <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]  <span class="sig">funct3</span>;
+} <span class="ty">ex_mem_t</span>;
+
+<span class="cm">// MEM → WB（8 个字段）</span>
+<span class="kw">typedef struct packed</span> {
+    <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">pc</span>, <span class="sig">instr</span>, <span class="sig">alu_result</span>, <span class="sig">mem_rdata</span>;
+    <span class="ty">logic</span> [<span class="num">4</span>:<span class="num">0</span>]  <span class="sig">rd_addr</span>;
+    <span class="ty">logic</span>        <span class="sig">wr_en</span>, <span class="sig">is_load</span>;
+    <span class="ty">logic</span> [<span class="num">6</span>:<span class="num">0</span>]  <span class="sig">opcode</span>;
+} <span class="ty">mem_wb_t</span>;</pre>
+<p><code>ifu_error</code> 在 IF→ID→EX 两级流水线寄存器中传播，确保只有"生效"的指令才触发异常。</p>
+
+<!-- ==================== §4 fetch.sv ==================== -->
+<h2><span class="n">4</span><code>fetch.sv</code> — 取指单元</h2>
+
+<h3>4.1 模块声明</h3>
+<div class="fh"><span>📄</span> fetch.sv · 第 4-36 行</div>
+<pre><span class="kw">module</span> <span class="fn">fetch</span> #(
+    <span class="kw">parameter</span> <span class="sig">AW</span> = <span class="num">32</span>,
+    <span class="kw">parameter</span> <span class="sig">DW</span> = <span class="num">32</span>
+)(
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">clk</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">rst_n</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="sig">AW-1</span>:<span class="num">0</span>] <span class="sig">pc_pointer</span>,
+
+    <span class="cm">// AXI4 AR 通道</span>
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_arvalid</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_arready</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="sig">AW-1</span>:<span class="num">0</span>] <span class="sig">ifu_araddr</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]    <span class="sig">ifu_arsize</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">7</span>:<span class="num">0</span>]    <span class="sig">ifu_arlen</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_arburst</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">3</span>:<span class="num">0</span>]    <span class="sig">ifu_arid</span>,
+
+    <span class="cm">// AXI4 R 通道</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_rvalid</span>,
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_rready</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="sig">DW-1</span>:<span class="num">0</span>] <span class="sig">ifu_rdata</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">ifu_rresp</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">ifu_rlast</span>,
+
+    <span class="cm">// 流水线控制</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">flush</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">stall</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="sig">DW-1</span>:<span class="num">0</span>] <span class="sig">instr_out</span>,
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_valid</span>,
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">ifu_error</span>
+);</pre>
+<p>端口分四组：时钟复位、AXI4 AR（读地址）、AXI4 R（读数据）、流水线控制。AR 和 R 是独立的 AXI4 通道，各自有自己的 valid/ready 握手。</p>
+
+<h3>4.2 状态机定义</h3>
+<div class="fh"><span>📄</span> fetch.sv · 第 38-46 行</div>
+<pre><span class="kw">typedef enum logic</span> [<span class="num">1</span>:<span class="num">0</span>] {
+    <span class="sig">S_REQ</span>       = <span class="num">2'b00</span>,  <span class="cm">// 发出 arvalid，等 arready</span>
+    <span class="sig">S_WAIT_RESP</span> = <span class="num">2'b01</span>,  <span class="cm">// 已握手，等 rvalid</span>
+    <span class="sig">S_DONE</span>      = <span class="num">2'b10</span>   <span class="cm">// 指令就绪，等流水线消费</span>
+} <span class="ty">state_t</span>;
+
+<span class="ty">state_t</span> <span class="sig">state</span>, <span class="sig">state_next</span>;
+<span class="ty">logic</span> [<span class="sig">DW-1</span>:<span class="num">0</span>] <span class="sig">instr_latch</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]    <span class="sig">rresp_latch</span>;</pre>
+<p>3 个状态对应 AXI4 读事务的 3 个阶段。<code>instr_latch</code> 锁存指令，<code>rresp_latch</code> 锁存响应码。</p>
+
+<h3>4.3 状态转移</h3>
+<div class="fh"><span>📄</span> fetch.sv · 第 48-78 行</div>
+<pre><span class="cm">// 时序逻辑：状态寄存器</span>
+<span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="sig">state</span> &lt;= <span class="sig">S_REQ</span>;
+    <span class="kw">else</span> <span class="sig">state</span> &lt;= <span class="sig">state_next</span>;
+<span class="kw">end</span>
+
+<span class="cm">// 组合逻辑：下一状态</span>
+<span class="kw">always_comb begin</span>
+    <span class="sig">state_next</span> = <span class="sig">state</span>;
+    <span class="kw">case</span> (<span class="sig">state</span>)
+        <span class="sig">S_REQ</span>: <span class="kw">begin</span>
+            <span class="kw">if</span> (<span class="sig">flush</span>)            <span class="sig">state_next</span> = <span class="sig">S_REQ</span>;       <span class="cm">// flush 回到空闲</span>
+            <span class="kw">else if</span> (<span class="sig">ifu_arvalid</span> && <span class="sig">ifu_arready</span>) <span class="sig">state_next</span> = <span class="sig">S_WAIT_RESP</span>; <span class="cm">// AR 握手成功</span>
+        <span class="kw">end</span>
+        <span class="sig">S_WAIT_RESP</span>: <span class="kw">begin</span>
+            <span class="kw">if</span> (<span class="sig">flush</span>)            <span class="sig">state_next</span> = <span class="sig">S_REQ</span>;
+            <span class="kw">else if</span> (<span class="sig">ifu_rvalid</span> && <span class="sig">ifu_rready</span>) <span class="sig">state_next</span> = <span class="sig">S_DONE</span>;    <span class="cm">// R 握手成功</span>
+        <span class="kw">end</span>
+        <span class="sig">S_DONE</span>: <span class="kw">begin</span>
+            <span class="kw">if</span> (<span class="sig">flush</span>)            <span class="sig">state_next</span> = <span class="sig">S_REQ</span>;
+            <span class="kw">else if</span> (!<span class="sig">stall</span>)      <span class="sig">state_next</span> = <span class="sig">S_REQ</span>;       <span class="cm">// 流水线消费后回空闲</span>
+        <span class="kw">end</span>
+        <span class="kw">default</span>: <span class="sig">state_next</span> = <span class="sig">S_REQ</span>;
+    <span class="kw">endcase</span>
+<span class="kw">end</span></pre>
+<p>任何状态都可以被 <code>flush</code>（分支跳转）打断，回到 S_REQ 重新取指。<code>stall</code>（load-use 冲突）阻止 S_DONE → S_REQ 的转移。</p>
+
+<h3>4.4 响应锁存</h3>
+<div class="fh"><span>📄</span> fetch.sv · 第 80-92 行</div>
+<pre><span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="mac">`INSTR_NOP</span>;
+        <span class="sig">rresp_latch</span> &lt;= <span class="num">2'b00</span>;
+    <span class="kw">end else if</span> (<span class="sig">state</span> == <span class="sig">S_WAIT_RESP</span> && <span class="sig">ifu_rvalid</span> && <span class="sig">ifu_rready</span> && !<span class="sig">flush</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="sig">ifu_rdata</span>;    <span class="cm">// 锁存指令</span>
+        <span class="sig">rresp_latch</span> &lt;= <span class="sig">ifu_rresp</span>;    <span class="cm">// 锁存响应码</span>
+    <span class="kw">end else if</span> (<span class="sig">flush</span>) <span class="kw">begin</span>
+        <span class="sig">instr_latch</span> &lt;= <span class="mac">`INSTR_NOP</span>;
+        <span class="sig">rresp_latch</span> &lt;= <span class="num">2'b00</span>;       <span class="cm">// flush 时清除</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+<p>在 R 通道握手成功的同一周期锁存 <code>ifu_rdata</code> 和 <code>ifu_rresp</code>。flush 时两者都清除为 NOP/OKAY。</p>
+
+<h3>4.5 输出赋值</h3>
+<div class="fh"><span>📄</span> fetch.sv · 第 94-108 行</div>
 <pre><span class="cm">// AR 通道：固定参数</span>
 <span class="kw">assign</span> <span class="sig">ifu_arvalid</span> = (<span class="sig">state</span> == <span class="sig">S_REQ</span>) && !<span class="sig">flush</span> && !<span class="sig">stall</span>;
 <span class="kw">assign</span> <span class="sig">ifu_araddr</span>  = <span class="sig">pc_pointer</span>;
-<span class="kw">assign</span> <span class="sig">ifu_arsize</span>  = <span class="mac">`AXI4_SIZE_4B</span>;
-<span class="kw">assign</span> <span class="sig">ifu_arlen</span>   = <span class="num">8'h0</span>;
+<span class="kw">assign</span> <span class="sig">ifu_arsize</span>  = <span class="mac">`AXI4_SIZE_4B</span>;  <span class="cm">// 4 字节</span>
+<span class="kw">assign</span> <span class="sig">ifu_arlen</span>   = <span class="num">8'h0</span>;            <span class="cm">// 单次传输</span>
 <span class="kw">assign</span> <span class="sig">ifu_arburst</span> = <span class="mac">`AXI4_BURST_INCR</span>;
+<span class="kw">assign</span> <span class="sig">ifu_arid</span>    = <span class="num">4'h0</span>;
 
 <span class="cm">// R 通道</span>
 <span class="kw">assign</span> <span class="sig">ifu_rready</span> = (<span class="sig">state</span> == <span class="sig">S_WAIT_RESP</span>) && !<span class="sig">flush</span>;
 
-<span class="cm">// 错误检测</span>
+<span class="cm">// 流水线输出</span>
+<span class="kw">assign</span> <span class="sig">ifu_valid</span> = (<span class="sig">state</span> == <span class="sig">S_DONE</span>) && !<span class="sig">flush</span>;
+<span class="kw">assign</span> <span class="sig">instr_out</span> = <span class="sig">ifu_valid</span> ? <span class="sig">instr_latch</span> : <span class="mac">`INSTR_NOP</span>;
 <span class="kw">assign</span> <span class="sig">ifu_error</span> = <span class="sig">ifu_valid</span> && (<span class="sig">rresp_latch</span> != <span class="mac">`AXI4_RESP_OKAY</span>);</pre>
+<p><code>arvalid</code> 仅在 S_REQ 且未 flush/stall 时有效。<code>ifu_error</code> 仅在指令"生效"（S_DONE 且未 flush）且响应码非 OKAY 时有效。</p>
 
-<!-- ============================================================ -->
-<h2><span class="num">5</span><code>mem.sv</code> — 访存单元</h2>
+<!-- ==================== §5 mem.sv ==================== -->
+<h2><span class="n">5</span><code>mem.sv</code> — 访存单元</h2>
 
-<p>驱动 AXI4 AR/R（load）和 AW/W/B（store）通道，使用两个独立状态机。</p>
+<h3>5.1 模块声明</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 4-60 行</div>
+<pre><span class="kw">module</span> <span class="fn">memory</span> #(...)(
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">clk</span>, <span class="sig">rst_n</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">valid_in</span>,        <span class="cm">// 流水线有效</span>
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">alu_result_in</span>,   <span class="cm">// 地址</span>
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">rs2_data_in</span>,     <span class="cm">// 写数据</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>          <span class="sig">is_load_in</span>, <span class="sig">is_store_in</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]    <span class="sig">funct3_in</span>,       <span class="cm">// LB/LH/LW/SB/SH/SW</span>
 
-<h3>5.1 端口</h3>
+    <span class="cm">// AXI4 AR（load 用）+ R</span>
+    <span class="cm">// AXI4 AW + W（store 用）+ B</span>
+    <span class="cm">// （共 26 个 AXI4 信号）</span>
 
-<table>
-  <tr><th>通道</th><th>信号</th><th>用途</th></tr>
-  <tr><td>AR</td><td><code>lsu_arvalid/arready/araddr/arsize/arlen/arburst/arid</span></td><td>load 读地址</td></tr>
-  <tr><td>R</td><td><code>lsu_rvalid/rready/rdata/rresp/rlast</code></td><td>load 读数据</td></tr>
-  <tr><td>AW</td><td><code>lsu_awvalid/awready/awaddr/awsize/awlen/awburst/awid</code></td><td>store 写地址</td></tr>
-  <tr><td>W</td><td><code>lsu_wvalid/wready/wdata/wstrb/wlast</code></td><td>store 写数据</td></tr>
-  <tr><td>B</td><td><code>lsu_bvalid/bready/bresp/bid</code></td><td>store 写回复</td></tr>
-</table>
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">lsu_busy</span>,        <span class="cm">// 阻塞流水线</span>
+    <span class="dir">output</span> <span class="ty">logic</span>          <span class="sig">lsu_error</span>,       <span class="cm">// 总线错误</span>
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">mem_rdata_out</span>    <span class="cm">// 读出数据（已符号扩展）</span>
+);</pre>
 
-<h3>5.2 双状态机</h3>
+<h3>5.2 操作类型判断</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 62-64 行</div>
+<pre><span class="ty">wire</span> <span class="sig">is_load</span>  = <span class="sig">valid_in</span> && <span class="sig">is_load_in</span>;
+<span class="ty">wire</span> <span class="sig">is_store</span> = <span class="sig">valid_in</span> && <span class="sig">is_store_in</span>;
+<span class="ty">wire</span> <span class="sig">is_mem</span>   = <span class="sig">is_load</span> || <span class="sig">is_store</span>;</pre>
+<p>只有当流水线阶段有效（<code>valid_in</code>）且指令是 load/store 时才触发访存。</p>
 
-<div style="display:flex;gap:20px;margin:16px 0">
-<div style="flex:1">
-<pre style="font-size:11px"><span class="cm">// Load 状态机 (AR + R)</span>
-LD_IDLE ──arvalid&&arready──► LD_WAIT ──rvalid&&rready──► LD_DONE
-   ▲                                                         │
-   └─────────────────────────────────────────────────────────┘</pre>
-</div>
-<div style="flex:1">
-<pre style="font-size:11px"><span class="cm">// Store 状态机 (AW + W + B)</span>
-ST_IDLE ──aw&&awready&&w&&wready──► ST_WAIT ──bvalid&&bready──► ST_DONE
-   ▲                                                               │
-   └───────────────────────────────────────────────────────────────┘</pre>
-</div>
-</div>
+<h3>5.3 Load 状态机</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 66-98 行</div>
+<pre><span class="kw">typedef enum logic</span> [<span class="num">1</span>:<span class="num">0</span>] {
+    <span class="sig">LD_IDLE</span> = <span class="num">2'd0</span>,   <span class="cm">// 等待 AR 握手</span>
+    <span class="sig">LD_WAIT</span> = <span class="num">2'd1</span>,   <span class="cm">// 等待 R 响应</span>
+    <span class="sig">LD_DONE</span> = <span class="num">2'd2</span>    <span class="cm">// 数据就绪</span>
+} <span class="ty">ld_state_t</span>;
 
-<h3>5.3 写掩码生成</h3>
+<span class="cm">// 状态转移</span>
+<span class="kw">always_comb begin</span>
+    <span class="sig">ld_state_next</span> = <span class="sig">ld_state</span>;
+    <span class="kw">case</span> (<span class="sig">ld_state</span>)
+        <span class="sig">LD_IDLE</span>: <span class="kw">if</span> (<span class="sig">is_load</span> && <span class="sig">lsu_arvalid</span> && <span class="sig">lsu_arready</span>) <span class="sig">ld_state_next</span> = <span class="sig">LD_WAIT</span>;
+        <span class="sig">LD_WAIT</span>: <span class="kw">if</span> (<span class="sig">lsu_rvalid</span> && <span class="sig">lsu_rready</span>)               <span class="sig">ld_state_next</span> = <span class="sig">LD_DONE</span>;
+        <span class="sig">LD_DONE</span>: <span class="sig">ld_state_next</span> = <span class="sig">LD_IDLE</span>;
+    <span class="kw">endcase</span>
+<span class="kw">end</span></pre>
 
-<div class="file-header"><span class="file-icon">📄</span> mem.sv · 第 148-166 行</div>
-<pre><span class="kw">always_comb begin</span>
+<h3>5.4 Store 状态机</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 100-132 行</div>
+<pre><span class="kw">typedef enum logic</span> [<span class="num">1</span>:<span class="num">0</span>] {
+    <span class="sig">ST_IDLE</span> = <span class="num">2'd0</span>,   <span class="cm">// 等待 AW+W 同时握手</span>
+    <span class="sig">ST_WAIT</span> = <span class="num">2'd1</span>,   <span class="cm">// 等待 B 回复</span>
+    <span class="sig">ST_DONE</span> = <span class="num">2'd2</span>    <span class="cm">// 写完成</span>
+} <span class="ty">st_state_t</span>;
+
+<span class="cm">// 状态转移</span>
+<span class="kw">always_comb begin</span>
+    <span class="sig">st_state_next</span> = <span class="sig">st_state</span>;
+    <span class="kw">case</span> (<span class="sig">st_state</span>)
+        <span class="sig">ST_IDLE</span>: <span class="kw">if</span> (<span class="sig">is_store</span> && <span class="sig">lsu_awvalid</span> && <span class="sig">lsu_awready</span> && <span class="sig">lsu_wvalid</span> && <span class="sig">lsu_wready</span>)
+                    <span class="sig">st_state_next</span> = <span class="sig">ST_WAIT</span>;
+        <span class="sig">ST_WAIT</span>: <span class="kw">if</span> (<span class="sig">lsu_bvalid</span> && <span class="sig">lsu_bready</span>) <span class="sig">st_state_next</span> = <span class="sig">ST_DONE</span>;
+        <span class="sig">ST_DONE</span>: <span class="sig">st_state_next</span> = <span class="sig">ST_IDLE</span>;
+    <span class="kw">endcase</span>
+<span class="kw">end</span></pre>
+<p>Store 要求 AW 和 W 同时握手。这是因为 arbiter 在 AW 之后才发 W，两者在同一周期到达。</p>
+
+<h3>5.5 Load 数据锁存</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 134-146 行</div>
+<pre><span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">rdata_latch</span>;
+<span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">resp_latch</span>;
+
+<span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="kw">begin</span>
+        <span class="sig">rdata_latch</span> &lt;= <span class="num">32'h0</span>;
+        <span class="sig">resp_latch</span>  &lt;= <span class="num">2'b00</span>;
+    <span class="kw">end else if</span> (<span class="sig">ld_state</span> == <span class="sig">LD_WAIT</span> && <span class="sig">lsu_rvalid</span> && <span class="sig">lsu_rready</span>) <span class="kw">begin</span>
+        <span class="sig">rdata_latch</span> &lt;= <span class="sig">lsu_rdata</span>;    <span class="cm">// 锁存读出数据</span>
+        <span class="sig">resp_latch</span>  &lt;= <span class="sig">lsu_rresp</span>;    <span class="cm">// 锁存响应码</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+
+<h3>5.6 写掩码生成</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 148-166 行</div>
+<pre><span class="ty">logic</span> [<span class="num">3</span>:<span class="num">0</span>] <span class="sig">wmask_gen</span>;
+<span class="kw">always_comb begin</span>
     <span class="sig">wmask_gen</span> = <span class="num">4'b0000</span>;
     <span class="kw">if</span> (<span class="sig">is_store</span>) <span class="kw">begin</span>
         <span class="kw">case</span> (<span class="sig">funct3_in</span>)
             <span class="mac">`INST_SB</span>: <span class="kw">case</span> (<span class="sig">alu_result_in</span>[<span class="num">1</span>:<span class="num">0</span>])
-                <span class="num">2'b00</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0001</span>;
-                <span class="num">2'b01</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0010</span>;
-                <span class="num">2'b10</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0100</span>;
-                <span class="num">2'b11</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b1000</span>;
+                <span class="num">2'b00</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0001</span>;  <span class="cm">// 字节 0</span>
+                <span class="num">2'b01</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0010</span>;  <span class="cm">// 字节 1</span>
+                <span class="num">2'b10</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b0100</span>;  <span class="cm">// 字节 2</span>
+                <span class="num">2'b11</span>: <span class="sig">wmask_gen</span> = <span class="num">4'b1000</span>;  <span class="cm">// 字节 3</span>
             <span class="kw">endcase</span>
             <span class="mac">`INST_SH</span>:  <span class="sig">wmask_gen</span> = <span class="sig">alu_result_in</span>[<span class="num">1</span>] ? <span class="num">4'b1100</span> : <span class="num">4'b0011</span>;
-            <span class="kw">default</span>:   <span class="sig">wmask_gen</span> = <span class="num">4'b1111</span>;  <span class="cm">// SW</span>
+            <span class="kw">default</span>:   <span class="sig">wmask_gen</span> = <span class="num">4'b1111</span>;  <span class="cm">// SW：全部 4 字节</span>
         <span class="kw">endcase</span>
     <span class="kw">end</span>
 <span class="kw">end</span></pre>
+<p>根据 funct3（SB/SH/SW）和地址低 2 位生成写选通。SB 只写 1 字节，SH 写 2 字节，SW 写 4 字节。</p>
 
-<h3>5.4 错误检测</h3>
+<h3>5.7 AXI4 AR 通道输出</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 168-174 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_arvalid</span> = <span class="sig">is_load</span> && (<span class="sig">ld_state</span> == <span class="sig">LD_IDLE</span>);
+<span class="kw">assign</span> <span class="sig">lsu_araddr</span>  = <span class="sig">alu_result_in</span>;
+<span class="kw">assign</span> <span class="sig">lsu_arsize</span>  = <span class="mac">`AXI4_SIZE_4B</span>;
+<span class="kw">assign</span> <span class="sig">lsu_arlen</span>   = <span class="num">8'h0</span>;
+<span class="kw">assign</span> <span class="sig">lsu_arburst</span> = <span class="mac">`AXI4_BURST_INCR</span>;
+<span class="kw">assign</span> <span class="sig">lsu_arid</span>    = <span class="num">4'h0</span>;</pre>
+<p>Load 时发出 AR 请求。<code>arsize</code> 固定 4B——对于 lb/lh，Slave 会根据实际访问宽度返回数据。</p>
 
-<pre><span class="kw">assign</span> <span class="sig">lsu_error</span> = (<span class="sig">is_load</span> && <span class="sig">ld_state</span> == <span class="sig">LD_DONE</span> && <span class="sig">resp_latch</span> != <span class="mac">`AXI4_RESP_OKAY</span>) ||
+<h3>5.8 AXI4 R 通道输出</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 176-177 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_rready</span> = (<span class="sig">ld_state</span> == <span class="sig">LD_WAIT</span>);</pre>
+
+<h3>5.9 AXI4 AW 通道输出</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 179-185 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_awvalid</span> = <span class="sig">is_store</span> && (<span class="sig">st_state</span> == <span class="sig">ST_IDLE</span>);
+<span class="kw">assign</span> <span class="sig">lsu_awaddr</span>  = <span class="sig">alu_result_in</span>;
+<span class="kw">assign</span> <span class="sig">lsu_awsize</span>  = <span class="mac">`AXI4_SIZE_4B</span>;
+<span class="kw">assign</span> <span class="sig">lsu_awlen</span>   = <span class="num">8'h0</span>;
+<span class="kw">assign</span> <span class="sig">lsu_awburst</span> = <span class="mac">`AXI4_BURST_INCR</span>;
+<span class="kw">assign</span> <span class="sig">lsu_awid</span>    = <span class="num">4'h0</span>;</pre>
+
+<h3>5.10 AXI4 W 通道输出</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 187-191 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_wvalid</span> = <span class="sig">is_store</span> && (<span class="sig">st_state</span> == <span class="sig">ST_IDLE</span>);
+<span class="kw">assign</span> <span class="sig">lsu_wdata</span>  = <span class="sig">rs2_data_in</span> &lt;&lt; (<span class="num">8</span> * <span class="sig">alu_result_in</span>[<span class="num">1</span>:<span class="num">0</span>]);
+<span class="kw">assign</span> <span class="sig">lsu_wstrb</span>  = <span class="sig">wmask_gen</span>;
+<span class="kw">assign</span> <span class="sig">lsu_wlast</span>  = <span class="num">1'b1</span>;</pre>
+<p>写数据按地址低 2 位左移到正确的字节 lane。例如 SB 到地址 0x01：数据左移 8 位，wstrb=0010。</p>
+
+<h3>5.11 AXI4 B 通道输出</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 193-194 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_bready</span> = (<span class="sig">st_state</span> == <span class="sig">ST_WAIT</span>);</pre>
+
+<h3>5.12 流水线控制</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 196-201 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_busy</span> = (<span class="sig">is_load</span> && <span class="sig">ld_state</span> != <span class="sig">LD_DONE</span>) ||
+                  (<span class="sig">is_store</span> && <span class="sig">st_state</span> != <span class="sig">ST_DONE</span>);
+
+<span class="kw">assign</span> <span class="sig">lsu_error</span> = (<span class="sig">is_load</span> && <span class="sig">ld_state</span> == <span class="sig">LD_DONE</span> && <span class="sig">resp_latch</span> != <span class="mac">`AXI4_RESP_OKAY</span>) ||
                    (<span class="sig">is_store</span> && <span class="sig">st_state</span> == <span class="sig">ST_DONE</span> && <span class="sig">lsu_bresp</span> != <span class="mac">`AXI4_RESP_OKAY</span>);</pre>
+<p><code>lsu_busy</code> 阻塞流水线直到访存完成。<code>lsu_error</code> 在响应码非 OKAY 时触发。</p>
 
-<!-- ============================================================ -->
-<h2><span class="num">6</span><code>axi_arbiter.sv</code> — AXI4 合并器</h2>
+<h3>5.13 读数据符号扩展</h3>
+<div class="fh"><span>📄</span> mem.sv · 第 203-230 行</div>
+<pre><span class="kw">always_comb begin</span>
+    <span class="sig">mem_rdata_out</span> = <span class="num">32'h0</span>;
+    <span class="kw">if</span> (<span class="sig">is_load</span> && <span class="sig">ld_state</span> == <span class="sig">LD_DONE</span>) <span class="kw">begin</span>
+        <span class="kw">case</span> (<span class="sig">funct3_in</span>)
+            <span class="mac">`INST_LB</span>:  <span class="kw">case</span> (<span class="sig">alu_result_in</span>[<span class="num">1</span>:<span class="num">0</span>])
+                <span class="num">2'b00</span>: <span class="sig">mem_rdata_out</span> = {{<span class="num">24</span>{<span class="sig">rdata_latch</span>[<span class="num">7</span>]}},  <span class="sig">rdata_latch</span>[<span class="num">7</span>:<span class="num">0</span>]};
+                <span class="num">2'b01</span>: <span class="sig">mem_rdata_out</span> = {{<span class="num">24</span>{<span class="sig">rdata_latch</span>[<span class="num">15</span>]}}, <span class="sig">rdata_latch</span>[<span class="num">15</span>:<span class="num">8</span>]};
+                <span class="num">2'b10</span>: <span class="sig">mem_rdata_out</span> = {{<span class="num">24</span>{<span class="sig">rdata_latch</span>[<span class="num">23</span>]}}, <span class="sig">rdata_latch</span>[<span class="num">23</span>:<span class="num">16</span>]};
+                <span class="num">2'b11</span>: <span class="sig">mem_rdata_out</span> = {{<span class="num">24</span>{<span class="sig">rdata_latch</span>[<span class="num">31</span>]}}, <span class="sig">rdata_latch</span>[<span class="num">31</span>:<span class="num">24</span>]};
+            <span class="kw">endcase</span>
+            <span class="mac">`INST_LBU</span>: <span class="cm">// 同 LB 但零扩展</span>
+            <span class="mac">`INST_LH</span>:  <span class="cm">// 按 addr[1] 选择高/低半字，符号扩展</span>
+            <span class="mac">`INST_LHU</span>: <span class="cm">// 同 LH 但零扩展</span>
+            <span class="mac">`INST_LW</span>:  <span class="sig">mem_rdata_out</span> = <span class="sig">rdata_latch</span>;
+        <span class="kw">endcase</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+<p>从 32 位 <code>rdata_latch</code> 中根据地址低 2 位和 funct3 提取并扩展数据。LB 符号扩展，LBU 零扩展。</p>
 
-<p>纯组合逻辑（除 1 个 1-bit 寄存器外），将 IFU 和 LSU 的 AXI4 端口合并为一个 Master 端口。</p>
+<!-- ==================== §6 axi_arbiter.sv ==================== -->
+<h2><span class="n">6</span><code>axi_arbiter.sv</code> — AXI4 合并器</h2>
 
-<h3>6.1 设计决策</h3>
-
+<h3>6.1 设计原则</h3>
 <table>
-  <tr><th>通道</th><th>策略</th><th>原因</th></tr>
-  <tr><td>AR（读地址）</td><td>组合 MUX，LSU 优先</td><td>流水线中 IFU 被 lsu_busy 阻塞，不会同时发请求</td></tr>
-  <tr><td>R（读数据）</td><td>sel_lsu_ar 路由回请求方</td><td>1-bit 寄存器记录谁发了 AR</td></tr>
-  <tr><td>AW/W/B（写）</td><td>直通</td><td>仅 LSU 使用，无需仲裁</td></tr>
+<tr><th>部分</th><th>策略</th><th>原因</th></tr>
+<tr><td>AR（读地址）</td><td>组合 MUX，LSU 优先</td><td>流水线中 IFU 被 lsu_busy 阻塞，不会同时发请求</td></tr>
+<tr><td>R（读数据）</td><td>sel_lsu_ar 路由</td><td>1-bit 寄存器记录谁发了 AR</td></tr>
+<tr><td>AW/W/B（写）</td><td>直通</td><td>仅 LSU 使用，无需仲裁</td></tr>
 </table>
 
-<h3>6.2 读通道仲裁</h3>
+<h3>6.2 端口声明</h3>
+<div class="fh"><span>📄</span> axi_arbiter.sv · 第 12-101 行</div>
+<pre><span class="kw">module</span> <span class="fn">axi_arbiter</span> (
+    <span class="dir">input</span>  <span class="ty">logic</span> <span class="sig">clk</span>, <span class="sig">rst_n</span>,
 
-<div class="file-header"><span class="file-icon">📄</span> axi_arbiter.sv · 第 110-144 行</div>
-<pre><span class="cm">// AR 通道选择寄存器</span>
-<span class="ty">logic</span> <span class="sig">sel_lsu_ar</span>;  <span class="cm">// 1 = LSU 获得 AR 通道</span>
+    <span class="cm">// IFU AXI4 端口 (只读)</span>
+    <span class="dir">input</span>  <span class="ty">logic</span>        <span class="sig">ifu_arvalid</span>,
+    <span class="dir">output</span> <span class="ty">logic</span>        <span class="sig">ifu_arready</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">ifu_araddr</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span> [<span class="num">2</span>:<span class="num">0</span>]  <span class="sig">ifu_arsize</span>, <span class="sig">ifu_arlen</span> [<span class="num">7</span>:<span class="num">0</span>], <span class="sig">ifu_arburst</span>, <span class="sig">ifu_arid</span> [<span class="num">3</span>:<span class="num">0</span>],
+    <span class="dir">output</span> <span class="ty">logic</span>        <span class="sig">ifu_rvalid</span>,
+    <span class="dir">input</span>  <span class="ty">logic</span>        <span class="sig">ifu_rready</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">31</span>:<span class="num">0</span>] <span class="sig">ifu_rdata</span>,
+    <span class="dir">output</span> <span class="ty">logic</span> [<span class="num">1</span>:<span class="num">0</span>]  <span class="sig">ifu_rresp</span>,
+    <span class="dir">output</span> <span class="ty">logic</span>        <span class="sig">ifu_rlast</span>,
+
+    <span class="cm">// LSU AXI4 端口 (读写)</span>
+    <span class="cm">// AR + R + AW + W + B（共 26 个信号）</span>
+
+    <span class="cm">// AXI4 Master 端口 (连接 SoC)</span>
+    <span class="cm">// AR + R + AW + W + B（共 20 个信号）</span>
+);</pre>
+<p>三组端口：IFU（AR/R）、LSU（AR/R + AW/W/B）、Master（AR/R + AW/W/B）。IFU 只有读通道，LSU 有读写通道。</p>
+
+<h3>6.3 AR 通道选择寄存器</h3>
+<div class="fh"><span>📄</span> axi_arbiter.sv · 第 110-121 行</div>
+<pre><span class="ty">logic</span> <span class="sig">sel_lsu_ar</span>;  <span class="cm">// 1 = LSU 获得 AR 通道</span>
+
 <span class="kw">always_ff</span> @(<span class="kw">posedge</span> <span class="sig">clk</span> <span class="kw">or</span> <span class="kw">negedge</span> <span class="sig">rst_n</span>) <span class="kw">begin</span>
-    <span class="kw">if</span> (!<span class="sig">rst_n</span>) <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b0</span>;
-    <span class="kw">else if</span> (<span class="sig">m_arvalid</span> && <span class="sig">m_arready</span>)  <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b0</span>;
-    <span class="kw">else if</span> (<span class="sig">lsu_arvalid</span> && !<span class="sig">ifu_arvalid</span>) <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b1</span>;
-<span class="kw">end</span>
+    <span class="kw">if</span> (!<span class="sig">rst_n</span>)
+        <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b0</span>;
+    <span class="kw">else if</span> (<span class="sig">m_arvalid</span> && <span class="sig">m_arready</span>) <span class="kw">begin</span>
+        <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b0</span>;  <span class="cm">// 握手后清除（下次默认 IFU）</span>
+    <span class="kw">end else if</span> (<span class="sig">lsu_arvalid</span> && !<span class="sig">ifu_arvalid</span>) <span class="kw">begin</span>
+        <span class="sig">sel_lsu_ar</span> &lt;= <span class="num">1'b1</span>;  <span class="cm">// LSU 优先</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+<p>这是 arbiter 中唯一的时序逻辑。记录"当前 R 通道的响应应该路由给谁"。握手后自动清除，确保下次默认路由给 IFU。</p>
 
-<span class="cm">// AR MUX</span>
+<h3>6.4 AR 通道 MUX</h3>
+<div class="fh"><span>📄</span> axi_arbiter.sv · 第 123-133 行</div>
+<pre><span class="cm">// AR MUX</span>
 <span class="kw">assign</span> <span class="sig">m_arvalid</span> = <span class="sig">lsu_arvalid</span> | <span class="sig">ifu_arvalid</span>;
-<span class="kw">assign</span> <span class="sig">m_araddr</span>  = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_araddr</span> : <span class="sig">ifu_araddr</span>;
+<span class="kw">assign</span> <span class="sig">m_araddr</span>  = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_araddr</span>  : <span class="sig">ifu_araddr</span>;
+<span class="kw">assign</span> <span class="sig">m_arid</span>    = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_arid</span>    : <span class="sig">ifu_arid</span>;
+<span class="kw">assign</span> <span class="sig">m_arlen</span>   = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_arlen</span>   : <span class="sig">ifu_arlen</span>;
+<span class="kw">assign</span> <span class="sig">m_arsize</span>  = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_arsize</span>  : <span class="sig">ifu_arsize</span>;
+<span class="kw">assign</span> <span class="sig">m_arburst</span> = <span class="sig">lsu_arvalid</span> ? <span class="sig">lsu_arburst</span> : <span class="sig">ifu_arburst</span>;
 
-<span class="cm">// R 路由</span>
-<span class="kw">assign</span> <span class="sig">lsu_rvalid</span> = <span class="sig">m_rvalid</span> && <span class="sig">sel_lsu_ar</span>;
-<span class="kw">assign</span> <span class="sig">ifu_rvalid</span> = <span class="sig">m_rvalid</span> && !<span class="sig">sel_lsu_ar</span>;</pre>
+<span class="cm">// AR ready 路由</span>
+<span class="kw">assign</span> <span class="sig">lsu_arready</span> = <span class="sig">m_arready</span> && <span class="sig">lsu_arvalid</span>;
+<span class="kw">assign</span> <span class="sig">ifu_arready</span> = <span class="sig">m_arready</span> && !<span class="sig">lsu_arvalid</span>;</pre>
+<p>LSU 有请求时优先选择 LSU，否则选择 IFU。<code>arready</code> 路由确保只有被选中的 master 收到 ready。</p>
 
-<h3>6.3 写通道直通</h3>
+<h3>6.5 R 通道路由</h3>
+<div class="fh"><span>📄</span> axi_arbiter.sv · 第 135-144 行</div>
+<pre><span class="kw">assign</span> <span class="sig">lsu_rvalid</span> = <span class="sig">m_rvalid</span> && <span class="sig">sel_lsu_ar</span>;
+<span class="kw">assign</span> <span class="sig">ifu_rvalid</span> = <span class="sig">m_rvalid</span> && !<span class="sig">sel_lsu_ar</span>;
+<span class="kw">assign</span> <span class="sig">m_rready</span>   = <span class="sig">sel_lsu_ar</span> ? <span class="sig">lsu_rready</span> : <span class="sig">ifu_rready</span>;
+<span class="kw">assign</span> <span class="sig">lsu_rdata</span>  = <span class="sig">m_rdata</span>;
+<span class="kw">assign</span> <span class="sig">ifu_rdata</span>  = <span class="sig">m_rdata</span>;
+<span class="kw">assign</span> <span class="sig">lsu_rresp</span>  = <span class="sig">m_rresp</span>;
+<span class="kw">assign</span> <span class="sig">ifu_rresp</span>  = <span class="sig">m_rresp</span>;
+<span class="kw">assign</span> <span class="sig">lsu_rlast</span>  = <span class="sig">m_rlast</span>;
+<span class="kw">assign</span> <span class="sig">ifu_rlast</span>  = <span class="sig">m_rlast</span>;</pre>
+<p>根据 <code>sel_lsu_ar</code> 将 R 通道响应路由给正确的请求方。数据和响应码同时广播给两者，但只有被选中的 valid 有效。</p>
 
-<pre><span class="cm">// 仅 LSU 使用，无需仲裁</span>
-<span class="kw">assign</span> <span class="sig">m_awvalid</span> = <span class="sig">lsu_awvalid</span>;
-<span class="kw">assign</span> <span class="sig">m_awaddr</span>  = <span class="sig">lsu_awaddr</span>;
-<span class="cm">// ... 所有 AW/W 信号直通</span>
-<span class="kw">assign</span> <span class="sig">lsu_bvalid</span> = <span class="sig">m_bvalid</span>;  <span class="cm">// B 回复直通</span></pre>
+<h3>6.6 写通道直通</h3>
+<div class="fh"><span>📄</span> axi_arbiter.sv · 第 146-168 行</div>
+<pre><span class="cm">// AW 直通</span>
+<span class="kw">assign</span> <span class="sig">m_awvalid</span>  = <span class="sig">lsu_awvalid</span>;
+<span class="kw">assign</span> <span class="sig">m_awaddr</span>   = <span class="sig">lsu_awaddr</span>;
+<span class="kw">assign</span> <span class="sig">m_awid</span>     = <span class="sig">lsu_awid</span>;
+<span class="kw">assign</span> <span class="sig">m_awlen</span>    = <span class="sig">lsu_awlen</span>;
+<span class="kw">assign</span> <span class="sig">m_awsize</span>   = <span class="sig">lsu_awsize</span>;
+<span class="kw">assign</span> <span class="sig">m_awburst</span>  = <span class="sig">lsu_awburst</span>;
+<span class="kw">assign</span> <span class="sig">lsu_awready</span> = <span class="sig">m_awready</span>;
 
-<!-- ============================================================ -->
-<h2><span class="num">7</span><code>execute.sv</code> — 异常处理</h2>
+<span class="cm">// W 直通</span>
+<span class="kw">assign</span> <span class="sig">m_wvalid</span>  = <span class="sig">lsu_wvalid</span>;
+<span class="kw">assign</span> <span class="sig">m_wdata</span>   = <span class="sig">lsu_wdata</span>;
+<span class="kw">assign</span> <span class="sig">m_wstrb</span>   = <span class="sig">lsu_wstrb</span>;
+<span class="kw">assign</span> <span class="sig">m_wlast</span>   = <span class="sig">lsu_wlast</span>;
+<span class="kw">assign</span> <span class="sig">lsu_wready</span> = <span class="sig">m_wready</span>;
 
-<h3>7.1 异常码</h3>
+<span class="cm">// B 直通</span>
+<span class="kw">assign</span> <span class="sig">lsu_bvalid</span> = <span class="sig">m_bvalid</span>;
+<span class="kw">assign</span> <span class="sig">m_bready</span>   = <span class="sig">lsu_bready</span>;
+<span class="kw">assign</span> <span class="sig">lsu_bresp</span>  = <span class="sig">m_bresp</span>;
+<span class="kw">assign</span> <span class="sig">lsu_bid</span>    = <span class="sig">m_bid</span>;</pre>
+<p>写通道只有 LSU 使用，所有信号直接连接，零延迟。</p>
 
-<table>
-  <tr><th>mcause</th><th>宏</th><th>触发条件</th></tr>
-  <tr><td>1</td><td><code>TRAP_CAUSE_IF_ACCESS</code></td><td>取指时 rresp ≠ OKAY</td></tr>
-  <tr><td>5</td><td><code>TRAP_CAUSE_LD_ACCESS</code></td><td>load 时 rresp ≠ OKAY</td></tr>
-  <tr><td>7</td><td><code>TRAP_CAUSE_ST_ACCESS</code></td><td>store 时 bresp ≠ OKAY</td></tr>
-  <tr><td>11</td><td><code>TRAP_CAUSE_ECALL_M</code></td><td>ECALL 指令</td></tr>
-</table>
+<!-- ==================== §7 execute.sv ==================== -->
+<h2><span class="n">7</span><code>execute.sv</code> — 异常处理</h2>
 
-<h3>7.2 优先级编码</h3>
+<h3>7.1 新增端口</h3>
+<div class="fh"><span>📄</span> execute.sv · 第 28-31 行</div>
+<pre><span class="dir">input</span> <span class="ty">logic</span> <span class="sig">ifu_access_fault</span>,  <span class="cm">// 取指错误（从 IF 阶段传播来）</span>
+<span class="dir">input</span> <span class="ty">logic</span> <span class="sig">lsu_access_fault</span>,  <span class="cm">// 访存错误（从 MEM 阶段直接来）</span>
+<span class="dir">input</span> <span class="ty">logic</span> <span class="sig">is_load_in</span>,        <span class="cm">// 区分 load/store</span>
+<span class="dir">input</span> <span class="ty">logic</span> <span class="sig">is_store_in</span>,</pre>
 
-<div class="file-header"><span class="file-icon">📄</span> execute.sv · 第 153-161 行</div>
-<pre><span class="ty">wire</span> <span class="sig">access_fault</span> = <span class="sig">ifu_access_fault</span> | <span class="sig">lsu_access_fault</span>;
+<h3>7.2 异常优先级编码</h3>
+<div class="fh"><span>📄</span> execute.sv · 第 153-161 行</div>
+<pre><span class="cm">// 异常优先级：Access Fault > ECALL</span>
+<span class="ty">wire</span> <span class="sig">access_fault</span> = <span class="sig">ifu_access_fault</span> | <span class="sig">lsu_access_fault</span>;
 
 <span class="kw">assign</span> <span class="sig">trap_valid</span> = <span class="sig">access_fault</span> | <span class="sig">inst_ecall</span>;
 <span class="kw">assign</span> <span class="sig">trap_pc</span>    = <span class="sig">pc_in</span>;
-<span class="kw">assign</span> <span class="sig">trap_cause</span> = <span class="sig">ifu_access_fault</span> ? <span class="mac">`TRAP_CAUSE_IF_ACCESS</span> :
-                    <span class="sig">lsu_access_fault</span> ? (<span class="sig">is_store_in</span> ? <span class="mac">`TRAP_CAUSE_ST_ACCESS</span>
-                                                    : <span class="mac">`TRAP_CAUSE_LD_ACCESS</span>) :
-                    <span class="mac">`TRAP_CAUSE_ECALL_M</span>;</pre>
+<span class="kw">assign</span> <span class="sig">trap_cause</span> = <span class="sig">ifu_access_fault</span> ? <span class="mac">`TRAP_CAUSE_IF_ACCESS</span> :      <span class="cm">// mcause=1</span>
+                    <span class="sig">lsu_access_fault</span> ? (<span class="sig">is_store_in</span> ? <span class="mac">`TRAP_CAUSE_ST_ACCESS</span>  <span class="cm">// mcause=7</span>
+                                                    : <span class="mac">`TRAP_CAUSE_LD_ACCESS</span>) <span class="cm">// mcause=5</span>
+                    : <span class="mac">`TRAP_CAUSE_ECALL_M</span>;                              <span class="cm">// mcause=11</span></pre>
+<p>三目运算符实现优先级编码。Access Fault 优先于 ECALL。Load 和 Store 通过 <code>is_store_in</code> 区分。</p>
 
-<!-- ============================================================ -->
-<h2><span class="num">8</span><code>sim_top.sv</code> — 仿真环境</h2>
-
-<p>实例化 core + arbiter + AXI4 Slave 存储器模型。Slave 内部调用 DPI-C（paddr_read/paddr_write），并注入 LFSR 随机延迟。</p>
-
-<h3>8.1 架构</h3>
-
-<pre>core ──AXI4──► axi_arbiter ──AXI4──► AXI4 Slave 存储器模型
-                                      ├── 读状态机 (RD_IDLE→DELAY→RESP)
-                                      ├── 写状态机 (WR_IDLE→DELAY→RESP)
-                                      ├── LFSR 随机延迟 (1~4 周期)
-                                      └── DPI-C (paddr_read/write)</pre>
-
-<h3>8.2 Slave 读状态机</h3>
-
-<pre>RD_IDLE ──arvalid&&arready──► RD_DELAY ──cnt>=target──► RD_RESP ──rvalid&&rready──► RD_IDLE
-   │                            │                         │
-   │ 握手时调用                  │ LFSR 延迟               │ 输出 rdata
-   │ paddr_read(araddr)         │ 1~4 周期                │ rresp=OKAY</pre>
-
-<!-- ============================================================ -->
-<h2><span class="num">9</span>验证状态</h2>
+<!-- ==================== §8 验证 ==================== -->
+<h2><span class="n">8</span>验证状态</h2>
 
 <table>
-  <tr><th>验证层级</th><th>状态</th><th>说明</th></tr>
-  <tr><td>verilator lint</td><td><span class="badge badge-green">✅ 通过</span></td><td>语法/语义检查，0 errors, 0 warnings</td></tr>
-  <tr><td>verilator build</td><td><span class="badge badge-green">✅ 通过</span></td><td>C++ 模型 Vtop.h 生成</td></tr>
-  <tr><td>编译可执行文件</td><td><span class="badge badge-yellow">待做</span></td><td>需链接 main.cpp + memory + 设备</td></tr>
-  <tr><td>cpu-tests</td><td><span class="badge badge-yellow">待做</span></td><td>需可执行文件 + 测试 bin</td></tr>
-  <tr><td>接入 ysyxSoC</td><td><span class="badge badge-yellow">待做</span></td><td>Phase 4</td></tr>
+<tr><th>验证层级</th><th>状态</th><th>命令</th></tr>
+<tr><td>verilator lint</td><td><span class="b b-g">✅ 通过</span></td><td><code>verilator --lint-only -I./vsrc [所有.sv]</code></td></tr>
+<tr><td>verilator build</td><td><span class="b b-g">✅ 通过</span></td><td><code>verilator -MMD --build -cc ... --Mdir build/obj_dir</code></td></tr>
+<tr><td>编译可执行文件</td><td><span class="b b-y">待做</span></td><td>需链接 main.cpp + paddr.cpp + 设备</td></tr>
+<tr><td>cpu-tests</td><td><span class="b b-y">待做</span></td><td>需可执行文件 + 测试 bin</td></tr>
+<tr><td>接入 ysyxSoC</td><td><span class="b b-y">待做</span></td><td>Phase 4</td></tr>
 </table>
 
-<p style="text-align:center; color:var(--text2); margin-top:48px; font-size:12px;">
-  ysyx_250309 · NPC AXI4 技术报告 · 2026-06-14
+<p style="text-align:center;color:var(--text2);margin-top:48px;font-size:12px">
+  ysyx_250309 · NPC AXI4 完整技术报告 · 2026-06-14
 </p>
 
 </div>
