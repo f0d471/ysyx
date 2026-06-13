@@ -1,4 +1,5 @@
 `include "define.sv"
+`include "axi4.sv"
 
 module memory #(
     parameter AW = 32,
@@ -14,18 +15,46 @@ module memory #(
     input  logic          is_store_in,
     input  logic [2:0]    funct3_in,
 
-    output logic [AW-1:0] lsu_addr,
-    output logic          lsu_ren,
-    output logic          lsu_wen,
-    output logic [DW-1:0] lsu_wdata,
-    output logic [3:0]    lsu_wmask,
-    output logic          lsu_reqValid,
-    input  logic          lsu_reqReady,
-    input  logic          lsu_respValid,
-    output logic          lsu_respReady,
+    // AXI4 AR 通道 (读地址 — load 用)
+    output logic          lsu_arvalid,
+    input  logic          lsu_arready,
+    output logic [AW-1:0] lsu_araddr,
+    output logic [2:0]    lsu_arsize,
+    output logic [7:0]    lsu_arlen,
+    output logic [1:0]    lsu_arburst,
+    output logic [3:0]    lsu_arid,
+
+    // AXI4 R 通道 (读数据 — load 用)
+    input  logic          lsu_rvalid,
+    output logic          lsu_rready,
     input  logic [DW-1:0] lsu_rdata,
+    input  logic [1:0]    lsu_rresp,
+    input  logic          lsu_rlast,
+
+    // AXI4 AW 通道 (写地址 — store 用)
+    output logic          lsu_awvalid,
+    input  logic          lsu_awready,
+    output logic [AW-1:0] lsu_awaddr,
+    output logic [2:0]    lsu_awsize,
+    output logic [7:0]    lsu_awlen,
+    output logic [1:0]    lsu_awburst,
+    output logic [3:0]    lsu_awid,
+
+    // AXI4 W 通道 (写数据 — store 用)
+    output logic          lsu_wvalid,
+    input  logic          lsu_wready,
+    output logic [DW-1:0] lsu_wdata,
+    output logic [3:0]    lsu_wstrb,
+    output logic          lsu_wlast,
+
+    // AXI4 B 通道 (写回复 — store 用)
+    input  logic          lsu_bvalid,
+    output logic          lsu_bready,
+    input  logic [1:0]    lsu_bresp,
+    input  logic [3:0]    lsu_bid,
 
     output logic          lsu_busy,
+    output logic          lsu_error,
 
     output logic [DW-1:0] mem_rdata_out
 );
@@ -34,48 +63,89 @@ module memory #(
     wire is_store = valid_in && is_store_in;
     wire is_mem   = is_load || is_store;
 
+    // --- Load 状态机 (AR + R) ---
     typedef enum logic [1:0] {
-        S_IDLE      = 2'b00, // 无访存 / 等待发请求
-        S_WAIT_RESP = 2'b01, // 请求已发出，等 respValid
-        S_DONE      = 2'b10  // 访存完成，1 周期后回 IDLE
-    } state_t;
+        LD_IDLE = 2'd0,
+        LD_WAIT = 2'd1,
+        LD_DONE = 2'd2
+    } ld_state_t;
 
-    state_t state, state_next;
-    logic [DW-1:0] rdata_latch;
+    ld_state_t ld_state, ld_state_next;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
-            state <= S_IDLE;
+            ld_state <= LD_IDLE;
         else
-            state <= state_next;
+            ld_state <= ld_state_next;
     end
 
     always_comb begin
-        state_next = state;
-        case (state)
-            S_IDLE: begin
-                if (is_mem && lsu_reqValid && lsu_reqReady)
-                    state_next = S_WAIT_RESP;
+        ld_state_next = ld_state;
+        case (ld_state)
+            LD_IDLE: begin
+                if (is_load && lsu_arvalid && lsu_arready)
+                    ld_state_next = LD_WAIT;
             end
-            S_WAIT_RESP: begin
-                if (lsu_respValid && lsu_respReady)
-                    state_next = S_DONE;
+            LD_WAIT: begin
+                if (lsu_rvalid && lsu_rready)
+                    ld_state_next = LD_DONE;
             end
-            S_DONE: begin
-                state_next = S_IDLE;
+            LD_DONE: begin
+                ld_state_next = LD_IDLE;
             end
-            default: state_next = S_IDLE;
+            default: ld_state_next = LD_IDLE;
         endcase
     end
 
-    // 锁存读数据
+    // --- Store 状态机 (AW + W + B) ---
+    typedef enum logic [1:0] {
+        ST_IDLE = 2'd0,
+        ST_WAIT = 2'd1,
+        ST_DONE = 2'd2
+    } st_state_t;
+
+    st_state_t st_state, st_state_next;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
-            rdata_latch <= 32'h0;
-        else if (state == S_WAIT_RESP && lsu_respValid && lsu_respReady)
-            rdata_latch <= lsu_rdata;
+            st_state <= ST_IDLE;
+        else
+            st_state <= st_state_next;
     end
 
+    always_comb begin
+        st_state_next = st_state;
+        case (st_state)
+            ST_IDLE: begin
+                if (is_store && lsu_awvalid && lsu_awready && lsu_wvalid && lsu_wready)
+                    st_state_next = ST_WAIT;
+            end
+            ST_WAIT: begin
+                if (lsu_bvalid && lsu_bready)
+                    st_state_next = ST_DONE;
+            end
+            ST_DONE: begin
+                st_state_next = ST_IDLE;
+            end
+            default: st_state_next = ST_IDLE;
+        endcase
+    end
+
+    // --- Load 数据锁存 ---
+    logic [DW-1:0] rdata_latch;
+    logic [1:0]    resp_latch;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rdata_latch <= 32'h0;
+            resp_latch  <= 2'b00;
+        end else if (ld_state == LD_WAIT && lsu_rvalid && lsu_rready) begin
+            rdata_latch <= lsu_rdata;
+            resp_latch  <= lsu_rresp;
+        end
+    end
+
+    // --- 写掩码生成 ---
     logic [3:0] wmask_gen;
     always_comb begin
         wmask_gen = 4'b0000;
@@ -90,27 +160,50 @@ module memory #(
                     endcase
                 end
                 `INST_SH:  wmask_gen = alu_result_in[1] ? 4'b1100 : 4'b0011;
-                default:   wmask_gen = 4'b1111;  // SW
+                default:   wmask_gen = 4'b1111;
             endcase
         end
     end
 
-    //  总线输出
-    assign lsu_addr      = alu_result_in;
-    assign lsu_ren       = is_load;
-    assign lsu_wen       = is_store;
-    assign lsu_wdata     = rs2_data_in << (8 * alu_result_in[1:0]); // 写数据按 addr[1:0] 移位到正确的字节 lane
-    assign lsu_wmask     = wmask_gen;
-    assign lsu_reqValid  = is_mem && (state == S_IDLE);
-    assign lsu_respReady = (state == S_WAIT_RESP);
+    // --- AXI4 AR 通道输出 (load) ---
+    assign lsu_arvalid = is_load && (ld_state == LD_IDLE);
+    assign lsu_araddr  = alu_result_in;
+    assign lsu_arsize  = `AXI4_SIZE_4B;
+    assign lsu_arlen   = 8'h0;
+    assign lsu_arburst = `AXI4_BURST_INCR;
+    assign lsu_arid    = 4'h0;
 
-    // 有访存操作且尚未到 DONE
-    assign lsu_busy = is_mem && (state != S_DONE);
+    // --- AXI4 R 通道输出 (load) ---
+    assign lsu_rready = (ld_state == LD_WAIT);
 
-    //  读数据符号扩展（DONE 状态输出）
+    // --- AXI4 AW 通道输出 (store) ---
+    assign lsu_awvalid = is_store && (st_state == ST_IDLE);
+    assign lsu_awaddr  = alu_result_in;
+    assign lsu_awsize  = `AXI4_SIZE_4B;
+    assign lsu_awlen   = 8'h0;
+    assign lsu_awburst = `AXI4_BURST_INCR;
+    assign lsu_awid    = 4'h0;
+
+    // --- AXI4 W 通道输出 (store) ---
+    assign lsu_wvalid = is_store && (st_state == ST_IDLE);
+    assign lsu_wdata  = rs2_data_in << (8 * alu_result_in[1:0]);
+    assign lsu_wstrb  = wmask_gen;
+    assign lsu_wlast  = 1'b1;
+
+    // --- AXI4 B 通道输出 (store) ---
+    assign lsu_bready = (st_state == ST_WAIT);
+
+    // --- 流水线控制 ---
+    assign lsu_busy = (is_load && ld_state != LD_DONE) ||
+                      (is_store && st_state != ST_DONE);
+
+    assign lsu_error = (is_load && ld_state == LD_DONE && resp_latch != `AXI4_RESP_OKAY) ||
+                       (is_store && st_state == ST_DONE && lsu_bresp != `AXI4_RESP_OKAY);
+
+    // --- 读数据符号扩展 ---
     always_comb begin
         mem_rdata_out = 32'h0;
-        if (is_load && state == S_DONE) begin
+        if (is_load && ld_state == LD_DONE) begin
             case (funct3_in)
                 `INST_LB:  case (alu_result_in[1:0])
                     2'b00: mem_rdata_out = {{24{rdata_latch[7]}},  rdata_latch[7:0]};

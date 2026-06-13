@@ -9,25 +9,59 @@ module core #(
     input  logic          clk,
     input  logic          rst_n,
     
-    // IFU SimpleBus 接口
-    output logic [AW-1:0] ifu_raddr,
-    output logic          ifu_reqValid,
-    input  logic          ifu_reqReady,
-    input  logic [DW-1:0] ifu_rdata,
-    input  logic          ifu_respValid,
-    output logic          ifu_respReady,
+    // IFU AXI4 AR 通道 (读地址)
+    output logic          ifu_arvalid,
+    input  logic          ifu_arready,
+    output logic [AW-1:0] ifu_araddr,
+    output logic [2:0]    ifu_arsize,
+    output logic [7:0]    ifu_arlen,
+    output logic [1:0]    ifu_arburst,
+    output logic [3:0]    ifu_arid,
 
-    // LSU 握手接口
-    output logic [AW-1:0] lsu_addr,
-    output logic          lsu_ren,
-    output logic          lsu_wen,
-    output logic [DW-1:0] lsu_wdata,
-    output logic [3:0]    lsu_wmask,
-    output logic          lsu_reqValid,
-    input  logic          lsu_reqReady,
+    // IFU AXI4 R 通道 (读数据)
+    input  logic          ifu_rvalid,
+    output logic          ifu_rready,
+    input  logic [DW-1:0] ifu_rdata,
+    input  logic [1:0]    ifu_rresp,
+    input  logic          ifu_rlast,
+
+    // LSU AXI4 AR 通道 (读地址 — load)
+    output logic          lsu_arvalid,
+    input  logic          lsu_arready,
+    output logic [AW-1:0] lsu_araddr,
+    output logic [2:0]    lsu_arsize,
+    output logic [7:0]    lsu_arlen,
+    output logic [1:0]    lsu_arburst,
+    output logic [3:0]    lsu_arid,
+
+    // LSU AXI4 R 通道 (读数据 — load)
+    input  logic          lsu_rvalid,
+    output logic          lsu_rready,
     input  logic [DW-1:0] lsu_rdata,
-    input  logic          lsu_respValid,
-    output logic          lsu_respReady,
+    input  logic [1:0]    lsu_rresp,
+    input  logic          lsu_rlast,
+
+    // LSU AXI4 AW 通道 (写地址 — store)
+    output logic          lsu_awvalid,
+    input  logic          lsu_awready,
+    output logic [AW-1:0] lsu_awaddr,
+    output logic [2:0]    lsu_awsize,
+    output logic [7:0]    lsu_awlen,
+    output logic [1:0]    lsu_awburst,
+    output logic [3:0]    lsu_awid,
+
+    // LSU AXI4 W 通道 (写数据 — store)
+    output logic          lsu_wvalid,
+    input  logic          lsu_wready,
+    output logic [DW-1:0] lsu_wdata,
+    output logic [3:0]    lsu_wstrb,
+    output logic          lsu_wlast,
+
+    // LSU AXI4 B 通道 (写回复 — store)
+    input  logic          lsu_bvalid,
+    output logic          lsu_bready,
+    input  logic [1:0]    lsu_bresp,
+    input  logic [3:0]    lsu_bid,
  
     // Debug / Commit 信号  
     output logic [DW-1:0] debug_regs [15:0],
@@ -103,7 +137,9 @@ logic        load_stall;
 
 // IFU 控制信号
 logic        ifu_valid;        
-logic        lsu_busy;  
+logic        lsu_busy;
+logic        ifu_error;
+logic        lsu_error;
        
 // CSR 接口
 logic [11:0] csr_raddr;
@@ -134,20 +170,31 @@ fetch #(
     .clk          (clk),
     .rst_n        (rst_n),
     .pc_pointer   (pc),
-    .ifu_raddr    (ifu_raddr),
+
+    .ifu_arvalid  (ifu_arvalid),
+    .ifu_arready  (ifu_arready),
+    .ifu_araddr   (ifu_araddr),
+    .ifu_arsize   (ifu_arsize),
+    .ifu_arlen    (ifu_arlen),
+    .ifu_arburst  (ifu_arburst),
+    .ifu_arid     (ifu_arid),
+
+    .ifu_rvalid   (ifu_rvalid),
+    .ifu_rready   (ifu_rready),
     .ifu_rdata    (ifu_rdata),
-    .ifu_reqValid (ifu_reqValid),
-    .ifu_reqReady (ifu_reqReady),
-    .ifu_respValid(ifu_respValid),
-    .ifu_respReady(ifu_respReady),
+    .ifu_rresp    (ifu_rresp),
+    .ifu_rlast    (ifu_rlast),
+
     .flush        (ex_jump_flag),
     .stall        (load_stall | lsu_busy),      
     .instr_out    (instr),
-    .ifu_valid    (ifu_valid)
+    .ifu_valid    (ifu_valid),
+    .ifu_error    (ifu_error)
 );
 
-assign if_id_up.pc    = pc;
-assign if_id_up.instr = instr;
+assign if_id_up.pc        = pc;
+assign if_id_up.instr     = instr;
+assign if_id_up.ifu_error = ifu_error;
 
 pipe_reg #(.DW($bits(if_id_t))) u_if2id (
     .clk      (clk),
@@ -293,6 +340,7 @@ assign id_ex_up.inst_csrrs  = id_inst_csrrs;
 assign id_ex_up.inst_ecall  = id_inst_ecall;
 assign id_ex_up.inst_mret   = id_inst_mret;
 assign id_ex_up.inst_ebreak = id_inst_ebreak;
+assign id_ex_up.ifu_error   = if_id_dn.ifu_error;
 
 pipe_reg #(.DW($bits(id_ex_t))) u_id2ex (
     .clk      (clk),
@@ -329,6 +377,10 @@ execute #(
     .inst_csrrs      (id_ex_dn.inst_csrrs),
     .inst_ecall      (id_ex_dn.inst_ecall),
     .inst_mret       (id_ex_dn.inst_mret),
+    .ifu_access_fault(id_ex_dn.ifu_error),
+    .lsu_access_fault(lsu_error),
+    .is_load_in      (id_ex_dn.is_load),
+    .is_store_in     (id_ex_dn.is_store),
     .csr_raddr       (csr_raddr),
     .csr_rdata       (csr_rdata),
     .csr_wen         (csr_wen),
@@ -378,17 +430,47 @@ memory #(
     .is_load_in    (ex_mem_dn.is_load),
     .is_store_in   (ex_mem_dn.is_store),
     .funct3_in     (ex_mem_dn.funct3),
-    .lsu_addr      (lsu_addr),
-    .lsu_ren       (lsu_ren),
-    .lsu_wen       (lsu_wen),
-    .lsu_wdata     (lsu_wdata),
-    .lsu_wmask     (lsu_wmask),
-    .lsu_reqValid  (lsu_reqValid),
-    .lsu_reqReady  (lsu_reqReady),
+
+    // AXI4 AR
+    .lsu_arvalid   (lsu_arvalid),
+    .lsu_arready   (lsu_arready),
+    .lsu_araddr    (lsu_araddr),
+    .lsu_arsize    (lsu_arsize),
+    .lsu_arlen     (lsu_arlen),
+    .lsu_arburst   (lsu_arburst),
+    .lsu_arid      (lsu_arid),
+
+    // AXI4 R
+    .lsu_rvalid    (lsu_rvalid),
+    .lsu_rready    (lsu_rready),
     .lsu_rdata     (lsu_rdata),
-    .lsu_respValid (lsu_respValid),
-    .lsu_respReady (lsu_respReady),
+    .lsu_rresp     (lsu_rresp),
+    .lsu_rlast     (lsu_rlast),
+
+    // AXI4 AW
+    .lsu_awvalid   (lsu_awvalid),
+    .lsu_awready   (lsu_awready),
+    .lsu_awaddr    (lsu_awaddr),
+    .lsu_awsize    (lsu_awsize),
+    .lsu_awlen     (lsu_awlen),
+    .lsu_awburst   (lsu_awburst),
+    .lsu_awid      (lsu_awid),
+
+    // AXI4 W
+    .lsu_wvalid    (lsu_wvalid),
+    .lsu_wready    (lsu_wready),
+    .lsu_wdata     (lsu_wdata),
+    .lsu_wstrb     (lsu_wstrb),
+    .lsu_wlast     (lsu_wlast),
+
+    // AXI4 B
+    .lsu_bvalid    (lsu_bvalid),
+    .lsu_bready    (lsu_bready),
+    .lsu_bresp     (lsu_bresp),
+    .lsu_bid       (lsu_bid),
+
     .lsu_busy      (lsu_busy),
+    .lsu_error     (lsu_error),
     .mem_rdata_out (mem_rdata)
 );
 

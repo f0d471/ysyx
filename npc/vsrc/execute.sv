@@ -25,6 +25,11 @@ module execute #(
     input  logic          inst_ecall,
     input  logic          inst_mret,
 
+    input  logic          ifu_access_fault,
+    input  logic          lsu_access_fault,
+    input  logic          is_load_in,
+    input  logic          is_store_in,
+
     output logic [11:0]   csr_raddr,     
     input  logic [31:0]   csr_rdata,    
     output logic          csr_wen,      
@@ -145,9 +150,15 @@ module execute #(
     assign csr_waddr = csr_addr_in;
     assign csr_wdata = inst_csrrw ? op1_in : (csr_rdata | op1_in);
 
-    assign trap_valid = inst_ecall;
+    // 异常优先级：Access Fault > ECALL
+    wire access_fault = ifu_access_fault | lsu_access_fault;
+
+    assign trap_valid = access_fault | inst_ecall;
     assign trap_pc    = pc_in;
-    assign trap_cause = `TRAP_CAUSE_ECALL_M;
+    assign trap_cause = ifu_access_fault ? `TRAP_CAUSE_IF_ACCESS :
+                        lsu_access_fault ? (is_store_in ? `TRAP_CAUSE_ST_ACCESS
+                                                        : `TRAP_CAUSE_LD_ACCESS) :
+                        `TRAP_CAUSE_ECALL_M;
 
     // 结果选择 
     always_comb begin
