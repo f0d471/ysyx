@@ -65,19 +65,66 @@
 <h2><span class="n">1</span>架构总览</h2>
 
 <h3>1.1 模块拓扑</h3>
-<pre>
-┌─────────────────────────────────────────────────────────────┐
-│  core (ysyx_250309)                                         │
-│                                                             │
-│  fetch ──AXI4 AR/R──┐                                       │
-│                      ├──► axi_arbiter ──AXI4──► SoC/Slave   │
-│  mem ──AXI4 AR/R + AW/W/B──┘                               │
-│                                                             │
-│  fetch 的 AR/R 通道：取指专用                                │
-│  mem 的 AR/R 通道：load 专用                                │
-│  mem 的 AW/W/B 通道：store 专用                             │
-│  arbiter：读通道 MUX + 写通道直通                           │
-└─────────────────────────────────────────────────────────────┘</pre>
+<div style="display:flex;justify-content:center;margin:16px 0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 260" width="700" height="260" style="max-width:100%">
+  <defs>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#58a6ff"/></marker>
+    <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3fb950"/></marker>
+    <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#d29922"/></marker>
+  </defs>
+  <!-- Core box -->
+  <rect x="20" y="20" width="380" height="220" rx="12" fill="none" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="30" y="42" fill="#58a6ff" font-size="12" font-weight="700" font-family="system-ui">core (ysyx_250309)</text>
+
+  <!-- fetch -->
+  <rect x="40" y="60" width="140" height="50" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="110" y="82" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="600" font-family="system-ui">fetch</text>
+  <text x="110" y="98" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">AXI4 AR + R</text>
+
+  <!-- mem -->
+  <rect x="40" y="140" width="140" height="60" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="110" y="165" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="600" font-family="system-ui">mem</text>
+  <text x="110" y="185" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">AXI4 AR+R / AW+W+B</text>
+
+  <!-- AXI4 bus -->
+  <rect x="200" y="80" width="180" height="30" rx="6" fill="rgba(88,166,255,.08)" stroke="rgba(88,166,255,.3)" stroke-width="1"/>
+  <text x="290" y="100" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="600" font-family="system-ui">AXI4 总线（内部）</text>
+
+  <rect x="200" y="155" width="180" height="30" rx="6" fill="rgba(63,185,80,.08)" stroke="rgba(63,185,80,.3)" stroke-width="1"/>
+  <text x="290" y="175" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600" font-family="system-ui">AXI4 总线（内部）</text>
+
+  <!-- Arrows to bus -->
+  <line x1="180" y1="85" x2="196" y2="92" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#a1)"/>
+  <line x1="180" y1="170" x2="196" y2="168" stroke="#3fb950" stroke-width="1.5" marker-end="url(#a2)"/>
+
+  <!-- Arbiter -->
+  <rect x="420" y="90" width="120" height="80" rx="10" fill="#161b22" stroke="#d29922" stroke-width="2"/>
+  <text x="480" y="120" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="700" font-family="system-ui">axi_arbiter</text>
+  <text x="480" y="140" text-anchor="middle" fill="#8b949e" font-size="10" font-family="system-ui">MUX + 直通</text>
+  <text x="480" y="156" text-anchor="middle" fill="#8b949e" font-size="9" font-family="system-ui">140 行组合逻辑</text>
+
+  <!-- Arrow to arbiter -->
+  <line x1="380" y1="100" x2="416" y2="120" stroke="#d29922" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="380" y1="170" x2="416" y2="150" stroke="#d29922" stroke-width="2" marker-end="url(#a3)"/>
+
+  <!-- AXI4 Master output -->
+  <rect x="580" y="110" width="100" height="50" rx="8" fill="#161b22" stroke="#d29922" stroke-width="2"/>
+  <text x="630" y="133" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="700" font-family="system-ui">AXI4</text>
+  <text x="630" y="150" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="700" font-family="system-ui">Master</text>
+
+  <line x1="540" y1="130" x2="576" y2="135" stroke="#d29922" stroke-width="2" marker-end="url(#a3)"/>
+
+  <!-- SoC/Slave -->
+  <rect x="580" y="190" width="100" height="40" rx="8" fill="#161b22" stroke="#f85149" stroke-width="1.5"/>
+  <text x="630" y="215" text-anchor="middle" fill="#f85149" font-size="11" font-weight="600" font-family="system-ui">SoC / Slave</text>
+
+  <line x1="630" y1="160" x2="630" y2="186" stroke="#f85149" stroke-width="1.5" marker-end="url(#a1)"/>
+
+  <!-- Labels -->
+  <text x="110" y="55" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="system-ui">取指专用</text>
+  <text x="110" y="215" text-anchor="middle" fill="#3fb950" font-size="10" font-family="system-ui">load/store 专用</text>
+</svg>
+</div>
 
 <h3>1.2 信号流</h3>
 <table>
