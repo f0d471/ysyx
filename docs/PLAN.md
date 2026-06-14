@@ -3,11 +3,11 @@
 ## 当前状态
 
 - 五级流水线 RV32I 处理器（IF/ID/EX/MEM/WB）
-- SimpleBus 握手（reqValid/reqReady/respValid/respReady）
-- IFU/LSU 独立端口，LFSR 随机延迟仿真
+- **原生 AXI4 总线**（fetch 驱动 AR/R，mem 驱动 AR/R + AW/W/B）
+- axi_arbiter 合并 IFU/LSU 为单 AXI4 Master 端口
+- Access Fault 异常支持（mcause=1/5/7）
+- LFSR 随机延迟 AXI4 Slave 存储器模型（仿真用）
 - CSR 支持（ecall/mret/csrrw/csrrs）
-- AXI4 协议定义已完成（axi4.sv）
-- AXI4 仲裁器已完成（axi_arbiter.sv）
 - ysyxSoC 顶层包装已完成（ysyx_250309.sv）
 - ysyxSoCFull.v 已生成
 
@@ -16,22 +16,21 @@
 ### Phase 1：AXI4 基础接入 ✅ 已完成
 
 - [x] axi4.sv — 协议定义（参数、结构体、默认值）
-- [x] axi_arbiter.sv — SimpleBus → AXI4 仲裁器
+- [x] axi_arbiter.sv — AXI4 合并器（组合逻辑 MUX + 写通道直通）
 - [x] ysyx_250309.sv — 顶层包装（对齐 cpu-interface.md）
 
 ### Phase 2：错误处理与异常 ✅ 已完成
 
-- [x] fetch.sv — 状态机增加 rresp 检查
-- [x] mem.sv — 状态机增加 rresp/bresp 检查
-- [x] core_top.sv — 新增 ifu_rresp / lsu_rresp / lsu_bresp 输入端口
-- [x] execute.sv — 新增 Access Fault 异常（mcause=1 取指/5 load/7 store）
-- [x] define.sv — 新增 TRAP_CAUSE_ACCESS_FAULT 常量
-- [x] ysyx_250309.sv — 将 rresp/bresp 连入 core
+- [x] fetch.sv — AXI4 AR/R 端口 + rresp 检查
+- [x] mem.sv — AXI4 AR/R + AW/W/B 端口 + rresp/bresp 检查
+- [x] core_top.sv — 原生 AXI4 端口，error 信号通过流水线传播
+- [x] execute.sv — Access Fault 异常（mcause=1 取指/5 load/7 store）
+- [x] define.sv — 流水线结构体增加 ifu_error 字段
 
 ### Phase 3：AXI4 仿真验证 ✅ 已完成
 
-- [x] sim_top.sv — 改造为 core + arbiter + AXI4 Slave 存储器模型
-- [x] 实现单次传输（len=0, size=4B, burst=INCR）
+- [x] sim_top.sv — core + arbiter + AXI4 Slave 存储器模型（DPI-C + LFSR）
+- [x] 原生 AXI4 通道（去掉 SimpleBus 翻译层）
 - [x] verilator lint + build 通过
 - [ ] 运行 cpu-tests 验证（需要在 WSL 中配置 C++ 编译环境）
 
@@ -102,6 +101,11 @@ Phase 1 (AXI4 定义) ──► Phase 2 (错误处理) ──► Phase 3 (仿真
                                         Phase 8   Phase 9  Phase 10
                                         (Flash)   (PSRAM)  (SDRAM)
 ```
+
+## 待优化项
+
+- [ ] store 时不阻塞 IFU（AXI4 读写通道独立，可并行）
+- [ ] arsize 动态设置（lb→1B, lh→2B, lw→4B，当前固定 4B）
 
 ## 关键里程碑
 
