@@ -1,0 +1,65 @@
+# ============================================================
+# 换行符规范
+# ------------------------------------------------------------
+# 仓库内一律以 LF 存储，检出时也一律 LF。
+# 本项目的构建与仿真全部在 Linux 下进行，工作区出现 CRLF 会导致
+# Makefile 把 \r 吃进变量值和 recipe。此处的 eol=lf 会覆盖各机器
+# 上的 core.autocrlf 设置，Windows 端编辑也不会再污染仓库。
+# ============================================================
+* text=auto eol=lf
+
+# ============================================================
+# 二进制文件 —— 必须显式声明
+# ------------------------------------------------------------
+# git 的自动探测只检查文件前 8000 字节有无 NUL。
+# am-kernels/kernels/slider/images/*.bin 开头是大段 0xFF 填充，
+# 会被误判为文本，一旦参与换行符转换就会损坏。
+# 凡是二进制格式，宁可在此显式列出，不要依赖自动探测。
+# ============================================================
+*.bin  binary
+*.elf  binary
+*.img  binary
+*.o    binary
+*.a    binary
+*.so   binary
+*.jar  binary
+
+# 图片 / 字体 / 文档
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.bmp  binary
+*.ico  binary
+*.svg  text eol=lf
+*.pdf  binary
+*.ttf  binary
+*.otf  binary
+
+# difftest 参考实现（NEMU 编出来的动态库，文件名结尾是 -so 而非 .so）
+npc/csrc/difftest/riscv32-nemu-interpreter-so binary
+
+# ============================================================
+# 明确按文本处理（避免被误判）
+# ============================================================
+*.c    text eol=lf
+*.h    text eol=lf
+*.cc   text eol=lf
+*.cpp  text eol=lf
+*.S    text eol=lf
+*.s    text eol=lf
+*.v    text eol=lf
+*.sv   text eol=lf
+*.scala text eol=lf
+*.py   text eol=lf
+*.sh   text eol=lf
+*.mk   text eol=lf
+*.md   text eol=lf
+*.ld   text eol=lf
+*.xdc  text eol=lf
+Makefile text eol=lf
+
+# .hex / .mif 是 ASCII 文本（$readmemh 格式），不是二进制，
+# 例如 nvboard/example/resource/picture.hex 的内容是 "@000000\nAED8FF\n..."
+*.hex  text eol=lf
+*.mif  text eol=lf
