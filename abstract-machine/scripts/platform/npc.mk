@@ -27,7 +27,10 @@ image: image-dep
 	@echo + OBJCOPY "->" $(IMAGE_REL).bin
 	@$(OBJCOPY) -S --set-section-flags .bss=alloc,contents -O binary $(IMAGE).elf $(IMAGE).bin
 
+# npc/test/ 里的 Default.bin/elf 已被 .gitignore 排除，git 又不跟踪空目录，
+# 所以全新 clone 或 make clean 之后该目录并不存在，直接 cp 会失败。
 run: insert-arg
+	@mkdir -p $(NPC_HOME)/test
 	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
 	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
 	@cp $(IMAGE).elf $(NPC_HOME)/test/Default.elf
@@ -35,6 +38,7 @@ run: insert-arg
 	@$(MAKE) -C $(NPC_HOME) run TEST_BIN=./test/Default.bin
 
 gdb: insert-arg
+	@mkdir -p $(NPC_HOME)/test
 	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
 	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
 	@echo "[AM] Building and running NPC under gdb with Default.bin..."
