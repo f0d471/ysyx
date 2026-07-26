@@ -82,7 +82,9 @@ npc/project/project/
 npc/npc-trace.txt
 
 # ysyxSoC
-ysyxSoC/build/
+# 注意：必须写 build/* 而不是 build/。git 不会进入被排除的目录，
+# 所以对 build/ 目录整体排除时，下面这条 ! 例外规则不会生效。
+ysyxSoC/build/*
 !ysyxSoC/build/ysyxSoCFull.v
 ysyxSoC/target/
 ysyxSoC/project/target/
