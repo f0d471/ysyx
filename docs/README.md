@@ -46,21 +46,21 @@ bash docs/fetch.sh embedded     # 或按关键字
 
 这张表是这个知识库的**主入口**。左边是你在仓库里实际动的文件，右边是遇到问题该翻什么。
 
-| 你在动什么 | 具体在干的事 | 该查哪里 |
-|---|---|---|
-| `nemu/src/isa/riscv32/inst.c` | 逐条实现指令语义 | `01` ISA 手册 |
-| `npc/vsrc/decoder.sv` `execute.sv` | 译码、ALU、分支判断 | `01` ISA 手册 · `03` 微架构 |
-| `npc/vsrc/*.sv` 的写法本身 | 两段式 FSM、复位风格、位宽 | `02` lowRISC 编码规范 |
-| `npc/vsrc/axi4.sv` `axi_arbiter.sv` | AXI4 握手、仲裁、outstanding | `04` 总线规范 |
-| `ysyxSoC/perip/*` | UART/SPI/PSRAM/SDRAM 驱动 | `05` 外设与驱动 |
-| `npc/csrc/difftest/` | 对拍、golden model | `06` 验证方法学 · `11` 建模 |
-| ysyx 后期：综合、时序、布局布线 | STA、面积功耗 | `07` 后端与 EDA |
-| `abstract-machine/Makefile` 那一套 | 变量展开、模式规则、递归 make | `08` GNU Make 手册 |
-| `abstract-machine/scripts/linker.ld` | 段布局、符号定义、装载地址 | `08` ld 手册 · ELF 规范 |
-| `npc/csrc/utils/ftrace.cpp` | 从 ELF 解析符号、还原调用栈 | `08` ELF · DWARF |
-| `nanos-lite/src/proc.c` `mm.c` `fs.c` | 进程、内存、文件系统 | `09` OSTEP · xv6 |
-| `navy-apps/libs/libminiSDL` 等 | 帧缓冲、字体、音频解码 | `10` 图形与多媒体 |
-| NEMU 本身、想理解 QEMU/gem5 | 模拟器的层次与取舍 | `11` 模拟器与建模 |
+| 你在动什么                                 | 具体在干的事                  | 该查哪里                   |
+| ------------------------------------- | ----------------------- | ---------------------- |
+| `nemu/src/isa/riscv32/inst.c`         | 逐条实现指令语义                | `01` ISA 手册            |
+| `npc/vsrc/decoder.sv` `execute.sv`    | 译码、ALU、分支判断             | `01` ISA 手册 · `03` 微架构 |
+| `npc/vsrc/*.sv` 的写法本身                 | 两段式 FSM、复位风格、位宽         | `02` lowRISC 编码规范      |
+| `npc/vsrc/axi4.sv` `axi_arbiter.sv`   | AXI4 握手、仲裁、outstanding  | `04` 总线规范              |
+| `ysyxSoC/perip/*`                     | UART/SPI/PSRAM/SDRAM 驱动 | `05` 外设与驱动             |
+| `npc/csrc/difftest/`                  | 对拍、golden model         | `06` 验证方法学 · `11` 建模   |
+| ysyx 后期：综合、时序、布局布线                    | STA、面积功耗                | `07` 后端与 EDA           |
+| `abstract-machine/Makefile` 那一套       | 变量展开、模式规则、递归 make       | `08` GNU Make 手册       |
+| `abstract-machine/scripts/linker.ld`  | 段布局、符号定义、装载地址           | `08` ld 手册 · ELF 规范    |
+| `npc/csrc/utils/ftrace.cpp`           | 从 ELF 解析符号、还原调用栈        | `08` ELF · DWARF       |
+| `nanos-lite/src/proc.c` `mm.c` `fs.c` | 进程、内存、文件系统              | `09` OSTEP · xv6       |
+| `navy-apps/libs/libminiSDL` 等         | 帧缓冲、字体、音频解码             | `10` 图形与多媒体            |
+| NEMU 本身、想理解 QEMU/gem5                 | 模拟器的层次与取舍               | `11` 模拟器与建模            |
 
 ---
 
@@ -95,13 +95,30 @@ bash docs/fetch.sh embedded     # 或按关键字
 你正在重构 AXI4，`ysyxSoC/perip/amba/` 里也躺着 `axi4_delayer.v` 和 `apb_delayer.v`。
 **总线的坑几乎都是协议细节没吃透**——比如 VALID 举起后不得撤销、发出的读事务必须收完。
 
-| 文件 | 说明 |
-|---|---|
-| `TileLink-Spec-1.7.pdf` | SiFive 开放的总线规范。**ysyxSoC 内部的 rocket-chip 用的就是 TileLink**，要读懂 SoC 内部必看 |
-| `Wishbone-B4-Spec.pdf` | OpenCores 的开放总线，`ysyxSoC/perip/` 下多个外设是 Wishbone 接口 |
+| 文件                                    | 来源           | 说明                                                             |
+| ------------------------------------- | ------------ | -------------------------------------------------------------- |
+| `IHI0022L_amba_axi_protocol_spec.pdf` | **手动放置**     | ARM 官方《AMBA® AXI Protocol Specification》，IHI 0022 Issue L。写 AXI4 的唯一判据 |
+| `TileLink-Spec-1.7.pdf`               | `fetch.sh`   | SiFive 开放的总线规范。**ysyxSoC 内部的 rocket-chip 用的就是 TileLink**，要读懂 SoC 内部必看 |
+| `Wishbone-B4-Spec.pdf`                | `fetch.sh`   | OpenCores 的开放总线，`ysyxSoC/perip/` 下多个外设是 Wishbone 接口             |
 
-> **AXI4 规范不在这里**：ARM 的 AMBA AXI（IHI 0022）可以免费下载，但要先接受 ARM
-> 的许可条款，再分发受限。自己去 [developer.arm.com](https://developer.arm.com/documentation/ihi0022/latest/) 取。
+> ⚠️ **AXI 规范 `fetch.sh` 抓不到，误删了要手动补**
+>
+> ARM 的 AMBA AXI（IHI 0022）可以免费下载，但需先接受 ARM 的许可条款，且限制再分发，
+> 所以脚本里没有它，也不会随仓库分发。到
+> [developer.arm.com](https://developer.arm.com/documentation/ihi0022/latest/)
+> 自行下载后放进本目录即可。
+>
+> 校验是否为正版：PDF 元数据里 `dc:title` 应为 `AMBA® AXI Protocol Specification`，
+> `xmp:CreatorTool` 为 ARM 的文档流水线 `LaTeX via pandoc via doctool`。
+
+**对着 NPC 的 AXI4 该先读哪几处**（各版次章节号不同，按关键词搜）：
+
+| 搜什么 | 管什么 | 你哪里会踩 |
+|---|---|---|
+| `Handshake process`、VALID `must remain asserted` | VALID 举起后不得撤销；但 READY **允许**依赖 VALID（方向不对称，最易记反） | `fetch.sv` 用 `!stall && !flush` 门控 `arvalid`；`mem.sv` 的 `lsu_arvalid` 依赖 `valid_in` |
+| `Transaction dependencies`、读通道 | 发出 AR 握手后必须收完该事务全部 R 拍直到 `RLAST` | `fetch.sv` 在 flush 时拉低 `rready` 且状态跳走，在途 R 拍没人收 → 死锁 |
+| write address / write data channel 的依赖关系 | AW 与 W 是**独立通道**，可任意顺序到达 | `mem.sv` 要求两者同拍握手，否则 `awvalid` 重复举起 = 同一事务发两次 AW |
+| `Burst address`、`AxSIZE` | 突发地址推进与 size、strobe 的自洽 | `arsize` 恒为 4B 而地址直送 `alu_result_in`，靠从设备抹低位；SoC 的 crossbar 不会帮你抹 |
 
 ### 05-embedded-periph —— 嵌入式外设与驱动
 
