@@ -1,6 +1,23 @@
 # abstract-machine 缺陷档案
 
-对 `abstract-machine/` 从上游基线 `c04da8c`（NJU-ProjectN ics2024 initialized）到当前 HEAD 的全量复盘中，确认并修复的缺陷。一个缺陷一份档案，按「题目 → 复现 → 原理 → 修复 → 举一反三」组织。
+对 `abstract-machine/` 从上游基线 `c04da8c`（NJU-ProjectN ics2024 initialized）到当前 HEAD 的全量复盘中，确认并修复的缺陷。
+
+## 每份档案怎么读
+
+一个缺陷一份，结构固定，**从零开始不需要预备知识**：
+
+| 节 | 内容 |
+| --- | --- |
+| **〇、前置知识** | 涉及的函数/概念是什么、名字怎么来的、中文叫什么、**标准规定的行为是什么**。不熟悉的话从这里读起 |
+| 一、题目 | 只给代码，自己先找问题（答案折叠着） |
+| 二、复现 | 最小触发用例 |
+| 三、原理 | 为什么会这样、为什么难查 |
+| 四、修复 | 改法，以及**为什么不用别的改法** |
+| 五～ | 举一反三、同类模式自查清单、本次刻意未处理的遗留 |
+
+前置知识各篇不重复：`printf` 一家子在 [01](./01-vsnprintf-trailing-percent.md)，`size_t` 与无符号运算在 [02](./02-append-char-size-underflow.md)，分配器原理在 [03](./03-malloc-freelist-null-double-meaning.md)，MMIO 与帧缓冲在 [04](./04-gpu-debug-printf-in-hotpath.md)，`atoi` 与字符串转数值在 [05](./05-atoi-missing-sign.md)。
+
+> C 标准条款号按 **C99（ISO/IEC 9899:1999）** 给出。正式文本收费，公开草案 **N1256**（C99 + 三份技术勘误）与 **N1570**（C11）内容足够用。本地 `docs/` 暂无副本，`docs/08-toolchain-link/GNU-C-Manual.pdf` 可作旁证。
 
 ## 索引
 
@@ -11,6 +28,29 @@
 | [03](./03-malloc-freelist-null-double-meaning.md) | `free_list == NULL` 身兼两职，堆耗尽后二次分配 | `klib/src/stdlib.c` `malloc` | 堆破坏 | 🔴 |
 | [04](./04-gpu-debug-printf-in-hotpath.md) | 调试 printf 留在每帧必经的热路径上 | `am/.../nemu/ioe/gpu.c` | 调试残留 | 🟠 |
 | [05](./05-atoi-missing-sign.md) | 不识别正负号，`atoi("-5")` 返回 0 | `klib/src/stdlib.c` `atoi` | 功能不完整 | 🟠 |
+
+## 验证记录
+
+2026-07-27，Debian 虚拟机，`riscv32-nemu`（difftest 对 spike 开启）：
+
+- **BUG-01 / 02 / 03 / 05**：临时回归测试 `am-kernels/tests/cpu-tests/tests/klib-bugfix.c` 15 条断言全部通过，`HIT GOOD TRAP`。验证后该文件已删除，其设计要点（尤其 BUG-03 怎么在 128MB 堆上快速触达触发点）保留在 [03 第五节](./03-malloc-freelist-null-double-meaning.md#五怎么测它比修它更难)。
+- **BUG-04**：跑 `am-kernels/kernels/slider`，12.5 亿条指令、63 秒，串口输出中 `SYNC triggered` 已完全消失。
+
+### ⚠️ 顺带发现：cpu-tests 的 PASS/FAIL 目前不可信
+
+`abstract-machine/scripts/platform/nemu.mk` 的 `NEMUFLAGS` 里没有 `-b`（批处理），`make run` 每次都会掉进交互式 sdb 监视器。而 `nemu/src/utils/state.c`：
+
+```c
+int is_exit_status_bad() {
+  int good = (nemu_state.state == NEMU_END && nemu_state.halt_ret == 0) ||
+    (nemu_state.state == NEMU_QUIT);          // 手动 q 一律算 good
+  return !good;
+}
+```
+
+手敲的 `q` 会把状态置成 `NEMU_QUIT`，退出码 0，于是 Makefile 一律记 PASS。首轮验证中测试明明报了 `1 check(s) FAILED` 且 `HIT BAD TRAP`，末尾仍打印 `[klib-bugfix] PASS`，即为实证。
+
+**上游基线 `c04da8c` 同样没有 `-b`，非本次改动引入。** 但它意味着：只要是手动 `c` 然后 `q`，整个 cpu-tests 的 PASS 列永远是 PASS，真正的信号只有 `HIT GOOD/BAD TRAP`。处理方案待定，记在 `note/todo/`。
 
 ## 复盘中提炼出的通用模式
 
