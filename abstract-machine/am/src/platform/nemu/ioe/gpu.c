@@ -1,9 +1,8 @@
-// ⚠️ 本文件与 am/src/riscv/npc/gpu.c 是同一套逻辑的两份拷贝，改一处必须改另一处。
+// 本文件与 am/src/riscv/npc/gpu.c 是同一套逻辑的两份拷贝，改一处必须改另一处。
 // 二者无法合并：本文件属于跨 ISA 共享的 nemu 平台层（x86 / mips / loongarch 也在用
 // 它，那些 ISA 的 inl/outl 是端口指令而非访存），npc 那份则是 RISC-V 专用的。
-// 背景与判断依据见 note/bug/abstract-machine/06-*。
 //
-// 两份自下方标记行起**逐字相同**，可用 diff 检出漂移，命令见上述文档。
+// 两份自下方标记行起逐字相同，可用 diff 比对以检出漂移。
 
 #include <am.h>
 #include <nemu.h>

@@ -1,6 +1,6 @@
-// ⚠️ 本文件与 am/src/platform/nemu/ioe/timer.c 是同一套逻辑的两份拷贝，
+// 本文件与 am/src/platform/nemu/ioe/timer.c 是同一套逻辑的两份拷贝，
 // 改一处必须改另一处。二者无法合并的原因见那份文件顶部的说明。
-// 两份自下方标记行起**逐字相同**，可用 diff 检出漂移，命令见 note 中的文档。
+// 两份自下方标记行起逐字相同，可用 diff 比对以检出漂移。
 
 #include <am.h>
 #include <npc.h>
@@ -12,7 +12,7 @@
 static uint64_t start_us = 0;
 
 // 读一次 64 位的 RTC。
-// 🔴 必须先读低 32 位再读高 32 位：设备在低位被读时才刷新整个时间快照，读序反了
+// 必须先读低 32 位再读高 32 位：设备在低位被读时才刷新整个时间快照，读序反了
 // 会拿到"新的高位配旧的低位"，在低位回绕的那一刻算出跳变的时间（撕裂读）。
 static uint64_t read_rtc_us(void) {
   uint32_t low  = inl(RTC_ADDR);

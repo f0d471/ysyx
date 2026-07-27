@@ -1,8 +1,5 @@
-// RISC-V 的上下文扩展（CTE）：异常入口、事件分发、内核上下文构造。
-//
-// 这是 nemu / npc / logisim 各平台共用的唯一一份实现——陷入与上下文切换是纯粹的
-// ISA 行为，与外设、内存布局无关，不该按平台各写一份。（曾经存在 riscv/nemu 与
-// riscv/npc 两份拷贝，修 bug 时只改一边，详见 note/bug/abstract-machine/06-*。）
+// nemu / npc / logisim 各平台共用的唯一一份 CTE 实现——陷入与上下文切换是纯粹的
+// ISA 行为，与外设、内存布局无关，不按平台分立。平台差异只在 trap.S 里有一处。
 
 #include <am.h>
 #include <riscv/riscv.h>

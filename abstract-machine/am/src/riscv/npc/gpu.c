@@ -1,7 +1,7 @@
-// ⚠️ 本文件与 am/src/platform/nemu/ioe/gpu.c 是同一套逻辑的两份拷贝，
+// 本文件与 am/src/platform/nemu/ioe/gpu.c 是同一套逻辑的两份拷贝，
 // 改一处必须改另一处。二者无法合并的原因见那份文件顶部的说明。
 //
-// 两份自下方标记行起**逐字相同**，可用 diff 检出漂移，命令见上述文档。
+// 两份自下方标记行起逐字相同，可用 diff 比对以检出漂移。
 
 #include <am.h>
 #include <npc.h>

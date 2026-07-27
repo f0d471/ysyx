@@ -20,7 +20,7 @@ static BlockHeader *free_list = NULL;
 // 复用会导致堆用光后把整个 heap 重新当成空闲块，把已分配的内存二次发出去。
 static bool heap_inited = false;
 
-// 把整个 heap 铺成一个空闲块，只在第一次 malloc 时执行一次
+// 只在第一次 malloc 时执行一次
 static void heap_init(void) {
   int total = (int)((char *)heap.end - (char *)heap.start);
   if (total < MHDR_SZ + 8) return;  // 堆太小连一个可用块都放不下，free_list 保持 NULL
@@ -60,18 +60,15 @@ static void insert_free(BlockHeader *blk) {
 
 static unsigned long int next = 1;
 
-// 返回一个伪随机整数
 int rand(void) {
   next = next * 1103515245 + 12345;
   return (unsigned int)(next / 65536) % 32768;
 }
 
-// 设置伪随机数种子
 void srand(unsigned int seed) {
   next = seed;
 }
 
-// 返回 x 的绝对值
 int abs(int x) {
   return (x < 0 ? -x : x);
 }
@@ -84,7 +81,6 @@ static bool is_space(char c) {
   return c == ' ' || (c >= '\t' && c <= '\r');
 }
 
-// 把一个字符按 base 进制解释成数值，非法则返回 -1
 static int digit_value(char c, int base) {
   int v;
   if      (c >= '0' && c <= '9') v = c - '0';
@@ -97,8 +93,8 @@ static int digit_value(char c, int base) {
 // 将字符串按 base 进制转换为 long（C99 §7.20.1.4）。
 // base 为 0 时按前缀自动判断：0x/0X 为十六进制，前导 0 为八进制，否则十进制。
 // endptr 非 NULL 时回填"解析停在哪里"；一个数字都没读到则回填原始 nptr。
-// ⚠️ 与标准的唯一偏离：溢出时钳到 LONG_MAX / LONG_MIN 但**不设置 errno**
-//    ——klib 没有 errno。因此调用方无法区分"真的等于 LONG_MAX"和"溢出了"。
+// 与标准的唯一偏离：溢出时钳到 LONG_MAX / LONG_MIN 但不设置 errno
+// （klib 没有 errno），故调用方无法区分"真的等于 LONG_MAX"和"溢出了"
 long strtol(const char *nptr, char **endptr, int base) {
   const char *p = nptr;
 
@@ -144,9 +140,8 @@ long strtol(const char *nptr, char **endptr, int base) {
   return (long)(neg ? -acc : acc);
 }
 
-// 将十进制字符串转换为 int。
-// 标准把它定义为"除出错行为外等价于 strtol(nptr, NULL, 10)"，这里就照此实现——
-// 手写一份独立的累加循环正是此前漏掉符号处理、且 INT_MIN 无法正确解析的原因。
+// 标准定义为"除出错行为外等价于 strtol(nptr, NULL, 10)"，故直接照此实现——
+// 手写一份独立的累加循环正是此前漏掉符号处理、INT_MIN 无法解析的原因
 int atoi(const char *nptr) {
   return (int)strtol(nptr, NULL, 10);
 }
@@ -188,7 +183,6 @@ void *malloc(size_t size) {
   return NULL;
 }
 
-// 释放 ptr 指向的内存块，自动合并相邻空闲块
 void free(void *ptr) {
   if (ptr == NULL) return;
 
@@ -199,14 +193,12 @@ void free(void *ptr) {
   insert_free(blk);
 }
 
-// 已分配块中可供调用者使用的字节数（块总长减去块头）
 static size_t payload_size(void *ptr) {
   BlockHeader *blk = (BlockHeader *)((char *)ptr - MHDR_SZ);
   int sz = blk->size < 0 ? -blk->size : blk->size;
   return (size_t)sz - MHDR_SZ;
 }
 
-// 分配 nmemb 个 size 字节的元素并清零
 void *calloc(size_t nmemb, size_t size) {
   if (nmemb == 0 || size == 0) return NULL;
   // 溢出检查：nmemb * size 若回绕，会分配出远小于请求的内存，随后被越界写穿
@@ -218,9 +210,9 @@ void *calloc(size_t nmemb, size_t size) {
   return p;
 }
 
-// 把 ptr 指向的块改成 size 字节，内容保留 min(旧长, 新长) 字节。
-// ⚠️ 与标准的偏离：size == 0 时释放并返回 NULL。C99 允许这一行为，但 C17 起
-//    改为未定义，故调用方不要依赖它——要释放就直接写 free()。
+// 内容保留 min(旧长, 新长) 字节。
+// 与标准的偏离：size == 0 时释放并返回 NULL——C99 允许，但 C17 起
+// 改为未定义，故不要依赖它，要释放就直接写 free()
 void *realloc(void *ptr, size_t size) {
   if (ptr == NULL) return malloc(size);
   if (size == 0) { free(ptr); return NULL; }

@@ -197,6 +197,39 @@ git diff --name-only ... | while read f; do git checkout -- "$f"; done   # ❌ �
 
 **副产物二条**：`git status` 一度显示 120 个文件被修改，而 `git diff --name-only` 只有 19 个。原因是工作区是 CRLF、索引是 LF，`.gitattributes` 的 `text=auto eol=lf` 会在比较时归一化，**`git diff` 看的是归一化后的内容，`git status` 报的是 stat 脏标记**。`git update-index --refresh` 之后两者一致。判断"到底改了什么"要以 `git diff` 为准。
 
+### 同一个根因，第三轮又犯了一次，而且更严重
+
+收敛注释风格时，为了清掉源码里混进来的 markdown 强调号，跑了：
+
+```bash
+sed -i 's/\*\*//g' <一批 .c/.h/.S>
+```
+
+结果把 **C 语言的二级指针一起吃掉了**：
+
+```c
+static LenMod parse_spec(const char **fmt, ...)   →   (const char fmt, ...)
+BlockHeader **pp = &free_list;                    →   BlockHeader pp = ...
+long strtol(const char *nptr, char **endptr, ...) →   (..., char endptr, ...)
+```
+
+三处全是编译错误级别的破坏。**比第一次严重**：上一次只是改动面过大（噪声），这次是**语义损坏**，而且损坏的形态很像手误——如果没被发现，排查时极难联想到是批量替换干的。
+
+两次的根因完全相同：**用纯文本工具批量改代码，而匹配模式没有被限定在"只可能出现在注释里"的范围内**。`**` 在 markdown 里是强调，在 C 里是二级指针；`sed` 不区分。
+
+补上的防线（这次真正起作用的）：
+
+```bash
+# 除有意重构的文件外，其余文件"剥掉注释与空行后应与 HEAD 逐字相同"
+strip() { grep -vE '^\s*(//|/\*|\*/|\*[^/])' | grep -vE '^\s*$'; }
+diff <(git show HEAD:$f | strip) <(strip < $f)
+```
+
+11 个文件跑一遍，立刻定位到 `stdlib.c` 有代码行差异；`stdio.c` 因为确实抽了 `parse_spec` 需要人工核对，逐一比对了签名、`*fmt = p` 回写、调用点三处。
+
+> **规矩：批量修改代码时，必须有一个"预期不变的集合"，并在事后机械验证它确实没变。**
+> 只靠"我改的是注释"这个意图是不够的——工具不知道你的意图。
+
 ---
 
 ## 七、本轮未做（连同理由）
