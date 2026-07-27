@@ -68,9 +68,14 @@ __am_asm_trap:
   STORE t1, OFFSET_STATUS(sp)
   STORE t2, OFFSET_EPC(sp)
 
-#ifndef __PLATFORM_NPC__
-  // 置上 mstatus.MPRV 以通过 difftest。仅 NEMU/logisim 需要；NPC 自研 CPU 的
-  // CSR 实现不保证有这一位，保持它此前的行为（不设置）
+// 置上 mstatus.MPRV 以通过 difftest。这不是功能需要——C5 讲义明确说 mstatus
+// "目前我们都不需要使用, 只需要正确初始化通过DiffTest即可"——所以它是参照实现
+// 的产物，只有对着 NEMU/spike 做 difftest 的平台才需要。
+//
+// 🔴 这里刻意用白名单而非 #ifndef __PLATFORM_NPC__：往未实现的 CSR 位写值是
+// 安静的硬件误动作，而 difftest 不匹配是响亮的、可查的失败。新平台（例如 B 阶段
+// 要接的 ysyxSoC）默认落在"不设置"一侧，需要时自己显式加进来。
+#if defined(__PLATFORM_NEMU__) || defined(__PLATFORM_LOGISIM__)
   li a0, (1 << 17)
   or t1, t1, a0
   csrw mstatus, t1
