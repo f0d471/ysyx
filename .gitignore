@@ -64,6 +64,8 @@ nemu/build/
 
 abstract-machine/build/
 am-kernels/**/build/
+# cpu-tests 的结果暂存文件，正常结束时会被 run 目标删掉，中途失败则会残留
+am-kernels/tests/cpu-tests/.result
 
 nanos-lite/build/
 navy-apps/build/

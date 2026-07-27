@@ -1,4 +1,4 @@
-.PHONY: all run gdb clean latest $(ALL)
+.PHONY: all run gdb clean latest selfcheck $(ALL)
 
 RESULT = .result
 $(shell > $(RESULT))
@@ -29,13 +29,49 @@ Makefile.%: tests/%.c latest
 	fi
 	-@rm -f Makefile.$*
 
-run: all
+# ---------------------------------------------------------------- 框架自检
+#
+# 一张全绿的结果表，只有在"框架确实报得出错"的前提下才有意义。selfcheck/ 下的两个
+# 程序分别以 0 和 1 退出，本目标断言框架对它们的判定恰好是 PASS 和 FAIL——即同时
+# 验证阳性与阴性两个方向。任一不符即说明退出码链路断了，整张结果表不可信。
+#
+# 这两个程序放在 selfcheck/ 而非 tests/，因此不会被 ALL 自动发现，不会在常规回归
+# 里显示成一条刺眼的 ***FAIL***。
+#
+# 编译与运行分两步：编译失败也会让 run 返回非零，若混在一起，expect-fail 会因为
+# "根本没编出来"而假性通过。
+selfcheck:
+	@echo "== harness self-check [$(ARCH)] =="
+	@rc=0; \
+	for t in expect-pass expect-fail; do \
+	  case $$t in expect-pass) want=PASS;; *) want=FAIL;; esac; \
+	  /bin/echo -e "NAME = $$t\nSRCS = selfcheck/$$t.c\ninclude $${AM_HOME}/Makefile" > Makefile.$$t; \
+	  if ! make -s -f Makefile.$$t ARCH=$(ARCH) image >/dev/null 2>&1; then \
+	    printf "  [%12s] $(COLOR_RED)BUILD ERROR$(COLOR_NONE)\n" $$t; rc=1; \
+	    rm -f Makefile.$$t; continue; \
+	  fi; \
+	  if make -s -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run >/dev/null 2>&1; then got=PASS; else got=FAIL; fi; \
+	  rm -f Makefile.$$t; \
+	  if [ "$$got" = "$$want" ]; then \
+	    printf "  [%12s] want %-4s got %-4s $(COLOR_GREEN)OK$(COLOR_NONE)\n" $$t $$want $$got; \
+	  else \
+	    printf "  [%12s] want %-4s got %-4s $(COLOR_RED)BROKEN$(COLOR_NONE)\n" $$t $$want $$got; rc=1; \
+	  fi; \
+	done; \
+	if [ $$rc -ne 0 ]; then \
+	  printf "$(COLOR_RED)自检未通过：PASS/FAIL 判定不可信，下面的结果表没有意义$(COLOR_NONE)\n"; \
+	fi; \
+	exit $$rc
+
+# run 先自检再回归：框架坏掉时宁可停下，也好过给出一张看起来全绿的假表。
+# 依赖按顺序处理（串行 make 的既有行为，本目录的 $(RESULT) 追加本来也假定串行）
+run: selfcheck all
 	@cat $(RESULT)
 	@rm $(RESULT)
 
 gdb: all
 
 clean:
-	rm -rf Makefile.* build/
+	rm -rf Makefile.* build/ $(RESULT)
 
 latest:
