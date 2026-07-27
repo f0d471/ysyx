@@ -16,6 +16,19 @@ typedef struct BlockHeader {
 } BlockHeader;
 
 static BlockHeader *free_list = NULL;
+// 独立的初始化标志。不能用 free_list == NULL 代替：它同时也是"堆已耗尽"的合法状态，
+// 复用会导致堆用光后把整个 heap 重新当成空闲块，把已分配的内存二次发出去。
+static bool heap_inited = false;
+
+// 把整个 heap 铺成一个空闲块，只在第一次 malloc 时执行一次
+static void heap_init(void) {
+  int total = (int)((char *)heap.end - (char *)heap.start);
+  if (total < MHDR_SZ + 8) return;  // 堆太小连一个可用块都放不下，free_list 保持 NULL
+  BlockHeader *init = (BlockHeader *)heap.start;
+  init->size = total;
+  init->next = NULL;
+  free_list = init;
+}
 
 // 将空闲块按地址顺序插入 free_list，并合并前后相邻块
 static void insert_free(BlockHeader *blk) {
@@ -63,15 +76,25 @@ int abs(int x) {
   return (x < 0 ? -x : x);
 }
 
-// 将十进制字符串转换为 int
+// 将十进制字符串转换为 int，跳过前导空白，识别可选的 '+' / '-' 符号
 int atoi(const char *nptr) {
   int x = 0;
-  while (*nptr == ' ') { nptr++; }
+  int neg = 0;
+
+  // isspace() 的全集：空格与 \t \n \v \f \r（后者在 ASCII 中是连续的 0x09~0x0d）
+  while (*nptr == ' ' || (*nptr >= '\t' && *nptr <= '\r')) { nptr++; }
+
+  if (*nptr == '-' || *nptr == '+') {
+    neg = (*nptr == '-');
+    nptr++;
+  }
+
   while (*nptr >= '0' && *nptr <= '9') {
     x = x * 10 + *nptr - '0';
     nptr++;
   }
-  return x;
+
+  return neg ? -x : x;
 }
 
 // 从 heap 分配至少 size 字节的内存，首次适应策略
@@ -80,13 +103,9 @@ void *malloc(size_t size) {
 
   int need = ALIGN((int)size + MHDR_SZ);
 
-  if (free_list == NULL) {
-    BlockHeader *init = (BlockHeader *)heap.start;
-    int total = (int)((char *)heap.end - (char *)heap.start);
-    if (total < need + MHDR_SZ) return NULL;
-    init->size = total;
-    init->next = NULL;
-    free_list = init;
+  if (!heap_inited) {
+    heap_inited = true;
+    heap_init();
   }
 
   BlockHeader *prev = NULL;

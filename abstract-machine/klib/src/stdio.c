@@ -6,8 +6,10 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 // 向输出缓冲区安全追加一个字符，超出容量则丢弃
+// pos 无论是否真的写入都要自增：vsnprintf 的返回值是"假如缓冲区足够大本该写多少"
 static void append_char(char *out, size_t n, size_t *pos, char c) {
-  if (*pos < n - 1) {
+  // n == 0 必须单独判断：size_t 是无符号数，n - 1 会回绕成 SIZE_MAX 使判断恒真
+  if (n > 0 && *pos < n - 1) {
     out[*pos] = c;
   }
   (*pos)++;
@@ -125,6 +127,9 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
       }
       default:
         append_char(out, n, &pos, '%');
+        // 格式串在 '%' 之后就结束了：此时 *fmt 已经是 '\0'，不能再 fmt++ 跨过终止符，
+        // 否则外层 while 会继续扫描字符串之外的内存。continue 交给外层条件退出循环。
+        if (*fmt == '\0') continue;
         append_char(out, n, &pos, *fmt);
     }
     fmt++;
