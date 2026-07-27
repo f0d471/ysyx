@@ -41,10 +41,14 @@ Makefile.%: tests/%.c latest
 # 编译与运行分两步：编译失败也会让 run 返回非零，若混在一起，expect-fail 会因为
 # "根本没编出来"而假性通过。
 #
-# 输出不做重定向，与上面 Makefile.% 规则的既有行为一致——编译过程与模拟器输出本身
-# 就是信息（首次跑某个 ARCH 要编 AM 与 klib，NPC 还要让 Verilator 把整个 RTL 转成
-# C++ 再编译，是分钟级的，静默会让人以为卡死）。只在每个程序前后加一行标注，说明
-# 这一段属于自检、以及它的预期结果是什么。
+# 输出既不重定向、也不加 -s：编译过程本身就是信息，首次跑某个 ARCH 要编 AM 与
+# klib，NPC 还要让 Verilator 把整个 RTL 转成 C++ 再编译，是分钟级的，遮起来只会
+# 让人以为卡死。只在每个程序前加一行标注，说明这一段属于自检、预期结果是什么。
+#
+# 注意 -s 会经 MAKEFLAGS 一路传给所有子 make：上面 Makefile.% 规则里的那个 -s
+# （上游原有）就把 npc/Makefile 里 verilator 那条命令行也一并吞掉了。它只挡"回显
+# 命令"，不挡命令自身的输出，但对着 verilator 这种长命令行差别不小。自检只跑两个
+# 程序，不加 -s 的代价可以接受。
 selfcheck:
 	@echo "== harness self-check [$(ARCH)] =="
 	@rc=0; \
@@ -56,11 +60,11 @@ selfcheck:
 	  echo ""; \
 	  echo "---- selfcheck: $$t —— $$note ----"; \
 	  /bin/echo -e "NAME = $$t\nSRCS = selfcheck/$$t.c\ninclude $${AM_HOME}/Makefile" > Makefile.$$t; \
-	  if ! make -s -f Makefile.$$t ARCH=$(ARCH) image; then \
+	  if ! make -f Makefile.$$t ARCH=$(ARCH) image; then \
 	    printf "  [%12s] $(COLOR_RED)BUILD ERROR$(COLOR_NONE)\n" $$t; rc=1; \
 	    rm -f Makefile.$$t; continue; \
 	  fi; \
-	  if make -s -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run; then got=PASS; else got=FAIL; fi; \
+	  if make -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run; then got=PASS; else got=FAIL; fi; \
 	  rm -f Makefile.$$t; \
 	  if [ "$$got" = "$$want" ]; then \
 	    printf "  [%12s] want %-4s got %-4s $(COLOR_GREEN)OK$(COLOR_NONE)\n" $$t $$want $$got; \
