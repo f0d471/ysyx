@@ -28,13 +28,37 @@
 | [03](./03-malloc-freelist-null-double-meaning.md) | `free_list == NULL` 身兼两职，堆耗尽后二次分配 | `klib/src/stdlib.c` `malloc` | 堆破坏 | 🔴 |
 | [04](./04-gpu-debug-printf-in-hotpath.md) | 调试 printf 留在每帧必经的热路径上 | `am/.../nemu/ioe/gpu.c` | 调试残留 | 🟠 |
 | [05](./05-atoi-missing-sign.md) | 不识别正负号，`atoi("-5")` 返回 0 | `klib/src/stdlib.c` `atoi` | 功能不完整 | 🟠 |
+| [06](./06-cte-gpr1-abstraction-bypassed.md) | 现成的 `GPR1` 抽象被绕开，RV32E 下读越界致 yield 失效 | `am/src/riscv/*/cte.c` | 越界读 | 🔴 |
+| [07](./07-misc-round2.md) | 第二轮零散修复合辑（6 组） | 多处 | 混合 | 🟠 |
+
+### 分轮次
+
+- **第一轮**（01~05）：逐文件对比上游基线，找"写错了"的地方。
+- **第二轮**（06~07）：处理第一轮列出但未动的架构与规范问题，含一次结构性去重（riscv 的 CTE/trap 由两份合并为一份）。
 
 ## 验证记录
 
-2026-07-27，Debian 虚拟机，`riscv32-nemu`（difftest 对 spike 开启）：
+### 第一轮　2026-07-27，Debian 虚拟机，`riscv32-nemu`（difftest 对 spike 开启）
 
-- **BUG-01 / 02 / 03 / 05**：临时回归测试 `am-kernels/tests/cpu-tests/tests/klib-bugfix.c` 15 条断言全部通过，`HIT GOOD TRAP`。验证后该文件已删除，其设计要点（尤其 BUG-03 怎么在 128MB 堆上快速触达触发点）保留在 [03 第五节](./03-malloc-freelist-null-double-meaning.md#五怎么测它比修它更难)。
+- **BUG-01 / 02 / 03 / 05**：临时回归测试 15 条断言全部通过，`HIT GOOD TRAP`。验证后测试文件已删除，其设计要点（尤其 BUG-03 怎么在 128MB 堆上快速触达触发点）保留在 [03 第五节](./03-malloc-freelist-null-double-meaning.md#五怎么测它比修它更难)。
 - **BUG-04**：跑 `am-kernels/kernels/slider`，12.5 亿条指令、63 秒，串口输出中 `SYNC triggered` 已完全消失。
+
+### 第二轮　待验证
+
+改动面比第一轮大得多（合并了 CTE/trap、重写了格式化引擎、新增 `strtol`/`calloc`/`realloc`），且触及全部 7 个 RISC-V 架构的构建配置。回归测试重新加回 `am-kernels/tests/cpu-tests/tests/klib-bugfix.c`，约 40 条断言。
+
+```bash
+cd am-kernels/tests/cpu-tests
+make run ARCH=riscv32-nemu  ALL=klib-bugfix    # 主回归
+make run ARCH=riscv32e-nemu ALL=klib-bugfix    # 🔴 唯一能真正检验 BUG-06 的架构
+make run ARCH=riscv32-nemu                     # 全量 cpu-tests，确认合并没打破基本盘
+cd ../../kernels/yield-os && make run ARCH=riscv32-nemu   # CTE 合并后的上下文切换
+```
+
+⚠️ 两处**改了但没有对应自动断言**，需人工确认：
+
+1. **`trap.S` 现在会把陷入前的 sp 存进 `c->gpr[2]`**（NEMU 平台此前是垃圾）。目前无人读它，要到 PA4 构造用户上下文时才用得上。
+2. **`mstatus.MPRV` 改为按平台条件编译**。逐架构行为应与合并前一致，但 `minirv-logisim` 无从验证。
 
 ### ⚠️ 顺带发现：cpu-tests 的 PASS/FAIL 目前不可信
 
@@ -77,16 +101,30 @@ int is_exit_status_bad() {
 7. **简化可以，但必须写在注释里**（BUG-05、BUG-01 第七节）
    裸机上不背标准库全部包袱是对的；不写明简化了什么，取舍就退化成了缺陷。
 
-## 已知但本次未处理
+8. **同一个知识有第二份实现，就一定会漂移，而且只会修好其中一份**（BUG-06）
+   三处漂移全是"修一处忘另一处"，无一处是有意为之。**当发现自己要写 `#ifdef <架构宏>` 时，先去找这个分情况有没有人已经封装过**——`GPR1` 就摆在 `arch/riscv.h` 里，`nanos-lite` 早就在用了。
 
-只修"错的"，不动"丑的"和"没做的"。以下已确认存在，但属于重构或待办，不在本批修复范围：
+9. **批量格式化必须限定在本次真正改动的文件范围内**（BUG-07 第六节）
+   第二轮清理行尾空格时图省事，对全部 AM 文件跑了一遍 `sed`，一次改动 130 个文件、绝大多数是无关的上游代码。这正是第一轮批评过的第 13 条（注释翻译混进功能 commit）的同一种错误。已全部回退。
 
-- **klib/stdio 缺少 sink 抽象** —— `printf` 用 2048 字节栈缓冲，超长静默截断，格式化引擎与输出目标耦合。→ BUG-02 第六节
-- **npc / nemu 两个平台的 AM 代码是复制粘贴的，且已开始漂移** —— `trap.S` 存 sp、`cte.c` 的 `__riscv_e` 分支、`timer.c` 的 RTC 读序，三处都只改了一边。这是当前最值得处理的结构性隐患。
-- **`cte.c` 的魔数** —— `case 11`、`gpr[17]`、`-1`、`0x1800` 四个魔数挤在一起，无符号常量。
-- **`Context` 的 union 缺注释** —— `pdir` 借用 `gpr[0]` 槽位的技巧，成立前提（x0 恒零、trap.S 从 `f(1)` 开始）没有写下来。
-- **malloc 的若干弱点** —— heap.start 未对齐、用符号位当分配标志、free 无校验。→ BUG-03 第六节
-- **CFLAGS 建议加 `-Wextra` 和 `-nostdinc`** —— 前者能静态抓出 BUG-02 那一类，后者能让"引错头文件"变成编译错误。
-- **风格** —— `npc/timer.c` 4 空格缩进（AM 全仓 2 空格）、多个文件缺行尾换行、`npc.h` 用相对路径 `../../riscv.h` 逃出 include 目录。
+## 已修复的架构问题（第二轮）
+
+第一轮列为"已知但未处理"的项目，第二轮处理掉的：
+
+- ✅ **riscv 的 CTE/trap 由两份合并为一份** —— `am/src/riscv/{cte.c,trap.S}`，7 个 RISC-V 架构共用。为此顺带把顶层 Makefile 的 `-D__PLATFORM_*` 提取成 `ARCHFLAGS` 并给到 `ASFLAGS`（原先汇编看不到平台宏）。
+- ✅ **cte.c 的魔数** —— `MCAUSE_ECALL_M` / `GPR1` / `SYSCALL_YIELD` / `ECALL_INSTR_LEN` / `MODE_M << 11`。
+- ✅ **`Context` 的 union 注释**、**`npc.h` 的相对路径**、**`npc.mk` 的 gdb 目标**、**缩进与行尾**。
+- ✅ **klib 格式符缺口** —— `%u` `%X` `%ld` `%lld` `%zu` `%hd` `%-`，`%p` 补 `0x` 前缀，`%d` 修正 `INT_MIN` 取反溢出。
+- ✅ **`strtol` / `calloc` / `realloc`**，`atoi` 退化为 `strtol` 的薄包装（顺带解决其 `INT_MIN` 与溢出遗留）。
+
+## 仍未处理
+
+- **klib/stdio 缺少 sink 抽象** —— `printf` 仍用 2048 字节栈缓冲，超长静默截断。→ BUG-02 第六节
+- **`gpu.c`/`input.c`/`timer.c` 仍是两份** —— 合并需重构上游 platform 分层，波及 5 个架构，代价与收益不成比例。已改为"共享段逐字相同 + 一条 diff 可检出漂移"。→ BUG-06 第五节
+- **那条 diff 检查未接进 `make`** —— 目前要人工执行。
+- **CFLAGS 加 `-Wextra` / `-nostdinc`** —— 会引出一批既有告警，单独处理。
+- **malloc 的若干弱点** —— `heap.start` 未对齐、用符号位当分配标志、`free` 无校验。→ BUG-03 第七节
+- **`%X` 仍输出小写** —— `print_num` 的数字表写死小写，补个 upper 参数即可，但目前无调用方。
+- **cpu-tests 的 `-b`** —— 见上文，处理方案待定。
 
 以上逐条记在 `note/todo/`。
