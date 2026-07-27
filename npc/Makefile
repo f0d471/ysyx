@@ -51,9 +51,12 @@ $(BIN): $(VSRCS) $(CSRCS)
 		--LDFLAGS "$(LDFLAGS)" \
 		--CFLAGS "$(CFLAGS)"  
 
+# BATCH=1 时给仿真器加 -b：跑完即退出，不进入交互式 sdb，供无人值守的批量回归使用
+NPC_ARGS = $(RUN_IMAGE) $(if $(BATCH),-b)
+
 run: $(BIN)
-	@echo "[NPC] Running with image: $(RUN_IMAGE)"  
-	LD_LIBRARY_PATH=$(abspath ../nemu/tools/capstone/repo) $(BIN) $(RUN_IMAGE)
+	@echo "[NPC] Running with image: $(RUN_IMAGE)"
+	LD_LIBRARY_PATH=$(abspath ../nemu/tools/capstone/repo) $(BIN) $(NPC_ARGS)
 
 gdb: $(BIN)
 	@echo "[NPC] Running under gdb with image: $(RUN_IMAGE)"

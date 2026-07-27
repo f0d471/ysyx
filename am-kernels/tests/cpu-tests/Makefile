@@ -15,10 +15,14 @@ all: $(addprefix Makefile., $(ALL))
 
 $(ALL): %: Makefile.%
 
+# 批量回归必须无人值守，故 run 时传 BATCH=1，由各平台的 .mk 翻译成模拟器的 -b。
+# gdb 目标不传，保留交互能力。
+BATCH_FLAG = $(if $(filter run,$(MAKECMDGOALS)),BATCH=1)
+
 # 每个测试生成临时 Makefile，递归调用子 make 完成编译+运行，根据退出码记录 PASS/FAIL
 Makefile.%: tests/%.c latest
 	@/bin/echo -e "NAME = $*\nSRCS = $<\ninclude $${AM_HOME}/Makefile" > $@
-	@if make -s -f $@ ARCH=$(ARCH) $(MAKECMDGOALS); then \
+	@if make -s -f $@ ARCH=$(ARCH) $(BATCH_FLAG) $(MAKECMDGOALS); then \
 		printf "[%14s] $(COLOR_GREEN)PASS$(COLOR_NONE)\n" $* >> $(RESULT); \
 	else \
 		printf "[%14s] $(COLOR_RED)***FAIL***$(COLOR_NONE)\n" $* >> $(RESULT); \

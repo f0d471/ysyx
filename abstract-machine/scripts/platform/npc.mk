@@ -35,7 +35,7 @@ run: insert-arg
 	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
 	@cp $(IMAGE).elf $(NPC_HOME)/test/Default.elf
 	@echo "[AM] Building and running NPC with Default.bin..."
-	@$(MAKE) -C $(NPC_HOME) run TEST_BIN=./test/Default.bin
+	@$(MAKE) -C $(NPC_HOME) run TEST_BIN=./test/Default.bin BATCH=$(BATCH)
 
 gdb: insert-arg
 	@mkdir -p $(NPC_HOME)/test

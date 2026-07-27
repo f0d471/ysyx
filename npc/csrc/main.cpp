@@ -3,16 +3,22 @@
 #include "Vtop.h"
 #include <cstdio>
 #include <cstdint>
+#include <cstring>
 #include <string>
 
 #include "common.h"
 
-// 全局变量  
+// 全局变量
 Vtop* top = nullptr;
 VerilatedVcdC* tfp = nullptr;
 uint64_t sim_time = 0;
 const char *img_file = NULL;
 NPCState npc_state = NPC_STOP;
+
+// 批处理模式（命令行 -b）：跑完即退出，不进入交互式 sdb，供无人值守的批量回归使用
+static bool batch_mode = false;
+// 客户程序通过 ebreak 传回的退出码，决定进程的退出状态
+static int halt_ret = 0;
 
 // 时钟  
 static void single_cycle() {
@@ -49,17 +55,23 @@ extern "C" void trap(int code, int pc) {
     } else {
         printf(ANSI_FG_RED "HIT BAD TRAP" ANSI_NONE " at pc = 0x%08x, code = %d\n", pc, code);
     }
-    npc_state = NPC_END;
+    // 必须按 code 区分：此处原本无条件置 NPC_END，导致 BAD TRAP 也被记成正常结束，
+    // npc_quit() 随后打印 "HIT GOOD TRAP"，批量回归也就永远是 PASS
+    halt_ret = code;
+    npc_state = (code == 0) ? NPC_END : NPC_ABORT;
     Verilated::gotFinish(true);
 }
 
 //  初始化  
 void init_sim(int argc, char** argv) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <bin_file>\n", argv[0]);
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-b") == 0) batch_mode = true;
+        else if (img_file == NULL)      img_file = argv[i];
+    }
+    if (img_file == NULL) {
+        fprintf(stderr, "Usage: %s <bin_file> [-b]\n", argv[0]);
         exit(1);
     }
-    img_file = argv[1];
 
     // 初始化 基础环境
     Verilated::commandArgs(argc, argv);
@@ -198,12 +210,18 @@ void cpu_exec(uint64_t n) {
         #endif
     }
 
-    if (Verilated::gotFinish()) {
-        npc_state = NPC_END;
+    // trap() 可能已把状态定性为 END 或 ABORT，这里不能覆盖它——原写法一律置
+    // NPC_END，是 BAD TRAP 被抹平的第二处
+    if (npc_state == NPC_RUNNING) {
+        npc_state = Verilated::gotFinish() ? NPC_END : NPC_STOP;
     }
-    else if (npc_state == NPC_RUNNING) {
-        npc_state = NPC_STOP;
-    }
+}
+
+// 与 NEMU 的 is_exit_status_bad() 同一套判据：只有"正常结束且退出码为 0"才算成功。
+// 用户从 sdb 主动退出(NPC_STOP)不算失败——此时无从判断被测程序的对错。
+static int is_exit_status_bad() {
+    int good = (npc_state == NPC_END && halt_ret == 0) || (npc_state == NPC_STOP);
+    return !good;
 }
 
 int main(int argc, char **argv) {
@@ -211,11 +229,13 @@ int main(int argc, char **argv) {
 
     #ifdef CONFIG_SDB
         init_sdb();
-        sdb_mainloop();
+        if (batch_mode) cpu_exec(-1);
+        else            sdb_mainloop();
     #else
         cpu_exec(-1);
     #endif
 
     npc_quit();
-    return 0;
+    // 必须把结果反映到进程退出码上，否则上层的批量回归无从判断 PASS/FAIL
+    return is_exit_status_bad();
 }
