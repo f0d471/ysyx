@@ -1,18 +1,10 @@
 #include <am.h>
 #include <nemu.h>
-#include <stdio.h>
-#include <string.h>
+#include <klib.h>
 
 #define SYNC_ADDR (VGACTL_ADDR + 4)
 
 void __am_gpu_init() {
-  // int i;
-  // uint32_t wh = inl(VGACTL_ADDR); 
-  // int w = wh >> 16;               
-  // int h = wh & 0xffff;            
-  // uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
-  // for (i = 0; i < w * h; i ++) fb[i] = i;
-  // outl(SYNC_ADDR, 1);
 }
 
 // AM显示控制器信息
@@ -78,7 +70,6 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   }
 
   if (ctl->sync) {
-    printf("SYNC triggered at x=%d y=%d\n", ctl->x, ctl->y);
     outl(SYNC_ADDR, 1);
   }
 }

@@ -1,17 +1,15 @@
 #include <am.h>
 #include <nemu.h>
-#include <stdio.h>
 
 #define KEYDOWN_MASK 0x8000
 
 void __am_input_keybrd(AM_INPUT_KEYBRD_T *kbd) {
   uint32_t raw = inl(KBD_ADDR);
-  if (raw == AM_KEY_NONE){
+  if (raw == AM_KEY_NONE) {
     kbd->keydown = 0;
     kbd->keycode = AM_KEY_NONE;
-  }
-  else {
-    kbd->keydown = (raw & KEYDOWN_MASK) ? 1: 0;
+  } else {
+    kbd->keydown = (raw & KEYDOWN_MASK) ? 1 : 0;
     kbd->keycode = raw & (~KEYDOWN_MASK);
   }
 }
