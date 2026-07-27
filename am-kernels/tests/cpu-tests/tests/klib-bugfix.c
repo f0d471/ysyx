@@ -92,7 +92,14 @@ static void test_bug03_heap_exhaustion(void) {
   size_t got = 0;
   int n = 0;
 
-  size_t sz = heap_size / 64;   // 首级块大小，使总次数与堆大小无关
+  // 首级块大小取 heap/64（使总次数与堆大小无关），但必须向下取整到 2 的幂，
+  // 折半阶梯才能正好落在 8 上。首轮 VM 验证就栽在这里：heap/64 = 2093750 不是
+  // 2 的幂，阶梯走成 ... 31 → 15 → 7 而跳过了 8，而 malloc(15) 需要
+  // ALIGN(15+8) = 24 字节、malloc(8) 只需 16 字节——残留块为 16~23 字节时前者
+  // 失败、后者仍能成功，于是链表尚未抽干循环就退出，探针误报。
+  size_t sz = 8;
+  while (sz * 2 <= heap_size / 64) sz *= 2;
+
   while (sz >= 8 && n < MAX_ALLOC) {
     void *p = malloc(sz);
     if (p == NULL) { sz /= 2; continue; }
