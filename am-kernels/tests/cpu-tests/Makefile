@@ -41,29 +41,34 @@ Makefile.%: tests/%.c latest
 # 编译与运行分两步：编译失败也会让 run 返回非零，若混在一起，expect-fail 会因为
 # "根本没编出来"而假性通过。
 #
-# 两步的输出都重定向到 /dev/null——被测程序自己的输出不该混进报告。代价是构建进度
-# 也被吞掉，而首次跑某个 ARCH 时这段静默期里要编 AM 与 klib，NPC 还要让 Verilator
-# 把整个 RTL 转成 C++ 再编译，是分钟级的，看着像卡死。故逐阶段打出 building/running。
+# 输出不做重定向，与上面 Makefile.% 规则的既有行为一致——编译过程与模拟器输出本身
+# 就是信息（首次跑某个 ARCH 要编 AM 与 klib，NPC 还要让 Verilator 把整个 RTL 转成
+# C++ 再编译，是分钟级的，静默会让人以为卡死）。只在每个程序前后加一行标注，说明
+# 这一段属于自检、以及它的预期结果是什么。
 selfcheck:
 	@echo "== harness self-check [$(ARCH)] =="
 	@rc=0; \
 	for t in expect-pass expect-fail; do \
-	  case $$t in expect-pass) want=PASS;; *) want=FAIL;; esac; \
+	  case $$t in \
+	    expect-pass) want=PASS; note="正常结束，框架应判 PASS";; \
+	    *)           want=FAIL; note="故意以非零码结束，框架应判 FAIL；下面出现的 make Error 是预期的";; \
+	  esac; \
+	  echo ""; \
+	  echo "---- selfcheck: $$t —— $$note ----"; \
 	  /bin/echo -e "NAME = $$t\nSRCS = selfcheck/$$t.c\ninclude $${AM_HOME}/Makefile" > Makefile.$$t; \
-	  printf "  [%12s] building ... " $$t; \
-	  if ! make -s -f Makefile.$$t ARCH=$(ARCH) image >/dev/null 2>&1; then \
-	    printf "$(COLOR_RED)BUILD ERROR$(COLOR_NONE)\n"; rc=1; \
+	  if ! make -s -f Makefile.$$t ARCH=$(ARCH) image; then \
+	    printf "  [%12s] $(COLOR_RED)BUILD ERROR$(COLOR_NONE)\n" $$t; rc=1; \
 	    rm -f Makefile.$$t; continue; \
 	  fi; \
-	  printf "running ... "; \
-	  if make -s -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run >/dev/null 2>&1; then got=PASS; else got=FAIL; fi; \
+	  if make -s -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run; then got=PASS; else got=FAIL; fi; \
 	  rm -f Makefile.$$t; \
 	  if [ "$$got" = "$$want" ]; then \
-	    printf "want %-4s got %-4s $(COLOR_GREEN)OK$(COLOR_NONE)\n" $$want $$got; \
+	    printf "  [%12s] want %-4s got %-4s $(COLOR_GREEN)OK$(COLOR_NONE)\n" $$t $$want $$got; \
 	  else \
-	    printf "want %-4s got %-4s $(COLOR_RED)BROKEN$(COLOR_NONE)\n" $$want $$got; rc=1; \
+	    printf "  [%12s] want %-4s got %-4s $(COLOR_RED)BROKEN$(COLOR_NONE)\n" $$t $$want $$got; rc=1; \
 	  fi; \
 	done; \
+	echo ""; \
 	if [ $$rc -ne 0 ]; then \
 	  printf "$(COLOR_RED)自检未通过：PASS/FAIL 判定不可信，下面的结果表没有意义$(COLOR_NONE)\n"; \
 	fi; \
