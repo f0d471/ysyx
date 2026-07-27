@@ -2,8 +2,11 @@
 #define __NPC_H__
 
 #include <am.h>
-#include "../../riscv.h" 
+// inl/outl 等 MMIO 访问原语。am/Makefile 已把 am/src 放进 INC_PATH，
+// 用尖括号按包含路径查找即可，不必写 "../../riscv.h" 这种逃出 include 目录的相对路径
+#include <riscv/riscv.h>
 
+// NPC 的外设映射，与 am/src/platform/nemu/include/nemu.h 采用同一套地址
 #define DEVICE_BASE 0xa0000000
 #define SERIAL_PORT (DEVICE_BASE + 0x00003f8)
 #define KBD_ADDR    (DEVICE_BASE + 0x0000060)

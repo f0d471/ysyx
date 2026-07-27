@@ -17,7 +17,13 @@ void putch(char ch) {
 }
 
 void halt(int code) {
-  asm volatile ("mv a0, %0; ebreak" : : "r"(code));  
+  // NPC 约定：ebreak 结束仿真，退出码放在 a0。
+  // 用 register 变量把 code 直接绑定到 a0，而不是写成
+  //   asm volatile ("mv a0, %0; ebreak" : : "r"(code));
+  // ——后者在汇编里改写了 a0 却没把它列进 clobber list，编译器仍认为 a0 保持原值。
+  // 此处因为 halt 不返回而侥幸无事，但这是"靠运气对"，换个上下文就会咬人。
+  register int a0 asm("a0") = code;
+  asm volatile ("ebreak" : : "r"(a0));
   while (1);
 }
 
