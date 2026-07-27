@@ -1,3 +1,9 @@
+// RISC-V 的异常入口汇编：保存现场 → 调 C 处理函数 → 恢复现场 → mret。
+//
+// 与 riscv/cte.c 一样，这是各平台共用的唯一一份实现。平台差异只有一处
+// （mstatus.MPRV），用 __PLATFORM_* 宏区分；该宏由顶层 Makefile 的 ARCHFLAGS
+// 同时给到 CFLAGS 与 ASFLAGS。
+
 #define concat_temp(x, y) x ## y
 #define concat(x, y) concat_temp(x, y)
 #define MAP(c, f) c(f)
@@ -12,6 +18,8 @@
 #define XLEN  8
 #endif
 
+// 注意 x0 与 x2 不在列表里：x0 恒零无需保存；x2 是 sp，此刻已被 addi 改过，
+// 必须单独算出陷入前的值再存（见下方 OFFSET_SP）
 #define REGS_LO16(f) \
       f( 1)       f( 3) f( 4) f( 5) f( 6) f( 7) f( 8) f( 9) \
 f(10) f(11) f(12) f(13) f(14) f(15)
@@ -31,6 +39,9 @@ f(30) f(31)
 #define PUSH(n) STORE concat(x, n), (n * XLEN)(sp);
 #define POP(n)  LOAD  concat(x, n), (n * XLEN)(sp);
 
+// 必须与 arch/riscv.h 里 struct Context 的布局一致：
+//   union { void *pdir; uintptr_t gpr[NR_REGS]; }; uintptr_t mcause, mstatus, mepc;
+// pdir 与 gpr[0] 共用同一个槽位，所以总大小是 NR_REGS + 3 个字
 #define CONTEXT_SIZE  ((NR_REGS + 3) * XLEN)
 #define OFFSET_SP     ( 2 * XLEN)
 #define OFFSET_CAUSE  ((NR_REGS + 0) * XLEN)
@@ -44,8 +55,10 @@ __am_asm_trap:
 
   MAP(REGS, PUSH)
 
-  addi t0, sp, CONTEXT_SIZE    
-  STORE t0, OFFSET_SP(sp)      
+  // 补上 x2(sp)：REGS 列表里没有它，而 c->gpr[2] 应当是陷入发生前的 sp。
+  // PA4 构造用户上下文时要读这个值，缺了它会拿到栈上的垃圾。
+  addi t0, sp, CONTEXT_SIZE
+  STORE t0, OFFSET_SP(sp)
 
   csrr t0, mcause
   csrr t1, mstatus
@@ -55,9 +68,18 @@ __am_asm_trap:
   STORE t1, OFFSET_STATUS(sp)
   STORE t2, OFFSET_EPC(sp)
 
+#ifndef __PLATFORM_NPC__
+  // 置上 mstatus.MPRV 以通过 difftest。仅 NEMU/logisim 需要；NPC 自研 CPU 的
+  // CSR 实现不保证有这一位，保持它此前的行为（不设置）
+  li a0, (1 << 17)
+  or t1, t1, a0
+  csrw mstatus, t1
+#endif
+
   mv a0, sp
   call __am_irq_handle
 
+  // 处理函数可能返回另一个上下文（yield / 进程切换），故以返回值为准
   mv sp, a0
 
   LOAD t1, OFFSET_STATUS(sp)
@@ -67,5 +89,6 @@ __am_asm_trap:
 
   MAP(REGS, POP)
 
+  // sp 不在 POP 列表里，靠这一句回到 CONTEXT 之上
   addi sp, sp, CONTEXT_SIZE
   mret

@@ -11,8 +11,8 @@ COMMON_CFLAGS += -march=rv32i_zicsr -mabi=ilp32  # overwrite
 LDFLAGS       += -melf32lriscv                   # overwrite
 
 AM_SRCS += riscv/nemu/start.S \
-           riscv/nemu/cte.c \
-           riscv/nemu/trap.S \
+           riscv/cte.c \
+           riscv/trap.S \
            riscv/nemu/vme.c
 
 AM_SRCS += riscv/npc/libgcc/div.S \

@@ -4,8 +4,8 @@ AM_SRCS := riscv/npc/start.S \
            riscv/npc/timer.c \
            riscv/npc/input.c \
            riscv/npc/gpu.c \
-           riscv/npc/cte.c \
-           riscv/npc/trap.S \
+           riscv/cte.c \
+           riscv/trap.S \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
 
@@ -41,6 +41,7 @@ gdb: insert-arg
 	@mkdir -p $(NPC_HOME)/test
 	@echo "[AM] Copy $(IMAGE).bin to NPC build directory as Default.bin..."
 	@cp $(IMAGE).bin $(NPC_HOME)/test/Default.bin
+	@cp $(IMAGE).elf $(NPC_HOME)/test/Default.elf
 	@echo "[AM] Building and running NPC under gdb with Default.bin..."
 	@$(MAKE) -C $(NPC_HOME) gdb TEST_BIN=./test/Default.bin
 
