@@ -43,24 +43,22 @@
 - **BUG-01 / 02 / 03 / 05**：临时回归测试 15 条断言全部通过，`HIT GOOD TRAP`。验证后测试文件已删除，其设计要点（尤其 BUG-03 怎么在 128MB 堆上快速触达触发点）保留在 [03 第五节](./03-malloc-freelist-null-double-meaning.md#五怎么测它比修它更难)。
 - **BUG-04**：跑 `am-kernels/kernels/slider`，12.5 亿条指令、63 秒，串口输出中 `SYNC triggered` 已完全消失。
 
-### 第二轮　待验证
+### 第二轮　2026-07-28 已验证通过
 
-改动面比第一轮大得多（合并了 CTE/trap、重写了格式化引擎、新增 `strtol`/`calloc`/`realloc`），且触及全部 7 个 RISC-V 架构的构建配置。回归测试重新加回 `am-kernels/tests/cpu-tests/tests/klib-bugfix.c`，约 40 条断言。
+改动面比第一轮大得多（合并了 CTE/trap、重写了格式化引擎、新增 `strtol`/`calloc`/`realloc`），且触及全部 7 个 RISC-V 架构的构建配置。
 
-```bash
-cd am-kernels/tests/cpu-tests
-make run ARCH=riscv32-nemu  ALL=klib-bugfix    # 主回归
-make run ARCH=riscv32e-nemu ALL=klib-bugfix    # 🔴 唯一能真正检验 BUG-06 的架构
-make run ARCH=riscv32-nemu                     # 全量 cpu-tests，确认合并没打破基本盘
-cd ../../kernels/yield-os && make run ARCH=riscv32-nemu   # CTE 合并后的上下文切换
-```
+- **`riscv32-nemu`**：临时回归测试 `klib-bugfix.c` 的 49 条断言全部通过，`HIT GOOD TRAP`；全量 cpu-tests 通过。
+- **`riscv32e-npc`**：全量 cpu-tests 通过。该架构是 `-march=rv32e_zicsr -mabi=ilp32e`，因而 `__riscv_e` 生效、`NR_REGS = 16`、`GPR1` 解析为 `gpr[15]`——**这条链路上 `klib-bugfix` 的 yield 用例通过，说明合并后的 CTE 在 RV32E 下工作正常**。
+- 验证通过后 `klib-bugfix.c` 已删除；其中的设计要点（BUG-03 怎么在 128MB 堆上快速触达触发点、BUG-01 的哨兵手法）保留在各自档案里。
 
-⚠️ 两处**改了但没有对应自动断言**，需人工确认：
+**仍未覆盖的一处**：`riscv32e-nemu`。RV32E 下 `gpr[17]` 越界读那个缺陷原本只存在于 nemu 侧的 `cte.c`，npc 侧当年补过 `#ifdef`，所以跑 npc 证明的是"合并没破坏 RV32E 路径"，不等于"原缺陷已修"。要严格证明需补跑该架构。
+
+两处**改了但没有对应自动断言**：
 
 1. **`trap.S` 现在会把陷入前的 sp 存进 `c->gpr[2]`**（NEMU 平台此前是垃圾）。目前无人读它，要到 PA4 构造用户上下文时才用得上。
 2. **`mstatus.MPRV` 改为按平台条件编译**。逐架构行为应与合并前一致，但 `minirv-logisim` 无从验证。
 
-### ⚠️ 顺带发现：cpu-tests 的 PASS/FAIL 目前不可信
+### 顺带发现（已修复）：cpu-tests 的 PASS/FAIL 曾经不可信
 
 `abstract-machine/scripts/platform/nemu.mk` 的 `NEMUFLAGS` 里没有 `-b`（批处理），`make run` 每次都会掉进交互式 sdb 监视器。而 `nemu/src/utils/state.c`：
 
@@ -74,7 +72,19 @@ int is_exit_status_bad() {
 
 手敲的 `q` 会把状态置成 `NEMU_QUIT`，退出码 0，于是 Makefile 一律记 PASS。首轮验证中测试明明报了 `1 check(s) FAILED` 且 `HIT BAD TRAP`，末尾仍打印 `[klib-bugfix] PASS`，即为实证。
 
-**上游基线 `c04da8c` 同样没有 `-b`，非本次改动引入。** 但它意味着：只要是手动 `c` 然后 `q`，整个 cpu-tests 的 PASS 列永远是 PASS，真正的信号只有 `HIT GOOD/BAD TRAP`。处理方案待定，记在 `note/todo/`。
+**上游基线 `c04da8c` 同样没有 `-b`，非本次改动引入。**
+
+NPC 侧的问题更彻底，改好之前加什么开关都没用：
+
+1. `trap()` 无条件执行 `npc_state = NPC_END`——即使刚打印完 `HIT BAD TRAP`；
+2. `cpu_exec()` 收尾处 `if (Verilated::gotFinish()) npc_state = NPC_END;` 又覆盖一次；
+3. `main()` 恒 `return 0`，仿真结果根本没反映到进程退出码上。
+
+**已全部修复**：BATCH 开关逐层翻译（`cpu-tests/Makefile` → 各平台 `.mk` → 模拟器 `-b`），NPC 补上 `is_exit_status_bad()`，判据与 NEMU 对齐。
+
+并新增**常驻的框架自检** `selfcheck/`：`expect-pass.c` 返回 0、`expect-fail.c` 返回 1，`run` 目标先断言框架对二者的判定恰好是 PASS 与 FAIL，不符则中止且不输出结果表。
+
+> **阴性对照才是关键的那一半。** 上面两次"框架报不出错"，只跑正向用例永远发现不了——一张全绿的表，只有在框架确实报得出错的前提下才有意义。
 
 ## 复盘中提炼出的通用模式
 
