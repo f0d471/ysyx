@@ -43,7 +43,12 @@ Makefile.%: tests/%.c latest
 #
 # 输出既不重定向、也不加 -s：编译过程本身就是信息，首次跑某个 ARCH 要编 AM 与
 # klib，NPC 还要让 Verilator 把整个 RTL 转成 C++ 再编译，是分钟级的，遮起来只会
-# 让人以为卡死。只在每个程序前加一行标注，说明这一段属于自检、预期结果是什么。
+# 让人以为卡死。
+#
+# 标注行打在构建之后、运行之前，让它紧贴自己那条判定结果——打在构建之前的话，
+# 中间会隔着整段编译输出，标注与结论离得太远。
+# （NPC 首次运行是个例外：仿真器由 npc/Makefile 的 run 目标触发构建，所以第一个
+#  程序的标注后面仍会跟一段 verilator 输出，第二个起就没有了。）
 #
 # 注意 -s 会经 MAKEFLAGS 一路传给所有子 make：上面 Makefile.% 规则里的那个 -s
 # （上游原有）就把 npc/Makefile 里 verilator 那条命令行也一并吞掉了。它只挡"回显
@@ -57,13 +62,13 @@ selfcheck:
 	    expect-pass) want=PASS; note="正常结束，框架应判 PASS";; \
 	    *)           want=FAIL; note="故意以非零码结束，框架应判 FAIL；下面出现的 make Error 是预期的";; \
 	  esac; \
-	  echo ""; \
-	  echo "---- selfcheck: $$t —— $$note ----"; \
 	  /bin/echo -e "NAME = $$t\nSRCS = selfcheck/$$t.c\ninclude $${AM_HOME}/Makefile" > Makefile.$$t; \
 	  if ! make -f Makefile.$$t ARCH=$(ARCH) image; then \
 	    printf "  [%12s] $(COLOR_RED)BUILD ERROR$(COLOR_NONE)\n" $$t; rc=1; \
 	    rm -f Makefile.$$t; continue; \
 	  fi; \
+	  echo ""; \
+	  echo "---- selfcheck: $$t —— $$note ----"; \
 	  if make -f Makefile.$$t ARCH=$(ARCH) BATCH=1 run; then got=PASS; else got=FAIL; fi; \
 	  rm -f Makefile.$$t; \
 	  if [ "$$got" = "$$want" ]; then \
